@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Registration</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+	crossorigin="anonymous">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid container">
+    <a class="navbar-brand" href="/">Gomoku</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link disabled">Registration and Login</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<br>
+	<!-- Create HTML registration form -->
+	<div class = "container-fluid container">
+		<div class = "row">
+			<div class="col-md-6 col-md-offset-3">
+
+				<!-- failure message -->
+				<div th:if="${param.failure}">
+					<div class="alert alert-danger">User email already used.</div>
+				</div>
+
+				<h1 class="h2" style="margin-bottom:30px"> Registration </h1>
+
+				<form th:action="@{/registration}" method="post" th:object="${user}">
+					<div class="form-floating mb-3">
+					  <input type="text" class="form-control" id="firstName" th:field="*{firstName}" placeholder="First Name">
+					  <label for="firstName">First Name</label>
+					</div>
+
+					<div class="form-floating mb-3">
+					  <input autocomplete="off" type="text" class="form-control" id="lastName" th:field="*{lastName}" placeholder="Last Name">
+					  <label for="lastName">Last Name</label>
+					</div>
+
+					<div class="form-floating mb-3">
+					  <input type="text" name = "username" class="form-control" id="username" th:field="*{email}" placeholder="Email address">
+					  <label for="username">Email address</label>
+					</div>
+
+					<div class="form-floating" style="margin-bottom:15px">
+					  <input type="password" class="form-control" name="password" id="password" th:field="*{password}">
+					  <label for="password">Password</label>
+					</div>
+					
+					<div class="form-group">
+						<button type="submit" class="btn btn-success">Register</button>
+						<span>Already registered? <a href="/" th:href="@{/login}">Login
+								here</a></span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
