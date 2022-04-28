@@ -9,7 +9,7 @@ services:
     volumes:
       - db:/var/lib/mysql
   gomoku-web:
-    image: gomoku-web:0.0.1-SNAPSHOT
+    image: gomoku-web:1.0.0
     depends_on:
       - mysqldb
     ports:
@@ -29,7 +29,7 @@ services:
     stdin_open: true
     tty: true
   gomoku-engine:
-    image: gomoku-engine:0.0.1-SNAPSHOT
+    image: gomoku-engine:1.0.0
     ports:
       - 9000:9000
       - 9888:9888
