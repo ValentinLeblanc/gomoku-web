@@ -6,26 +6,33 @@
 - Docker 20.10.14
 - Docker Compose 2.4.1
 
-## Build and Start the application (Windows)
-- Navigate to the root folder with a command prompt
-- Run the "build_start.bat" file
+## How to build and start the web application :
 
-## Build and Start the application (Linux)
-- Navigate to the root folder with a command prompt
-- Execute "mvn clean install"
-- Execute "docker-compose up -d"
-- For logs : execute "docker-compose logs -f"
+- **Build the Gomoku Engine application**
 
-## Stop the application (Windows)
-- Navigate to the root folder with a command prompt
-- Run the "stop.bat" file
+  - Download the **gomoku-engine** project
 
-## Stop the application (Linux)
-- Navigate to the root folder with a command prompt
-- Execute "docker-compose down"
+  - Navigate to the root folder with a command prompt
 
-## How to use the Engine
-- Download the gomoku-engine project
+  - Execute `mvn clean install`
+
+- **Build and start the Gomoku Web application**
+
+  - Download the **gomoku-web** project
+
+  - Navigate to the root folder with a command prompt
+
+  - For Windows, you can execute the file *build_start.bat*
+
+  - Execute `mvn clean install`
+
+  - Execute `docker-compose up -d`
+
+  - For logs : `execute docker-compose logs -f`
+
+
+## How to stop the application :
+
 - Navigate to the root folder with a command prompt
-- Execute "mvn clean install"
-- Build and start the gomoku web application
+- For Windows, you can execute *stop.bat*
+- Execute `docker-compose down`
