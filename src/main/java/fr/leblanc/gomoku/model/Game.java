@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,11 +28,12 @@ import lombok.EqualsAndHashCode;
 @Builder
 @Data
 @EqualsAndHashCode
+@AllArgsConstructor
 public class Game
 {
-    public static final String MOVES = "moves";
-    public static final String BOARD_SIZE = "boardSize";
-    public static final String TYPE = "type";
+    private static final String BOARD_SIZE = "boardSize";
+	public static final String MOVES_STRING = "moves";
+    public static final String TYPE_STRING = "type";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -74,33 +76,24 @@ public class Game
     
     public JSONObject toJSON() {
         final JSONObject json = new JSONObject();
-        json.put("type", (Object)this.type);
-        json.put("boardSize", this.boardSize);
-        json.put("moves", (Object)this.getMovesToJSON());
+        json.put(TYPE_STRING, this.type);
+        json.put(BOARD_SIZE, this.boardSize);
+        json.put(MOVES_STRING, this.getMovesToJSON());
         return json;
     }
     
     public JSONArray getMovesToJSON() {
         final JSONArray jsonMoves = new JSONArray();
         for (final Move move : this.moves) {
-            jsonMoves.put((Object)move.toJSON());
+            jsonMoves.put(move.toJSON());
         }
         return jsonMoves;
     }
     
     public Game() {
-        this.moves = new HashSet<Move>();
-        this.winCombination = new HashSet<Move>();
+        this.moves = new HashSet<>();
+        this.winCombination = new HashSet<>();
     }
-    
-    public Game(final Long id, final GameType type, final User blackPlayer, final User whitePlayer, final int boardSize, final Set<Move> moves, final User winner, final Set<Move> winCombination) {
-        this.id = id;
-        this.type = type;
-        this.blackPlayer = blackPlayer;
-        this.whitePlayer = whitePlayer;
-        this.boardSize = boardSize;
-        this.moves = moves;
-        this.winner = winner;
-        this.winCombination = winCombination;
-    }
+
 }
+    

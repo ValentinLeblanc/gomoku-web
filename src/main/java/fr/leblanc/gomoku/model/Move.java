@@ -32,7 +32,7 @@ public class Move
         jsonCell.put("number", this.number);
         jsonCell.put("column", this.columnIndex);
         jsonCell.put("row", this.rowIndex);
-        jsonCell.put("color", (Object)this.color.toString());
+        jsonCell.put("color", this.color.toString());
         return jsonCell;
     }
     

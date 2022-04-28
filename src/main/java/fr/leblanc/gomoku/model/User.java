@@ -51,12 +51,12 @@ public class User
     
     public User() {
         this.settings = new Settings();
-        this.games = new ArrayList<Game>();
+        this.games = new ArrayList<>();
     }
     
     public User(final String firstName, final String lastName, final String email, final String password, final Collection<Role> roles) {
         this.settings = new Settings();
-        this.games = new ArrayList<Game>();
+        this.games = new ArrayList<>();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
