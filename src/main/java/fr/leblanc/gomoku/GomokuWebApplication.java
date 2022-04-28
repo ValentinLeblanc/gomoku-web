@@ -5,10 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
 
 @SpringBootApplication
-public class GomokuApplication implements CommandLineRunner
+public class GomokuWebApplication implements CommandLineRunner
 {
     public static void main(final String[] args) {
-        SpringApplication.run(GomokuApplication.class, args);
+        SpringApplication.run(GomokuWebApplication.class, args);
     }
     
     public void run(final String... args) throws Exception {

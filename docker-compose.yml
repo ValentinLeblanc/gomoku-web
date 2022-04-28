@@ -10,8 +10,8 @@ services:
       - 3307:3306
     volumes:
       - db:/var/lib/mysql
-  gomoku:
-    image: gomoku:0.0.1-SNAPSHOT
+  gomoku-web:
+    image: gomoku-web:0.0.1-SNAPSHOT
     depends_on:
       - mysqldb
     ports:
