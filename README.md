@@ -1,7 +1,7 @@
 # Gomoku Web application by  Valentin LEBLANC
 
 ## Prerequisites
-- Java 14
+- Java 17
 - Maven 3.8.4
 - Docker 20.10.14
 - Docker Compose 2.4.1
