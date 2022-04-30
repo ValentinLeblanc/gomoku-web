@@ -35,7 +35,7 @@ public class MainController
     
     @GetMapping({ "/settings" })
     public String settings(final Model model) {
-        model.addAttribute("settings", (Object)this.userService.getCurrentUser().getSettings());
+        model.addAttribute("settings", userService.getCurrentUser().getSettings());
         return "settings";
     }
 }

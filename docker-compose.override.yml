@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  gomoku-web:
+    environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8888,server=y,suspend=n"
+  gomoku-engine:
+    environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:9888,server=y,suspend=n"

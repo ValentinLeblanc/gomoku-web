@@ -16,9 +16,9 @@ public class OnlineBoardService {
 	private UserService userService;
 
 	public List<OnlineBoard> findAll() {
-		final List<OnlineBoard> onlineBoards = new ArrayList<OnlineBoard>();
-		final Iterable<OnlineBoard> onlineBoardsIterator = (Iterable<OnlineBoard>) this.onlineBoardRepository.findAll();
-		onlineBoardsIterator.forEach(e -> onlineBoards.add(e));
+		final List<OnlineBoard> onlineBoards = new ArrayList<>();
+		final Iterable<OnlineBoard> onlineBoardsIterator = onlineBoardRepository.findAll();
+		onlineBoardsIterator.forEach(onlineBoards::add);
 		return onlineBoards;
 	}
 

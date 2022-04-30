@@ -12,5 +12,6 @@ public class GomokuWebApplication implements CommandLineRunner
     }
     
     public void run(final String... args) throws Exception {
+    	//start
     }
 }

@@ -2,7 +2,6 @@ package fr.leblanc.gomoku.service;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,8 +34,8 @@ public class UserServiceImpl implements UserService
     
     @Override
     public User save(final UserRegistrationDto registrationDto) {
-        final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(), registrationDto.getEmail(), this.passwordEncoder().encode((CharSequence)registrationDto.getPassword()), Arrays.asList(new Role("ROLE_USER")));
-        return (User)this.userRepository.save(user);
+        final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(), registrationDto.getEmail(), this.passwordEncoder().encode(registrationDto.getPassword()), Arrays.asList(new Role("ROLE_USER")));
+        return userRepository.save(user);
     }
     
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
@@ -44,11 +43,11 @@ public class UserServiceImpl implements UserService
         if (user == null) {
             throw new UsernameNotFoundException("Invalid username or password.");
         }
-        return (UserDetails)new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
     }
     
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(final Collection<Role> roles) {
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
     }
     
     @Override
@@ -73,6 +72,6 @@ public class UserServiceImpl implements UserService
     
     @Override
     public User save(final User currentUser) {
-        return (User)this.userRepository.save(currentUser);
+        return userRepository.save(currentUser);
     }
 }

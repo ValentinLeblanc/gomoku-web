@@ -2,6 +2,9 @@ package fr.leblanc.gomoku.service;
 
 import fr.leblanc.gomoku.model.Settings;
 import fr.leblanc.gomoku.repository.SettingsRepository;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,13 @@ public class SettingsService
     }
     
     public Settings findById(final Long id) {
-        return this.settingsRepository.findById(id).get();
+    	
+    	Optional<Settings> findById = settingsRepository.findById(id);
+    	
+		if (findById.isPresent()) {
+    		return findById.get();
+    	}
+		
+    	return null;
     }
 }

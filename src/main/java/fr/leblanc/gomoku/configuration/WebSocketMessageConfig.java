@@ -8,15 +8,17 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketMessageConfig implements WebSocketMessageBrokerConfigurer
-{
-    public void configureMessageBroker(final MessageBrokerRegistry config) {
-        config.setApplicationDestinationPrefixes(new String[] { "/app" });
-        config.enableSimpleBroker(new String[] { "/topic" });
-    }
-    
-    public void registerStompEndpoints(final StompEndpointRegistry registry) {
-        registry.addEndpoint(new String[] { "/board-moves" }).withSockJS();
-        registry.addEndpoint(new String[] { "/online-boards" }).withSockJS();
-    }
+public class WebSocketMessageConfig implements WebSocketMessageBrokerConfigurer {
+	
+	@Override
+	public void configureMessageBroker(final MessageBrokerRegistry config) {
+		config.setApplicationDestinationPrefixes("/app");
+		config.enableSimpleBroker("/topic");
+	}
+
+	@Override
+	public void registerStompEndpoints(final StompEndpointRegistry registry) {
+		registry.addEndpoint("/board-moves").withSockJS();
+		registry.addEndpoint("/online-boards").withSockJS();
+	}
 }

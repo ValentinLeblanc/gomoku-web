@@ -16,6 +16,8 @@
 <script src="https://kit.fontawesome.com/561a872f6a.js"
 	crossorigin="anonymous"></script>
 <title>Gomoku Board</title>
+<meta th:name="_csrf" th:content="${_csrf.token}"/>
+<meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 	<div th:insert="~{menu}"></div>
@@ -57,6 +59,7 @@
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		var moves = /*[[${game.moves}]]*/'default';
+		var _csrf = /*[[${_csrf}]]*/'default';
 		/*]]>*/
 	</script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>

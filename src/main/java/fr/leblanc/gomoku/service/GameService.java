@@ -1,5 +1,6 @@
 package fr.leblanc.gomoku.service;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ public class GameService {
 
 	public Set<Move> addMove(int columnIndex, int rowIndex) {
 		
-		Set<Move> result = new HashSet<Move>();	
+		Set<Move> result = new HashSet<>();	
 		
 		Game currentGame = userService.getCurrentUser().getCurrentGame();
 
@@ -67,11 +68,11 @@ public class GameService {
 		}
 		
 		if (currentGame.getMove(columnIndex, rowIndex) != null) {
-			return null;
+			return Collections.emptySet();
 		}
 		
 		if (!currentGame.getWinCombination().isEmpty()) {
-			return null;
+			return Collections.emptySet();
 		}
 		
 		GomokuColor color = currentGame.getMoves().size() % 2 == 0 ? GomokuColor.BLACK : GomokuColor.WHITE;
@@ -85,10 +86,10 @@ public class GameService {
 		try {
 			winningMoves = engineService.checkWin(currentGame);
 		} catch (ResourceAccessException e) {
-			log.error("Could not access to Gomoku Engine", e.getMessage());
+			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
 		
-		if (winningMoves != null) {
+		if (winningMoves != null && !winningMoves.isEmpty()) {
 			currentGame.setWinCombination(winningMoves);
 			result.addAll(winningMoves);
 		} else {
@@ -106,7 +107,7 @@ public class GameService {
 		
 		if (currentGame.getType() == GameType.LOCAL) {
 			
-			Set<Move> result = new HashSet<Move>();	
+			Set<Move> result = new HashSet<>();	
 			
 			Move removedMove = removeLastMove(currentGame);
 			

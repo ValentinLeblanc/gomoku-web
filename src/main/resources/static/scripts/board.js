@@ -25,6 +25,9 @@ const onAddMoveAction = (event) => {
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/add-move", true);
 	xhr.withCredentials = true;
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
 			var moves = JSON.parse(xhr.response);
@@ -43,6 +46,9 @@ const onUndoMoveAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/undo-move", true);
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
@@ -61,6 +67,9 @@ const onResetGameAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/reset-game", true);
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE) {
