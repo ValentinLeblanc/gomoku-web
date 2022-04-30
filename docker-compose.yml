@@ -30,6 +30,10 @@ services:
     tty: true
   gomoku-engine:
     image: gomoku-engine:1.0.0
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "server.port" : "${ENGINE_PORT}"
+        }'
     ports:
       - ${ENGINE_PORT}:${ENGINE_PORT}
       - ${ENGINE_DEBUG_PORT}:${ENGINE_DEBUG_PORT}

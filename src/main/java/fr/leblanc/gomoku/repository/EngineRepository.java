@@ -44,7 +44,7 @@ public class EngineRepository {
 			
 			Set<Move> result = new HashSet<>();
 			for (MoveDto move : checkWinResult.getWinMoves()) {
-				result.add(Move.builder().color(GomokuColor.RED).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
+				result.add(Move.builder().color(GomokuColor.GREEN).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
 			}
 			
 			return result;

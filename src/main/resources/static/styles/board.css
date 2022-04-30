@@ -45,9 +45,9 @@ td {
     border-radius: 50px;
 }
 
-.red-piece {
+.green-piece {
     padding: 12px;
-    background-color: red;
+    background-color: green;
     border: 1px solid black;
     border-radius: 50px;
 }

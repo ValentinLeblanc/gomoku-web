@@ -2,11 +2,9 @@ package fr.leblanc.gomoku.model;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Builder
 @Data
-@EqualsAndHashCode
 public class WebSocketMessage
 {
     private MessageType type;

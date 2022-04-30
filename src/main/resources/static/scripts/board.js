@@ -83,8 +83,8 @@ const displayMove = (move) => {
 
 	const cells = document.querySelectorAll(".emptyCell");
 
-	for (var i = 0; i < cells.length; i++) {
-		var cell = cells[i];
+	for (const element of cells) {
+		var cell = element;
 		var column = parseInt(cell.id.split("-")[0]);
 		var row = parseInt(cell.id.split("-")[1]);
 
@@ -95,8 +95,8 @@ const displayMove = (move) => {
 				cell.classList.add('black-piece');
 			} else if (move.color == "WHITE") {
 				cell.classList.add('white-piece');
-			} else if (move.color == "RED") {
-				cell.classList.add('red-piece');
+			} else if (move.color == "GREEN") {
+				cell.classList.add('green-piece');
 			}
 		}
 	}
