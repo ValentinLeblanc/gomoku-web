@@ -6,17 +6,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.json.JSONObject;
-
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "move")
 @Builder
 @Data
-@EqualsAndHashCode
 public class Move
 {
     @Id
@@ -26,15 +22,6 @@ public class Move
     private int columnIndex;
     private int rowIndex;
     private GomokuColor color;
-    
-    public JSONObject toJSON() {
-        final JSONObject jsonCell = new JSONObject();
-        jsonCell.put("number", this.number);
-        jsonCell.put("column", this.columnIndex);
-        jsonCell.put("row", this.rowIndex);
-        jsonCell.put("color", this.color.toString());
-        return jsonCell;
-    }
     
     public Move() {
     }

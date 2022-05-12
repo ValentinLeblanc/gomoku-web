@@ -6,7 +6,7 @@ import java.util.Set;
 import lombok.Data;
 
 @Data
-public class CheckWinResultDto {
+public class CheckWinResult {
 
 	private boolean isWin = false;
 	

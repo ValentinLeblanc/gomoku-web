@@ -15,7 +15,7 @@ import fr.leblanc.gomoku.model.CustomProperties;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GomokuColor;
 import fr.leblanc.gomoku.model.Move;
-import fr.leblanc.gomoku.web.dto.CheckWinResultDto;
+import fr.leblanc.gomoku.web.dto.CheckWinResult;
 import fr.leblanc.gomoku.web.dto.GameDto;
 import fr.leblanc.gomoku.web.dto.MoveDto;
 
@@ -32,13 +32,13 @@ public class EngineRepository {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDto> request = new HttpEntity<>(new GameDto(game));
 		
-		ResponseEntity<CheckWinResultDto> response = restTemplate.exchange(
+		ResponseEntity<CheckWinResult> response = restTemplate.exchange(
 				checkWinUrl, 
 				HttpMethod.POST, 
 				request, 
-				CheckWinResultDto.class);
+				CheckWinResult.class);
 		
-		CheckWinResultDto checkWinResult = response.getBody();
+		CheckWinResult checkWinResult = response.getBody();
 		
 		if (checkWinResult != null && checkWinResult.isWin()) {
 			
@@ -52,6 +52,25 @@ public class EngineRepository {
 		
 		return Collections.emptySet();
 		
+	}
+
+	public Move computeMove(GameDto game) {
+		
+		String computeMove = customProperties.getEngineUrl() + "/computeMove";
+		
+		RestTemplate restTemplate = new RestTemplate();
+		HttpEntity<GameDto> request = new HttpEntity<>(game);
+		
+		ResponseEntity<MoveDto> response = restTemplate.exchange(
+				computeMove, 
+				HttpMethod.POST, 
+				request, 
+				MoveDto.class);
+		
+		MoveDto computedMove = response.getBody();
+		
+		return Move.builder().color(GomokuColor.GREEN).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
+			
 	}
 
 }

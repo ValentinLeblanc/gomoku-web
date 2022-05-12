@@ -1,30 +1,32 @@
 package fr.leblanc.gomoku.model;
 
 import java.util.ArrayList;
-import javax.persistence.FetchType;
 import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import java.util.List;
-import javax.persistence.JoinColumn;
-import javax.persistence.CascadeType;
 import javax.persistence.OneToOne;
-import javax.persistence.Column;
-import javax.persistence.GenerationType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Table;
-import javax.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "user", uniqueConstraints = { @UniqueConstraint(columnNames = { "email" }) })
-@Data
-@EqualsAndHashCode
+@Getter
+@Setter
 public class User
 {
     @Id
@@ -41,7 +43,8 @@ public class User
     private Settings settings;
     @OneToOne
     @JoinColumn(name = "current_game_id")
-    private Game currentGame;
+    @JsonIgnore
+    private Game currentLocalGame;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "users_games", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "game_id", referencedColumnName = "id") })
     private List<Game> games;

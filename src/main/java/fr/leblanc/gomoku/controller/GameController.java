@@ -2,7 +2,6 @@ package fr.leblanc.gomoku.controller;
 
 import java.util.Set;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +12,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import fr.leblanc.gomoku.model.Game;
-import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.service.GameService;
 import fr.leblanc.gomoku.service.OnlineBoardService;
+import fr.leblanc.gomoku.web.dto.GameDto;
+import fr.leblanc.gomoku.web.dto.MoveDto;
 
 @RestController
 public class GameController {
@@ -46,26 +46,29 @@ public class GameController {
 	}
 
 	@PostMapping("/reset-game")
-	public RedirectView resetGame(@RequestBody String body) {
+	public RedirectView resetLocalGame() {
 
-		Game game = gameService.resetGame();
+		gameService.resetLocalGame();
 
-		if (game.getType() == GameType.LOCAL) {
-			return new RedirectView("/local-game");
-		}
-
-		return null;
+		return new RedirectView("/local-game");
+	}
+	
+	@PostMapping("/ai-game")
+	public RedirectView AIGame() {
+		
+		gameService.AIGame();
+		
+		return new RedirectView("forward:/board");
 	}
 
 	@PostMapping("/add-move")
-	public Set<Move> addMove(@RequestBody String body) {
+	public Set<Move> addMove(@RequestBody MoveDto move) {
+		return gameService.addMove(move.getColumnIndex(), move.getRowIndex());
+	}
 	
-		JSONObject moveData = new JSONObject(body);
-	
-		int columnIndex = moveData.getInt("columnIndex");
-		int rowIndex = moveData.getInt("rowIndex");
-	
-		return gameService.addMove(columnIndex, rowIndex);
+	@PostMapping("/compute-move")
+	public Move computeMove(@RequestBody GameDto game) {
+		return gameService.computeMove(game);
 	}
 
 	@PostMapping("undo-move")

@@ -13,7 +13,7 @@ public class WebSocketMessage
     private int rowIndex;
     private GomokuColor color;
     
-    WebSocketMessage(final MessageType type, final int number, final int columnIndex, final int rowIndex, final GomokuColor color) {
+    public WebSocketMessage(final MessageType type, final int number, final int columnIndex, final int rowIndex, final GomokuColor color) {
         this.type = type;
         this.number = number;
         this.columnIndex = columnIndex;

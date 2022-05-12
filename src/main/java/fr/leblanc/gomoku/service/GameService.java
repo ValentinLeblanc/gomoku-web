@@ -14,6 +14,7 @@ import fr.leblanc.gomoku.model.GomokuColor;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.GameRepository;
+import fr.leblanc.gomoku.web.dto.GameDto;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -34,7 +35,7 @@ public class GameService {
 	
 	public Game localGame() {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentGame();
+		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
 		
 		if (currentGame == null) {
 			currentGame = createLocalGame(userService.getCurrentUser());
@@ -45,23 +46,33 @@ public class GameService {
 		
 	}
 	
-	public Game resetGame() {
+	public Game AIGame() {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentGame();
+		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
 		
-		if (currentGame.getType() == GameType.LOCAL) {
-			gameRepository.delete(currentGame);
-			return gameRepository.save(createLocalGame(userService.getCurrentUser()));
+		if (currentGame == null) {
+			currentGame = createLocalGame(userService.getCurrentUser());
+			gameRepository.save(currentGame);
 		}
 		
-		return null;
+		return currentGame;
+		
+	}
+	
+	public Game resetLocalGame() {
+		
+		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
+		
+		gameRepository.delete(currentGame);
+		
+		return gameRepository.save(createLocalGame(userService.getCurrentUser()));
 	}
 
 	public Set<Move> addMove(int columnIndex, int rowIndex) {
 		
 		Set<Move> result = new HashSet<>();	
 		
-		Game currentGame = userService.getCurrentUser().getCurrentGame();
+		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
 
 		if (currentGame == null) {
 			throw new IllegalStateException("Current user game doesn't exist");
@@ -103,7 +114,7 @@ public class GameService {
 	
 	public Set<Move> undoMove() {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentGame();
+		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
 		
 		if (currentGame.getType() == GameType.LOCAL) {
 			
@@ -128,7 +139,7 @@ public class GameService {
 
 	private Game createLocalGame(User user) {
 		Game localGame =  Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(GameType.LOCAL).build();
-		user.setCurrentGame(localGame);
+		user.setCurrentLocalGame(localGame);
 		return localGame;
 	}
 
@@ -144,5 +155,9 @@ public class GameService {
 		}
 		
 		return null;
+	}
+
+	public Move computeMove(GameDto game) {
+		return engineService.computeMove(game);
 	}
 }

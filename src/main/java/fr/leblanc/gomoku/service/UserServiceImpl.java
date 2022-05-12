@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import fr.leblanc.gomoku.controller.RegistrationException;
+import fr.leblanc.gomoku.exception.RegistrationException;
 import fr.leblanc.gomoku.model.Role;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.UserRepository;
@@ -74,4 +74,14 @@ public class UserServiceImpl implements UserService
     public User save(final User currentUser) {
         return userRepository.save(currentUser);
     }
+
+	@Override
+	public void deleteUserAccount(String username) {
+		
+		User user = findUserByEmail(username);
+		
+		if (user != null) {
+			userRepository.delete(findUserByEmail(username));
+		}
+	}
 }

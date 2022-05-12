@@ -14,6 +14,9 @@ const initButtonListeners = () => {
 
 	var resetGameButton = document.getElementById("reset-game");
 	resetGameButton.addEventListener("click", onResetGameAction);
+	
+	var computeMoveButton = document.getElementById("compute-move");
+	computeMoveButton.addEventListener("click", onComputeMoveAction);
 }
 
 const onAddMoveAction = (event) => {
@@ -24,6 +27,7 @@ const onAddMoveAction = (event) => {
 
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/add-move", true);
+	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.withCredentials = true;
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -77,6 +81,40 @@ const onResetGameAction = (event) => {
 		}
 	}
 	xhr.send({});
+}
+
+const onComputeMoveAction = (event) => {
+	event.stopPropagation();
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/compute-move", true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == XMLHttpRequest.DONE) {
+			var move = JSON.parse(xhr.response);
+			sendDisplayMove(move);
+		}
+	}
+	
+	var jsonMoves = [];
+	
+	for (var i = 0; i < moves.length; i++) {
+		jsonMoves.push({
+			columnIndex: moves[i].columnIndex,
+			rowIndex: moves[i].rowIndex,
+			color: moves[i].color == "BLACK" ? 0 : 1
+		});
+	}
+	
+	var jsonGame = {
+		boardSize: boardSize,
+		moves: jsonMoves
+	};
+	
+	xhr.send(JSON.stringify(jsonGame));
 }
 
 const displayMove = (move) => {

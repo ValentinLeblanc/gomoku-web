@@ -5,9 +5,13 @@ import java.util.Set;
 
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.Move;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GameDto {
 
 	private int boardSize;

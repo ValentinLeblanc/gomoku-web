@@ -1,9 +1,10 @@
 package fr.leblanc.gomoku.service;
 
-import fr.leblanc.gomoku.controller.RegistrationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+
+import fr.leblanc.gomoku.exception.RegistrationException;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.web.dto.UserRegistrationDto;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService
 {
@@ -16,4 +17,6 @@ public interface UserService extends UserDetailsService
     void registerUserAccount(final UserRegistrationDto registrationDto) throws RegistrationException;
     
     User save(final User currentUser);
+
+	void deleteUserAccount(String username);
 }

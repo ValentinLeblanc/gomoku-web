@@ -1,4 +1,4 @@
-package fr.leblanc.gomoku.controller;
+package fr.leblanc.gomoku.exception;
 
 public class RegistrationException extends Exception
 {
