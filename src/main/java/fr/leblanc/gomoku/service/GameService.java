@@ -70,8 +70,6 @@ public class GameService {
 
 	public Set<Move> addMove(int columnIndex, int rowIndex) {
 		
-		Set<Move> result = new HashSet<>();	
-		
 		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
 
 		if (currentGame == null) {
@@ -100,11 +98,14 @@ public class GameService {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
 		
+		Set<Move> result = new HashSet<>();	
+		
+		result.addAll(currentGame.getMoves());
+		
 		if (winningMoves != null && !winningMoves.isEmpty()) {
 			currentGame.setWinCombination(winningMoves);
+			
 			result.addAll(winningMoves);
-		} else {
-			result.add(newMove);
 		}
 		
 		gameRepository.save(currentGame);
@@ -118,9 +119,7 @@ public class GameService {
 		
 		if (currentGame.getType() == GameType.LOCAL) {
 			
-			Set<Move> result = new HashSet<>();	
-			
-			Move removedMove = removeLastMove(currentGame);
+			removeLastMove(currentGame);
 			
 			if (!currentGame.getWinCombination().isEmpty()) {
 				currentGame.getWinCombination().clear();
@@ -128,9 +127,7 @@ public class GameService {
 			
 			gameRepository.save(currentGame);
 			
-			result.add(removedMove);
-			
-			return result;
+			return currentGame.getMoves();
 		} else {
 			throw new IllegalStateException("Only supported for local game");
 		}
@@ -157,7 +154,17 @@ public class GameService {
 		return null;
 	}
 
-	public Move computeMove(GameDto game) {
-		return engineService.computeMove(game);
+	public Set<Move> computeMove(GameDto game) {
+		Move computedMove = engineService.computeMove(game);
+		
+		if (computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
+			return addMove(computedMove.getColumnIndex(), computedMove.getRowIndex());
+		}
+		
+		return null;
+	}
+
+	public Double computeEvaluation(GameDto game) {
+		return engineService.computeEvaluation(game);
 	}
 }

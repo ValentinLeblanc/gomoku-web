@@ -3,9 +3,7 @@ package fr.leblanc.gomoku.model;
 
 public enum MessageType
 {
-    CHAT, 
-    CONNECT, 
-    DISCONNECT, 
-    DISPLAY_MOVES, 
+    REFRESH_MOVE,
+    REFRESH_EVALUATION,
     RELOAD;
 }

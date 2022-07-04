@@ -2,10 +2,42 @@
 
 const initCellListeners = () => {
 	var cells = document.querySelectorAll(".emptyCell");
-	for (let i = 0; i < cells.length; i++) {
-		var cell = cells[i];
+	for (const element of cells) {
+		var cell = element;
 		cell.addEventListener("click", onAddMoveAction);
 	}
+}
+
+const updateEvaluation = (moves) => {
+	var jsonMoves = [];
+
+	for (const element of moves) {
+		jsonMoves.push({
+			columnIndex: element.columnIndex,
+			rowIndex: element.rowIndex,
+			color: element.color == "BLACK" ? 1 : -1
+		});
+	}
+
+	var jsonGame = {
+		boardSize: boardSize,
+		moves: jsonMoves
+	};
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/compute-evaluation", true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			var evaluation = xhr.response;
+			sendDisplayEvaluation(evaluation);
+		}
+	}
+	xhr.send(JSON.stringify(jsonGame));
 }
 
 const initButtonListeners = () => {
@@ -14,7 +46,7 @@ const initButtonListeners = () => {
 
 	var resetGameButton = document.getElementById("reset-game");
 	resetGameButton.addEventListener("click", onResetGameAction);
-	
+
 	var computeMoveButton = document.getElementById("compute-move");
 	computeMoveButton.addEventListener("click", onComputeMoveAction);
 }
@@ -22,8 +54,8 @@ const initButtonListeners = () => {
 const onAddMoveAction = (event) => {
 	event.stopPropagation();
 	var cell = event.srcElement;
-	var column = parseInt(cell.id.split("-")[0]);
-	var row = parseInt(cell.id.split("-")[1]);
+	var column = parseInt(cell.id.split("/")[0]);
+	var row = parseInt(cell.id.split("/")[1]);
 
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/add-move", true);
@@ -34,10 +66,11 @@ const onAddMoveAction = (event) => {
 	xhr.setRequestHeader(header, token);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			var moves = JSON.parse(xhr.response);
-			for (var i = 0; i < moves.length; i++) {
-				sendDisplayMove(moves[i]);
+			moves = JSON.parse(xhr.response);
+			for (const element of moves) {
+				sendDisplayMove(element);
 			}
+			updateEvaluation(moves);
 		}
 	}
 	xhr.send(JSON.stringify({
@@ -56,10 +89,6 @@ const onUndoMoveAction = (event) => {
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			var moves = JSON.parse(xhr.response);
-			for (var i = 0; i < moves.length; i++) {
-				sendDisplayMove(moves[i]);
-			}
 			sendReload();
 		}
 	}
@@ -93,27 +122,30 @@ const onComputeMoveAction = (event) => {
 	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE) {
-			var move = JSON.parse(xhr.response);
-			sendDisplayMove(move);
+		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			moves = JSON.parse(xhr.response);
+			for (const element of moves) {
+				sendDisplayMove(element);
+			}
+			updateEvaluation(moves);
 		}
 	}
-	
+
 	var jsonMoves = [];
-	
-	for (var i = 0; i < moves.length; i++) {
+
+	for (const element of moves) {
 		jsonMoves.push({
-			columnIndex: moves[i].columnIndex,
-			rowIndex: moves[i].rowIndex,
-			color: moves[i].color == "BLACK" ? 0 : 1
+			columnIndex: element.columnIndex,
+			rowIndex: element.rowIndex,
+			color: element.color == "BLACK" ? 1 : -1
 		});
 	}
-	
+
 	var jsonGame = {
 		boardSize: boardSize,
 		moves: jsonMoves
 	};
-	
+
 	xhr.send(JSON.stringify(jsonGame));
 }
 
@@ -123,8 +155,8 @@ const displayMove = (move) => {
 
 	for (const element of cells) {
 		var cell = element;
-		var column = parseInt(cell.id.split("-")[0]);
-		var row = parseInt(cell.id.split("-")[1]);
+		var column = parseInt(cell.id.split("/")[0]);
+		var row = parseInt(cell.id.split("/")[1]);
 
 		if (column == move.columnIndex && row == move.rowIndex) {
 			cell.classList.remove('white-piece');
@@ -140,9 +172,16 @@ const displayMove = (move) => {
 	}
 }
 
+const displayEvaluation = (evaluation) => {
+
+	const evaluationValue = document.getElementById("evaluationValue");
+
+	evaluationValue.innerText = evaluation;
+}
+
 const refreshGame = (moves) => {
-	for (var i = 0; i < moves.length; i++) {
-		displayMove(moves[i]);
+	for (const element of moves) {
+		displayMove(element);
 	}
 }
 
@@ -158,10 +197,18 @@ const sendReload = () => {
 const sendDisplayMove = (move) => {
 	if (stompClient) {
 		var webSocketMessage = {
-			columnIndex: move.columnIndex,
-			rowIndex: move.rowIndex,
-			color: move.color,
-			type: "DISPLAY_MOVES"
+			content: JSON.stringify(move),
+			type: "REFRESH_MOVE"
+		};
+		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
+	}
+}
+
+const sendDisplayEvaluation = (evaluation) => {
+	if (stompClient) {
+		var webSocketMessage = {
+			content: evaluation,
+			type: "REFRESH_EVALUATION"
 		};
 		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
 	}
@@ -182,8 +229,10 @@ const onReceive = (payload) => {
 
 	if (webSocketMessage.type == "RELOAD") {
 		location.reload();
-	} else if (webSocketMessage.type == "DISPLAY_MOVES") {
-		displayMove(webSocketMessage);
+	} else if (webSocketMessage.type == "REFRESH_MOVE") {
+		displayMove(JSON.parse(webSocketMessage.content));
+	} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
+		displayEvaluation(webSocketMessage.content);
 	}
 }
 
@@ -198,6 +247,8 @@ function main() {
 	initButtonListeners();
 
 	refreshGame(moves);
+	
+	displayEvaluation(evaluation);
 }
 
 

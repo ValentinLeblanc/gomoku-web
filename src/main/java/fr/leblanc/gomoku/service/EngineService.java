@@ -23,5 +23,9 @@ public class EngineService {
 	public Move computeMove(GameDto game) {
 		return engineRepository.computeMove(game);
 	}
+
+	public Double computeEvaluation(GameDto game) {
+		return engineRepository.computeEvaluation(game);
+	}
 	 
 }

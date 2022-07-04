@@ -24,10 +24,10 @@
 	<div class="container special">
 		<div id="board" style="width: fit-content">
 			<table>
-				<th:block th:each="y: ${#numbers.sequence(1, game.boardSize)}">
+				<th:block th:each="y: ${#numbers.sequence(0, game.boardSize)}">
 					<tr>
-						<th:block th:each="x: ${#numbers.sequence(1, game.boardSize)}">
-							<td th:id="${x} + '-' + ${y}" class="emptyCell" tabindex="-1" />
+						<th:block th:each="x: ${#numbers.sequence(0, game.boardSize)}">
+							<td th:id="(${x}-1) + '/' + (${y}-1)" class="emptyCell" tabindex="-1"><th:block th:if="${y}==0"><th:block th:if="${x}>0" th:text="${x}-1"></th:block></th:block><th:block th:if="${x}==0"><th:block th:if="${y}>0" th:text="${y}-1"></th:block></th:block></td>
 						</th:block>
 					</tr>
 				</th:block>
@@ -62,12 +62,21 @@
 					</div>
 				</div>
 			</div>
+			<div class="form-floating" style="display: inline-block">
+				<div class="row">
+					<div>
+						<span>Evaluation : </span>
+						<span id="evaluationValue"></span>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		var moves = /*[[${game.moves}]]*/'default';
 		var boardSize = /*[[${game.boardSize}]]*/'default';
+		var evaluation = /*[[${evaluation}]]*/'default';
 		var _csrf = /*[[${_csrf}]]*/'default';
 		/*]]>*/
 	</script>

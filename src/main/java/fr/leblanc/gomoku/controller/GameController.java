@@ -42,6 +42,8 @@ public class GameController {
 		
 		model.addAttribute("game", localGame);
 		
+		model.addAttribute("evaluation", gameService.computeEvaluation(new GameDto(localGame)));
+		
 		return new ModelAndView("forward:/board");
 	}
 
@@ -67,13 +69,18 @@ public class GameController {
 	}
 	
 	@PostMapping("/compute-move")
-	public Move computeMove(@RequestBody GameDto game) {
+	public Set<Move> computeMove(@RequestBody GameDto game) {
 		return gameService.computeMove(game);
 	}
 
-	@PostMapping("undo-move")
+	@PostMapping("/undo-move")
 	public Set<Move> undoMove() {
 		return gameService.undoMove();
+	}
+	
+	@PostMapping("/compute-evaluation")
+	public Double computeEvaluation(@RequestBody GameDto game) {
+		return gameService.computeEvaluation(game);
 	}
 
 }

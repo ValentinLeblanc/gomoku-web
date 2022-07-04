@@ -56,21 +56,37 @@ public class EngineRepository {
 
 	public Move computeMove(GameDto game) {
 		
-		String computeMove = customProperties.getEngineUrl() + "/computeMove";
+		String computeMoveUrl = customProperties.getEngineUrl() + "/computeMove";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDto> request = new HttpEntity<>(game);
 		
 		ResponseEntity<MoveDto> response = restTemplate.exchange(
-				computeMove, 
+				computeMoveUrl, 
 				HttpMethod.POST, 
 				request, 
 				MoveDto.class);
 		
 		MoveDto computedMove = response.getBody();
 		
-		return Move.builder().color(GomokuColor.GREEN).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
+		return Move.builder().color(GomokuColor.toValue(computedMove.getColor())).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
 			
+	}
+
+	public Double computeEvaluation(GameDto game) {
+		
+		String computeEvaluationUrl = customProperties.getEngineUrl() + "/computeEvaluation";
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpEntity<GameDto> request = new HttpEntity<>(game);
+
+		ResponseEntity<Double> response = restTemplate.exchange(
+				computeEvaluationUrl, 
+				HttpMethod.POST, 
+				request, 
+				Double.class);
+		
+		return response.getBody();
 	}
 
 }

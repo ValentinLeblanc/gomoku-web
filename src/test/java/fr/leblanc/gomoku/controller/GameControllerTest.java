@@ -113,7 +113,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertEquals(1, currentGame.getMoves().size());
 
-		mockMvc.perform(post("/reset-local-game").content("").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/reset-game").content("").contentType(MediaType.APPLICATION_JSON)
 				.with(user(USER).password(PASSWORD)).with(csrf())).andExpect(status().isFound());
 
 		currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
