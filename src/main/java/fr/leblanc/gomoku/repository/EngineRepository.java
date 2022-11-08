@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import fr.leblanc.gomoku.model.CustomProperties;
@@ -18,8 +19,10 @@ import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.web.dto.CheckWinResult;
 import fr.leblanc.gomoku.web.dto.GameDto;
 import fr.leblanc.gomoku.web.dto.MoveDto;
+import lombok.extern.log4j.Log4j2;
 
 @Repository
+@Log4j2
 public class EngineRepository {
 	
 	@Autowired
@@ -32,22 +35,25 @@ public class EngineRepository {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDto> request = new HttpEntity<>(new GameDto(game));
 		
-		ResponseEntity<CheckWinResult> response = restTemplate.exchange(
-				checkWinUrl, 
-				HttpMethod.POST, 
-				request, 
-				CheckWinResult.class);
-		
-		CheckWinResult checkWinResult = response.getBody();
-		
-		if (checkWinResult != null && checkWinResult.isWin()) {
+		try {
+			ResponseEntity<CheckWinResult> response = restTemplate.exchange(
+					checkWinUrl, 
+					HttpMethod.POST, 
+					request, 
+					CheckWinResult.class);
 			
-			Set<Move> result = new HashSet<>();
-			for (MoveDto move : checkWinResult.getWinMoves()) {
-				result.add(Move.builder().color(GomokuColor.GREEN).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
+			CheckWinResult checkWinResult = response.getBody();
+			if (checkWinResult != null && checkWinResult.isWin()) {
+				
+				Set<Move> result = new HashSet<>();
+				for (MoveDto move : checkWinResult.getWinMoves()) {
+					result.add(Move.builder().color(GomokuColor.GREEN).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
+				}
+				
+				return result;
 			}
-			
-			return result;
+		} catch (RestClientException e) {
+			log.error("Error while computing checkWin : " + e.getMessage());
 		}
 		
 		return Collections.emptySet();
@@ -61,16 +67,24 @@ public class EngineRepository {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDto> request = new HttpEntity<>(game);
 		
-		ResponseEntity<MoveDto> response = restTemplate.exchange(
-				computeMoveUrl, 
-				HttpMethod.POST, 
-				request, 
-				MoveDto.class);
-		
-		MoveDto computedMove = response.getBody();
-		
-		return Move.builder().color(GomokuColor.toValue(computedMove.getColor())).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
+		try {
+			ResponseEntity<MoveDto> response = restTemplate.exchange(
+					computeMoveUrl, 
+					HttpMethod.POST, 
+					request, 
+					MoveDto.class);
 			
+			MoveDto computedMove = response.getBody();
+			if (computedMove != null) {
+				return Move.builder().color(GomokuColor.toValue(computedMove.getColor())).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
+			}
+			
+			return null;
+		} catch (RestClientException e) {
+			log.error("Error while computing move : " + e.getMessage());
+			return null;
+		}
+		
 	}
 
 	public Double computeEvaluation(GameDto game) {
@@ -80,13 +94,18 @@ public class EngineRepository {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDto> request = new HttpEntity<>(game);
 
-		ResponseEntity<Double> response = restTemplate.exchange(
-				computeEvaluationUrl, 
-				HttpMethod.POST, 
-				request, 
-				Double.class);
-		
-		return response.getBody();
+		try {
+			ResponseEntity<Double> response = restTemplate.exchange(
+					computeEvaluationUrl, 
+					HttpMethod.POST, 
+					request, 
+					Double.class);
+			
+			return response.getBody();
+		} catch (RestClientException e) {
+			log.error("Error while computing evaluation : " + e.getMessage());
+			return 0d;
+		}
 	}
 
 }

@@ -4,7 +4,9 @@ const initCellListeners = () => {
 	var cells = document.querySelectorAll(".emptyCell");
 	for (const element of cells) {
 		var cell = element;
-		cell.addEventListener("click", onAddMoveAction);
+		if (cell.textContent == "" && cell.id != "-1/-1") {
+			cell.addEventListener("click", onAddMoveAction);
+		}
 	}
 }
 

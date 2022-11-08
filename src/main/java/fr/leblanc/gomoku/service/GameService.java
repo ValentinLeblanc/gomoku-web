@@ -157,11 +157,11 @@ public class GameService {
 	public Set<Move> computeMove(GameDto game) {
 		Move computedMove = engineService.computeMove(game);
 		
-		if (computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
+		if (computedMove != null && computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
 			return addMove(computedMove.getColumnIndex(), computedMove.getRowIndex());
 		}
 		
-		return null;
+		return Collections.emptySet();
 	}
 
 	public Double computeEvaluation(GameDto game) {
