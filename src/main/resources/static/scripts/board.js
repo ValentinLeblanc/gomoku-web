@@ -118,6 +118,7 @@ const onResetGameAction = (event) => {
 }
 
 const onComputeMoveAction = (event) => {
+	displayComputeProgress(1);
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-move", true);
