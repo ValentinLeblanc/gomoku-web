@@ -167,4 +167,8 @@ public class GameService {
 	public Double computeEvaluation(GameDto game) {
 		return engineService.computeEvaluation(game);
 	}
+
+	public void stopComputation() {
+		engineService.stopComputation();
+	}
 }

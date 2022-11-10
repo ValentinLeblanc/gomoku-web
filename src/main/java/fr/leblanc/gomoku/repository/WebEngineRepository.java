@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Repository
 @Log4j2
-public class EngineRepository {
+public class WebEngineRepository {
 	
 	@Autowired
 	private CustomProperties customProperties;
@@ -105,6 +105,24 @@ public class EngineRepository {
 		} catch (RestClientException e) {
 			log.error("Error while computing evaluation : " + e.getMessage());
 			return 0d;
+		}
+	}
+
+	public void stopComputation() {
+		String computeEvaluationUrl = customProperties.getEngineUrl() + "/stop";
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpEntity<String> request = new HttpEntity<>("");
+
+		try {
+			restTemplate.exchange(
+					computeEvaluationUrl, 
+					HttpMethod.POST, 
+					request, 
+					Void.class);
+			
+		} catch (RestClientException e) {
+			log.error("Error while stopping computation : " + e.getMessage());
 		}
 	}
 

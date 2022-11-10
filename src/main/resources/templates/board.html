@@ -55,6 +55,16 @@
 			<div class="form-floating" style="display: inline-block">
 				<div class="row">
 					<div class="col-sm-6 col-sm-offset-3">
+						<button type="submit" name="stop" id="stop"
+							class="btn btn-default" value="Stop">
+							<em class="fa-solid fa-stop" style="color: #0d6efd"></em>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-floating" style="display: inline-block">
+				<div class="row">
+					<div class="col-sm-6 col-sm-offset-3">
 						<button type="submit" name="undo-move" id="undo-move"
 							class="btn btn-default" value="Revert Move">
 							<em class="fas fa-undo" style="color: #0d6efd"></em>
@@ -69,6 +79,9 @@
 						<span id="evaluationValue"></span>
 					</div>
 				</div>
+			</div>
+			<div id="computeProgress">
+				<div id="progressBar"></div>
 			</div>
 		</div>
 	</div>

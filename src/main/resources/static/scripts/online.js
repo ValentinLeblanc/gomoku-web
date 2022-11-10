@@ -35,7 +35,7 @@ const onReceive = (payload) => {
 }
 
 const onConnected = () => {
-	stompClient.subscribe('/topic/public', onReceive)
+	stompClient.subscribe('/web/public', onReceive)
 }
 
 const connectToWebSocket = () => {

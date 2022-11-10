@@ -82,5 +82,10 @@ public class GameController {
 	public Double computeEvaluation(@RequestBody GameDto game) {
 		return gameService.computeEvaluation(game);
 	}
+	
+	@PostMapping("/stop")
+	public void stopComputation() {
+		gameService.stopComputation();
+	}
 
 }

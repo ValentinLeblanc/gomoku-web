@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.Move;
-import fr.leblanc.gomoku.repository.EngineRepository;
+import fr.leblanc.gomoku.repository.WebEngineRepository;
 import fr.leblanc.gomoku.web.dto.GameDto;
 
 @Service
 public class EngineService {
 
 	 @Autowired
-	 private EngineRepository engineRepository;
+	 private WebEngineRepository engineRepository;
 	 
 	 public Set<Move> checkWin(Game game) {
 		 return engineRepository.checkWin(game);
@@ -27,5 +27,9 @@ public class EngineService {
 	public Double computeEvaluation(GameDto game) {
 		return engineRepository.computeEvaluation(game);
 	}
-	 
+
+	public void stopComputation() {
+		engineRepository.stopComputation();
+	}
+	
 }

@@ -51,6 +51,9 @@ const initButtonListeners = () => {
 
 	var computeMoveButton = document.getElementById("compute-move");
 	computeMoveButton.addEventListener("click", onComputeMoveAction);
+	
+	var stopButton = document.getElementById("stop");
+	stopButton.addEventListener("click", onStopAction);
 }
 
 const onAddMoveAction = (event) => {
@@ -151,6 +154,22 @@ const onComputeMoveAction = (event) => {
 	xhr.send(JSON.stringify(jsonGame));
 }
 
+const onStopAction = (event) => {
+	event.stopPropagation();
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/stop", true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.onreadystatechange = function() {
+		sendReload();
+	}
+
+	xhr.send("");
+}
+
 const displayMove = (move) => {
 
 	const cells = document.querySelectorAll(".emptyCell");
@@ -161,17 +180,52 @@ const displayMove = (move) => {
 		var row = parseInt(cell.id.split("/")[1]);
 
 		if (column == move.columnIndex && row == move.rowIndex) {
-			cell.classList.remove('white-piece');
-			cell.classList.remove('black-piece');
+			cell.classList.add('stone');
+			cell.classList.remove('white');
+			cell.classList.remove('black');
 			if (move.color == "BLACK") {
-				cell.classList.add('black-piece');
+				cell.classList.add('black');
 			} else if (move.color == "WHITE") {
-				cell.classList.add('white-piece');
+				cell.classList.add('white');
 			} else if (move.color == "GREEN") {
-				cell.classList.add('green-piece');
+				cell.classList.add('green');
 			}
 		}
 	}
+}
+
+const displayAnalysisMove = (move) => {
+
+	const cells = document.querySelectorAll(".emptyCell");
+
+	for (const element of cells) {
+		var cell = element;
+		var column = parseInt(cell.id.split("/")[0]);
+		var row = parseInt(cell.id.split("/")[1]);
+
+		if (column == move.columnIndex && row == move.rowIndex) {
+			cell.classList.remove('white');
+			cell.classList.remove('black');
+			cell.classList.remove('analysis');
+			cell.classList.remove('stone');
+			if (move.color == 1) {
+				cell.classList.add('stone');
+				cell.classList.add('analysis');
+				cell.classList.add('black');
+			} else if (move.color == -1) {
+				cell.classList.add('stone');
+				cell.classList.add('analysis');
+				cell.classList.add('white');
+			}
+		}
+	}
+}
+
+const displayComputeProgress = (progress) => {
+
+	const progressBar = document.getElementById("progressBar");
+
+	progressBar.style.width = (progress + "%");
 }
 
 const displayEvaluation = (evaluation) => {
@@ -222,8 +276,18 @@ const connectToWebSocket = () => {
 	stompClient.connect({}, onConnected)
 }
 
+const connectToEngineSocket = () => {
+	const socket = new SockJS('http://localhost:8081/engineMessages')
+	stompClientEngine = Stomp.over(socket)
+	stompClientEngine.connect({}, onEngineConnected)
+}
+
 const onConnected = () => {
-	stompClient.subscribe('/topic/public', onReceive)
+	stompClient.subscribe('/web/public', onReceive)
+}
+
+const onEngineConnected = () => {
+	stompClientEngine.subscribe('/engine/public', onReceive)
 }
 
 const onReceive = (payload) => {
@@ -235,14 +299,22 @@ const onReceive = (payload) => {
 		displayMove(JSON.parse(webSocketMessage.content));
 	} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
 		displayEvaluation(webSocketMessage.content);
+	} else if (webSocketMessage.type == "COMPUTE_PROGRESS") {
+		displayComputeProgress(webSocketMessage.content);
+	} else if (webSocketMessage.type == "ANALYSIS_MOVE") {
+		displayAnalysisMove(webSocketMessage.content);
 	}
 }
 
 var stompClient;
 
+var stompClientEngine;
+
 function main() {
 
 	connectToWebSocket();
+	
+	connectToEngineSocket();
 
 	initCellListeners();
 

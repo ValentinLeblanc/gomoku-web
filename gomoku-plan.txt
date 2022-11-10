@@ -1,0 +1,14 @@
+- compute move
+	- find obvious move
+		- compute cell groups
+	- get sorted analyzed moves
+		- compute threats
+	- find mini maxi
+		- compute evaluation
+		
+		
+=> idée pour le calcul des groupes et des threats :
+	- créer un nouveau groupe de pions pour chaque tranche de 5 cases
+	- calculer les menaces pour ce groupe
+	- renseigner ces menaces dans une map de positions
+	- parcourir cette map et calculer le potentiel de chaque position (quel type de menaces,  menaes doubles, etc)
