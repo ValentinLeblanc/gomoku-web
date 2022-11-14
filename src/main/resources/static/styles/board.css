@@ -94,13 +94,17 @@ span {
 	-webkit-transform: rotate(45deg);
 }
 
-#computeProgress {
-	width: 100%;
+.fa-solid:focus {
+	outline: none;	
+}
+
+.computeProgress {
+	width: 50%;
 	background-color: grey;
 }
 
-#progressBar {
-	width: 1%;
+.progressBar {
+	width: 0%;
 	height: 30px;
 	background-color: green;
 }

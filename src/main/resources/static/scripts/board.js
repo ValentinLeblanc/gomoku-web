@@ -118,7 +118,8 @@ const onResetGameAction = (event) => {
 }
 
 const onComputeMoveAction = (event) => {
-	displayComputeProgress(1);
+	displayComputeProgress(1, 0);
+	displayComputeProgress(2, 0);
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-move", true);
@@ -222,9 +223,9 @@ const displayAnalysisMove = (move) => {
 	}
 }
 
-const displayComputeProgress = (progress) => {
-
-	const progressBar = document.getElementById("progressBar");
+const displayComputeProgress = (index, progress) => {
+	
+	const progressBar = document.getElementById("progressBar" + index);
 
 	progressBar.style.width = (progress + "%");
 }
@@ -301,7 +302,8 @@ const onReceive = (payload) => {
 	} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
 		displayEvaluation(webSocketMessage.content);
 	} else if (webSocketMessage.type == "COMPUTE_PROGRESS") {
-		displayComputeProgress(webSocketMessage.content);
+		const contentJson = JSON.parse(webSocketMessage.content);
+		displayComputeProgress(contentJson.index, contentJson.percent);
 	} else if (webSocketMessage.type == "ANALYSIS_MOVE") {
 		displayAnalysisMove(webSocketMessage.content);
 	}

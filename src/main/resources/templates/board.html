@@ -40,24 +40,8 @@
 				<div class="row">
 					<div class="col-sm-6 col-sm-offset-3">
 						<button type="submit" name="reset-game" id="reset-game"
-							class="btn btn-primary" value="Reset Game">Reset game</button>
-					</div>
-				</div>
-			</div>
-			<div class="form-floating" style="display: inline-block">
-				<div class="row">
-					<div class="col-sm-6 col-sm-offset-3">
-						<button type="submit" name="compute-move" id="compute-move"
-							class="btn btn-primary" value="Compute move">Compute move</button>
-					</div>
-				</div>
-			</div>
-			<div class="form-floating" style="display: inline-block">
-				<div class="row">
-					<div class="col-sm-6 col-sm-offset-3">
-						<button type="submit" name="stop" id="stop"
-							class="btn btn-default" value="Stop">
-							<em class="fa-solid fa-stop" style="color: #0d6efd"></em>
+							class="btn btn-default" value="Reset Game">
+							<em class="fa-solid fa-power-off" style="color: #0d6efd"></em>
 						</button>
 					</div>
 				</div>
@@ -74,14 +58,37 @@
 			</div>
 			<div class="form-floating" style="display: inline-block">
 				<div class="row">
+					<div class="col-sm-6 col-sm-offset-3">
+						<button type="submit" name="compute-move" id="compute-move"
+							class="btn btn-default" value="Compute move">
+							<em class="fa-solid fa-computer" style="color: #0d6efd"></em>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-floating" style="display: inline-block">
+				<div class="row">
+					<div class="col-sm-6 col-sm-offset-3">
+						<button type="submit" name="stop" id="stop"
+							class="btn btn-default" value="Stop" style="outline: none !important">
+							<em class="fa-solid fa-stop" style="color: #0d6efd; outline: none !important"></em>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-floating" style="display: inline-block">
+				<div class="row">
 					<div>
 						<span>Evaluation : </span>
 						<span id="evaluationValue"></span>
 					</div>
 				</div>
 			</div>
-			<div id="computeProgress">
-				<div id="progressBar"></div>
+			<div class="computeProgress" id="computeProgress1">
+				<div class="progressBar" id="progressBar1"></div>
+			</div>
+			<div class="computeProgress" id="computeProgress2">
+				<div class="progressBar" id="progressBar2"></div>
 			</div>
 		</div>
 	</div>

@@ -11,8 +11,8 @@ import lombok.Data;
 
 @Entity
 @Table(name = "move")
-@Builder
 @Data
+@Builder
 public class Move
 {
     @Id
