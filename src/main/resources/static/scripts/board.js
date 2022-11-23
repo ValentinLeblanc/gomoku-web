@@ -6,6 +6,8 @@ const initCellListeners = () => {
 		var cell = element;
 		if (cell.textContent == "" && cell.id != "-1/-1") {
 			cell.addEventListener("click", onAddMoveAction);
+		} else {
+			cell.style.backgroundColor = "white";
 		}
 	}
 }
@@ -27,7 +29,7 @@ const updateEvaluation = (moves) => {
 	};
 
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/compute-evaluation", true);
+	xhr.open("POST", "/compute-evaluation/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -57,13 +59,18 @@ const initButtonListeners = () => {
 }
 
 const onAddMoveAction = (event) => {
+	
+	if (isComputerRunning) {
+		return;	
+	}
+	
 	event.stopPropagation();
 	var cell = event.srcElement;
 	var column = parseInt(cell.id.split("/")[0]);
 	var row = parseInt(cell.id.split("/")[1]);
 
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/add-move", true);
+	xhr.open("POST", "/add-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.withCredentials = true;
 	var header = this._csrf.headerName;
@@ -76,6 +83,10 @@ const onAddMoveAction = (event) => {
 				sendDisplayMove(element);
 			}
 			updateEvaluation(moves);
+			
+			if (gameType == "AI") {
+				onComputeMoveAction();
+			}
 		}
 	}
 	xhr.send(JSON.stringify({
@@ -87,7 +98,7 @@ const onAddMoveAction = (event) => {
 const onUndoMoveAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/undo-move", true);
+	xhr.open("POST", "/undo-move/" + gameType, true);
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
@@ -104,7 +115,7 @@ const onUndoMoveAction = (event) => {
 const onResetGameAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/reset-game", true);
+	xhr.open("POST", "/reset-game/" + gameType, true);
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
@@ -118,11 +129,20 @@ const onResetGameAction = (event) => {
 }
 
 const onComputeMoveAction = (event) => {
+	
+	if (isComputerRunning) {
+		return;
+	}
+	
+	isComputerRunning = true;
+	
 	displayComputeProgress(1, 0);
 	displayComputeProgress(2, 0);
-	event.stopPropagation();
+	if (event) {
+		event.stopPropagation();
+	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/compute-move", true);
+	xhr.open("POST", "/compute-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -135,6 +155,8 @@ const onComputeMoveAction = (event) => {
 				sendDisplayMove(element);
 			}
 			updateEvaluation(moves);
+			
+			isComputerRunning = false;
 		}
 	}
 
@@ -328,6 +350,7 @@ function main() {
 	displayEvaluation(evaluation);
 }
 
+var isComputerRunning = false;
 
 main();
 

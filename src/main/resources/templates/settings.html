@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <title>Settings</title>
+<meta th:name="_csrf" th:content="${_csrf.token}"/>
+<meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 	<div th:insert="~{menu}"></div>
@@ -24,6 +26,7 @@
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		var settings = /*[[${settings}]]*/'default';
+		var _csrf = /*[[${_csrf}]]*/'default';
 		/*]]>*/
 	</script>
 	<script type="text/javascript" th:src="@{/scripts/settings.js}"></script>

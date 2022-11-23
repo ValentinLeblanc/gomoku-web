@@ -45,6 +45,10 @@ public class User
     @JoinColumn(name = "current_game_id")
     @JsonIgnore
     private Game currentLocalGame;
+    @OneToOne
+    @JoinColumn(name = "current_ai_game_id")
+    @JsonIgnore
+    private Game currentAIGame;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "users_games", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "game_id", referencedColumnName = "id") })
     private List<Game> games;

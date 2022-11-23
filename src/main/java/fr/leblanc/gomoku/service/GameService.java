@@ -33,44 +33,34 @@ public class GameService {
 	@Autowired
 	private EngineService engineService;
 	
-	public Game localGame() {
+	public Game getCurrentGame(GameType gameType) {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
+		Game currentGame = findCurrentGame(gameType);
 		
 		if (currentGame == null) {
-			currentGame = createLocalGame(userService.getCurrentUser());
+			currentGame = createGame(userService.getCurrentUser(), gameType);
 			gameRepository.save(currentGame);
 		}
 		
 		return currentGame;
-		
 	}
-	
-	public Game AIGame() {
+
+	public Game resetGame(GameType gameType) {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
+		Game currentGame = findCurrentGame(gameType);
 		
 		if (currentGame == null) {
-			currentGame = createLocalGame(userService.getCurrentUser());
-			gameRepository.save(currentGame);
+			throw new IllegalStateException("Current user game doesn't exist");
 		}
-		
-		return currentGame;
-		
-	}
-	
-	public Game resetLocalGame() {
-		
-		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
 		
 		gameRepository.delete(currentGame);
 		
-		return gameRepository.save(createLocalGame(userService.getCurrentUser()));
+		return gameRepository.save(createGame(userService.getCurrentUser(), gameType));
 	}
 
-	public Set<Move> addMove(int columnIndex, int rowIndex) {
+	public Set<Move> addMove(GameType gameType, int columnIndex, int rowIndex) {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
+		Game currentGame = findCurrentGame(gameType);
 
 		if (currentGame == null) {
 			throw new IllegalStateException("Current user game doesn't exist");
@@ -112,34 +102,83 @@ public class GameService {
 		
 		return result;
 	}
-	
-	public Set<Move> undoMove() {
+
+	public Set<Move> undoMove(GameType gameType) {
 		
-		Game currentGame = userService.getCurrentUser().getCurrentLocalGame();
-		
-		if (currentGame.getType() == GameType.LOCAL) {
-			
-			removeLastMove(currentGame);
-			
-			if (!currentGame.getWinCombination().isEmpty()) {
-				currentGame.getWinCombination().clear();
-			}
-			
-			gameRepository.save(currentGame);
-			
-			return currentGame.getMoves();
-		} else {
-			throw new IllegalStateException("Only supported for local game");
+		Game currentGame = findCurrentGame(gameType);
+
+		if (currentGame == null) {
+			throw new IllegalStateException("Current user game doesn't exist");
 		}
 		
+		if (currentGame.getType() == GameType.ONLINE) {
+			throw new IllegalStateException("Not supported for online game");
+		} 
+		
+		removeLastMove(currentGame);
+		
+		if (!currentGame.getWinCombination().isEmpty()) {
+			currentGame.getWinCombination().clear();
+		}
+		
+		gameRepository.save(currentGame);
+		
+		return currentGame.getMoves();
+		
 	}
 
-	private Game createLocalGame(User user) {
-		Game localGame =  Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(GameType.LOCAL).build();
-		user.setCurrentLocalGame(localGame);
-		return localGame;
+	public Set<Move> computeMove(GameType gameType, GameDto game) {
+		Move computedMove = engineService.computeMove(game);
+		
+		if (computedMove != null && computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
+			return addMove(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex());
+		}
+		
+		return Collections.emptySet();
 	}
 
+	public Double computeEvaluation(GameType gameType) {
+		
+		Game currentGame = findCurrentGame(gameType);
+	
+		if (currentGame == null) {
+			throw new IllegalStateException("Current user game doesn't exist");
+		}
+		
+		return engineService.computeEvaluation(new GameDto(currentGame));
+	}
+
+	public void stopComputation() {
+		engineService.stopComputation();
+	}
+
+	private Game findCurrentGame(GameType gameType) {
+		Game currentGame = null;
+		
+		switch (gameType) {
+		case LOCAL:
+			currentGame = userService.getCurrentUser().getCurrentLocalGame();
+			break;
+		case AI:
+			currentGame = userService.getCurrentUser().getCurrentAIGame();
+			break;
+		default:
+		}
+		return currentGame;
+	}
+
+	private Game createGame(User user, GameType gameType) {
+		Game newGame = Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(gameType).build();
+		
+		if (GameType.LOCAL.equals(gameType)) {
+			user.setCurrentLocalGame(newGame);
+		} else if (GameType.AI.equals(gameType)) {
+			user.setCurrentAIGame(newGame);
+		}
+		
+		return newGame;
+	}
+	
 	private Move removeLastMove(Game game) {
 		
 		Move lastMove = game.getMove(game.getMoves().size() - 1);
@@ -154,21 +193,4 @@ public class GameService {
 		return null;
 	}
 
-	public Set<Move> computeMove(GameDto game) {
-		Move computedMove = engineService.computeMove(game);
-		
-		if (computedMove != null && computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
-			return addMove(computedMove.getColumnIndex(), computedMove.getRowIndex());
-		}
-		
-		return Collections.emptySet();
-	}
-
-	public Double computeEvaluation(GameDto game) {
-		return engineService.computeEvaluation(game);
-	}
-
-	public void stopComputation() {
-		engineService.stopComputation();
-	}
 }

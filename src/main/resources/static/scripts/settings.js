@@ -27,6 +27,9 @@ const onUpdateSettingsClick = (event) => {
 	var xhr = new XMLHttpRequest();
 		xhr.open("POST", "http://localhost:8080/settings", true);
 		xhr.withCredentials = true;
+		var header = this._csrf.headerName;
+		var token = this._csrf.token;
+		xhr.setRequestHeader(header, token);
 	if (event.srcElement == document.getElementById("boardSize11")) {
 		document.getElementById("boardSize13").checked = false;
 		document.getElementById("boardSize15").checked = false;
