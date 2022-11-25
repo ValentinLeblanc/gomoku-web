@@ -15,6 +15,7 @@ import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDto;
+import fr.leblanc.gomoku.web.dto.SettingsDto;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -145,7 +146,11 @@ public class GameService {
 			throw new IllegalStateException("Current user game doesn't exist");
 		}
 		
-		return engineService.computeEvaluation(new GameDto(currentGame));
+		GameDto gameDto = new GameDto(currentGame);
+		
+		gameDto.setSettings(new SettingsDto(userService.getCurrentUser().getSettings()));
+		
+		return engineService.computeEvaluation(gameDto);
 	}
 
 	public void stopComputation() {

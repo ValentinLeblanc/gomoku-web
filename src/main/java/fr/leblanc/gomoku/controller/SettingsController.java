@@ -17,8 +17,13 @@ public class SettingsController
     @PostMapping({ "/settings" })
     public void updateSettings(@RequestBody final String body) {
         final JSONObject jsonBody = new JSONObject(body);
-        final Settings settings = this.settingsService.findById(Long.valueOf(jsonBody.getLong("id")));
-        settings.setBoardSize(Integer.valueOf(jsonBody.getInt("boardSize")));
+        final Settings settings = this.settingsService.findById(jsonBody.getLong("id"));
+        settings.setBoardSize(jsonBody.getInt("boardSize"));
+        settings.setDisplayAnalysis(jsonBody.getBoolean("displayAnalysis"));
+        settings.setStrikeEnabled(jsonBody.getBoolean("strikeEnabled"));
+        settings.setStrikeDepth(jsonBody.getInt("strikeDepth"));
+        settings.setMinMaxDepth(jsonBody.getInt("minMaxDepth"));
+        settings.setEvaluationDepth(jsonBody.getInt("evaluationDepth"));
         this.settingsService.updateSettings(settings);
     }
 }

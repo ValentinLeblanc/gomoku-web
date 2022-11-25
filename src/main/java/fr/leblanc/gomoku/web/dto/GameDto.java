@@ -18,6 +18,8 @@ public class GameDto {
 	
 	private Set<MoveDto> moves = new HashSet<>();
 	
+	private SettingsDto settings;
+	
 	public GameDto(Game game) {
 		boardSize = game.getBoardSize();
 		

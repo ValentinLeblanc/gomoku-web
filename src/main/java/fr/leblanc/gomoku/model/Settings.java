@@ -22,8 +22,19 @@ public class Settings
     private Long id;
     @Column(name = "board_size")
     private Integer boardSize;
-    
+    @Column(name = "display_analysis")
+    private Boolean displayAnalysis;
+	private Boolean strikeEnabled;
+	private int minMaxDepth;
+	private int strikeDepth;
+	private int evaluationDepth;
+
     public Settings() {
         this.boardSize = 15;
+        this.displayAnalysis = Boolean.FALSE;
+        this.strikeEnabled = Boolean.TRUE;
+        this.minMaxDepth = 3;
+        this.strikeDepth = 3;
+        this.evaluationDepth = 3;
     }
 }

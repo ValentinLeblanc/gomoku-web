@@ -8,6 +8,7 @@ const initCellListeners = () => {
 			cell.addEventListener("click", onAddMoveAction);
 		} else {
 			cell.style.backgroundColor = "white";
+			cell.style.border = "none";
 		}
 	}
 }
@@ -22,10 +23,19 @@ const updateEvaluation = (moves) => {
 			color: element.color == "BLACK" ? 1 : -1
 		});
 	}
-
+	
+	var settings = {
+		displayAnalysis: userSettings.displayAnalysis,
+		strikeEnabled: userSettings.strikeEnabled,
+		minMaxDepth: userSettings.minMaxDepth,
+		strikeDepth: userSettings.strikeDepth,
+		evaluationDepth: userSettings.evaluationDepth
+	};
+	
 	var jsonGame = {
 		boardSize: boardSize,
-		moves: jsonMoves
+		moves: jsonMoves,
+		settings: settings
 	};
 
 	var xhr = new XMLHttpRequest();
@@ -170,9 +180,18 @@ const onComputeMoveAction = (event) => {
 		});
 	}
 
+	var settings = {
+		displayAnalysis: userSettings.displayAnalysis,
+		strikeEnabled: userSettings.strikeEnabled,
+		minMaxDepth: userSettings.minMaxDepth,
+		strikeDepth: userSettings.strikeDepth,
+		evaluationDepth: userSettings.evaluationDepth
+	};
+
 	var jsonGame = {
 		boardSize: boardSize,
-		moves: jsonMoves
+		moves: jsonMoves,
+		settings: settings
 	};
 
 	xhr.send(JSON.stringify(jsonGame));

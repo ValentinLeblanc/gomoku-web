@@ -34,6 +34,8 @@ public class GameController {
 		
 		model.addAttribute("evaluation", gameService.computeEvaluation(GameType.valueOf(gameType)));
 		
+		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
+		
 		return new ModelAndView("forward:/board");
 	}
 	
