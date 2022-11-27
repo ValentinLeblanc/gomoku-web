@@ -13,31 +13,7 @@ const initCellListeners = () => {
 	}
 }
 
-const updateEvaluation = (moves) => {
-	var jsonMoves = [];
-
-	for (const element of moves) {
-		jsonMoves.push({
-			columnIndex: element.columnIndex,
-			rowIndex: element.rowIndex,
-			color: element.color == "BLACK" ? 1 : -1
-		});
-	}
-	
-	var settings = {
-		displayAnalysis: userSettings.displayAnalysis,
-		strikeEnabled: userSettings.strikeEnabled,
-		minMaxDepth: userSettings.minMaxDepth,
-		strikeDepth: userSettings.strikeDepth,
-		evaluationDepth: userSettings.evaluationDepth
-	};
-	
-	var jsonGame = {
-		boardSize: boardSize,
-		moves: jsonMoves,
-		settings: settings
-	};
-
+const updateEvaluation = () => {
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-evaluation/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -51,7 +27,7 @@ const updateEvaluation = (moves) => {
 			sendDisplayEvaluation(evaluation);
 		}
 	}
-	xhr.send(JSON.stringify(jsonGame));
+	xhr.send("");
 }
 
 const initButtonListeners = () => {
@@ -66,6 +42,9 @@ const initButtonListeners = () => {
 	
 	var stopButton = document.getElementById("stop");
 	stopButton.addEventListener("click", onStopAction);
+	
+	var lastMoveButton = document.getElementById("lastMove");
+	lastMoveButton.addEventListener("click", onLastMoveAction);
 }
 
 const onAddMoveAction = (event) => {
@@ -92,7 +71,7 @@ const onAddMoveAction = (event) => {
 			for (const element of moves) {
 				sendDisplayMove(element);
 			}
-			updateEvaluation(moves);
+			updateEvaluation();
 			
 			if (gameType == "AI") {
 				onComputeMoveAction();
@@ -118,8 +97,7 @@ const onUndoMoveAction = (event) => {
 			sendReload();
 		}
 	}
-	xhr.send(JSON.stringify({
-	}));
+	xhr.send("");
 }
 
 const onResetGameAction = (event) => {
@@ -135,7 +113,7 @@ const onResetGameAction = (event) => {
 			sendReload();
 		}
 	}
-	xhr.send({});
+	xhr.send("");
 }
 
 const onComputeMoveAction = (event) => {
@@ -147,7 +125,6 @@ const onComputeMoveAction = (event) => {
 	isComputerRunning = true;
 	
 	displayComputeProgress(1, 0);
-	displayComputeProgress(2, 0);
 	if (event) {
 		event.stopPropagation();
 	}
@@ -164,37 +141,13 @@ const onComputeMoveAction = (event) => {
 			for (const element of moves) {
 				sendDisplayMove(element);
 			}
-			updateEvaluation(moves);
+			updateEvaluation();
 			
 			isComputerRunning = false;
 		}
 	}
 
-	var jsonMoves = [];
-
-	for (const element of moves) {
-		jsonMoves.push({
-			columnIndex: element.columnIndex,
-			rowIndex: element.rowIndex,
-			color: element.color == "BLACK" ? 1 : -1
-		});
-	}
-
-	var settings = {
-		displayAnalysis: userSettings.displayAnalysis,
-		strikeEnabled: userSettings.strikeEnabled,
-		minMaxDepth: userSettings.minMaxDepth,
-		strikeDepth: userSettings.strikeDepth,
-		evaluationDepth: userSettings.evaluationDepth
-	};
-
-	var jsonGame = {
-		boardSize: boardSize,
-		moves: jsonMoves,
-		settings: settings
-	};
-
-	xhr.send(JSON.stringify(jsonGame));
+	xhr.send("");
 }
 
 const onStopAction = (event) => {
@@ -207,13 +160,40 @@ const onStopAction = (event) => {
 	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
-		sendReload();
+		var cells = document.querySelectorAll(".analysis");
+		for (const element of cells) {
+			element.classList.remove("analysis");
+			element.classList.remove("black");
+			element.classList.remove("white");
+		}
+		
+		isComputerRunning = false;
+		setTimeout(() => displayComputeProgress(1, 0), 100);
 	}
 
 	xhr.send("");
 }
 
-const displayMove = (move) => {
+const onLastMoveAction = (event) => {
+	event.stopPropagation();
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "/lastMove/" + gameType, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			var lastMove = JSON.parse(xhr.response);
+			displayLastMove(lastMove);
+		}
+	}
+
+	xhr.send("");
+}
+
+const displayLastMove = (move) => {
 
 	const cells = document.querySelectorAll(".emptyCell");
 
@@ -223,22 +203,44 @@ const displayMove = (move) => {
 		var row = parseInt(cell.id.split("/")[1]);
 
 		if (column == move.columnIndex && row == move.rowIndex) {
-			cell.classList.add('stone');
-			cell.classList.remove('white');
-			cell.classList.remove('black');
-			if (move.color == "BLACK") {
-				cell.classList.add('black');
-			} else if (move.color == "WHITE") {
-				cell.classList.add('white');
-			} else if (move.color == "GREEN") {
-				cell.classList.add('green');
+			cell.classList.add('green');
+			setTimeout(() => removeGreenClass(cell), 1000);
+			break;
+		}
+	}
+}
+
+const removeGreenClass = (cell) => {
+	cell.classList.remove('green');
+}
+
+const displayMove = (move) => {
+
+	if (move) {
+		const cells = document.querySelectorAll(".emptyCell");
+	
+		for (const element of cells) {
+			var cell = element;
+			var column = parseInt(cell.id.split("/")[0]);
+			var row = parseInt(cell.id.split("/")[1]);
+	
+			if (column == move.columnIndex && row == move.rowIndex) {
+				cell.classList.add('stone');
+				cell.classList.remove('white');
+				cell.classList.remove('black');
+				if (move.color == 1) {
+					cell.classList.add('black');
+				} else if (move.color == -1) {
+					cell.classList.add('white');
+				} else if (move.color == 2) {
+					cell.classList.add('green');
+				}
 			}
 		}
 	}
 }
 
 const displayAnalysisMove = (move) => {
-
 	const cells = document.querySelectorAll(".emptyCell");
 
 	for (const element of cells) {
@@ -278,6 +280,17 @@ const displayEvaluation = (evaluation) => {
 	evaluationValue.innerText = evaluation;
 }
 
+const updateComputeIcon = (isRunning) => {
+
+	const computeIcon = document.getElementById("computeIcon");
+	
+	if (isRunning) {
+		computeIcon.classList.add("fa-spin");
+	} else {
+		computeIcon.classList.remove("fa-spin");
+	}
+}
+
 const refreshGame = (moves) => {
 	for (const element of moves) {
 		displayMove(element);
@@ -296,7 +309,7 @@ const sendReload = () => {
 const sendDisplayMove = (move) => {
 	if (stompClient) {
 		var webSocketMessage = {
-			content: JSON.stringify(move),
+			content: move,
 			type: "REFRESH_MOVE"
 		};
 		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
@@ -339,14 +352,19 @@ const onReceive = (payload) => {
 	if (webSocketMessage.type == "RELOAD") {
 		location.reload();
 	} else if (webSocketMessage.type == "REFRESH_MOVE") {
-		displayMove(JSON.parse(webSocketMessage.content));
+		displayMove(webSocketMessage.content);
 	} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
 		displayEvaluation(webSocketMessage.content);
 	} else if (webSocketMessage.type == "COMPUTE_PROGRESS") {
-		const contentJson = JSON.parse(webSocketMessage.content);
+		const contentJson = webSocketMessage.content;
 		displayComputeProgress(contentJson.index, contentJson.percent);
-	} else if (webSocketMessage.type == "ANALYSIS_MOVE") {
-		displayAnalysisMove(webSocketMessage.content);
+	} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
+		if (userSettings.displayAnalysis) {
+			displayAnalysisMove(webSocketMessage.content);
+		}
+		updateComputeIcon(true);
+	} else if (webSocketMessage.type == "IS_RUNNING") {
+		updateComputeIcon(webSocketMessage.content);
 	}
 }
 
@@ -367,6 +385,8 @@ function main() {
 	refreshGame(moves);
 	
 	displayEvaluation(evaluation);
+	
+	updateComputeIcon(false);
 }
 
 var isComputerRunning = false;

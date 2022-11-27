@@ -6,6 +6,6 @@ import lombok.Data;
 public class WebSocketMessage
 {
     private MessageType type;
-    private String content;
+    private Object content;
     
 }

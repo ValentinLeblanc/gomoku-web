@@ -11,15 +11,12 @@ import lombok.NoArgsConstructor;
 public class SettingsDto {
 
 	public SettingsDto(Settings settings) {
-		this.displayAnalysis = settings.getDisplayAnalysis();
 		this.strikeEnabled = settings.getStrikeEnabled();
-		this.minMaxDepth = settings.getStrikeDepth();
+		this.minMaxDepth = settings.getMinMaxDepth();
 		this.evaluationDepth = settings.getEvaluationDepth();
 		this.strikeDepth = settings.getStrikeDepth();
 	}
 
-	private Boolean displayAnalysis;
-	
 	private Boolean strikeEnabled;
 	
 	private int minMaxDepth;

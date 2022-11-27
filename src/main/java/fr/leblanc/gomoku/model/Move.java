@@ -21,12 +21,12 @@ public class Move
     private int number;
     private int columnIndex;
     private int rowIndex;
-    private GomokuColor color;
+    private int color;
     
     public Move() {
     }
     
-    public Move(final Long id, final int number, final int columnIndex, final int rowIndex, final GomokuColor color) {
+    public Move(final Long id, final int number, final int columnIndex, final int rowIndex, final int color) {
         this.id = id;
         this.number = number;
         this.columnIndex = columnIndex;

@@ -16,7 +16,7 @@ public class MoveDto {
     public MoveDto(Move move) {
     	columnIndex = move.getColumnIndex();
     	rowIndex = move.getRowIndex();
-    	color = move.getColor().toNumber();
+    	color = move.getColor();
     }
 }
 	

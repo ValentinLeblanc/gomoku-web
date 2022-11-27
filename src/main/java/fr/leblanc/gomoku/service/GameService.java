@@ -22,6 +22,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GameService {
 
+	private static final String GAME_NOT_FOUND = "Game not found";
+
 	@Autowired
 	private GameRepository gameRepository;
 	
@@ -51,7 +53,7 @@ public class GameService {
 		Game currentGame = findCurrentGame(gameType);
 		
 		if (currentGame == null) {
-			throw new IllegalStateException("Current user game doesn't exist");
+			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
 		gameRepository.delete(currentGame);
@@ -64,7 +66,7 @@ public class GameService {
 		Game currentGame = findCurrentGame(gameType);
 
 		if (currentGame == null) {
-			throw new IllegalStateException("Current user game doesn't exist");
+			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
 		if (currentGame.getMove(columnIndex, rowIndex) != null) {
@@ -75,7 +77,7 @@ public class GameService {
 			return Collections.emptySet();
 		}
 		
-		GomokuColor color = currentGame.getMoves().size() % 2 == 0 ? GomokuColor.BLACK : GomokuColor.WHITE;
+		int color = currentGame.getMoves().size() % 2 == 0 ? GomokuColor.BLACK.toNumber() : GomokuColor.WHITE.toNumber();
 		
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
 		
@@ -109,7 +111,7 @@ public class GameService {
 		Game currentGame = findCurrentGame(gameType);
 
 		if (currentGame == null) {
-			throw new IllegalStateException("Current user game doesn't exist");
+			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
 		if (currentGame.getType() == GameType.ONLINE) {
@@ -128,8 +130,23 @@ public class GameService {
 		
 	}
 
-	public Set<Move> computeMove(GameType gameType, GameDto game) {
-		Move computedMove = engineService.computeMove(game);
+	public Set<Move> computeMove(GameType gameType) {
+		
+		Game currentGame = findCurrentGame(gameType);
+
+		if (currentGame == null) {
+			throw new IllegalStateException(GAME_NOT_FOUND);
+		}
+		
+		if (currentGame.getType() == GameType.ONLINE) {
+			throw new IllegalStateException("Not supported for online game");
+		} 
+		
+		GameDto gameDto = new GameDto(currentGame);
+		
+		gameDto.setSettings(new SettingsDto(userService.getCurrentUser().getSettings()));
+		
+		Move computedMove = engineService.computeMove(gameDto);
 		
 		if (computedMove != null && computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
 			return addMove(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex());
@@ -143,7 +160,7 @@ public class GameService {
 		Game currentGame = findCurrentGame(gameType);
 	
 		if (currentGame == null) {
-			throw new IllegalStateException("Current user game doesn't exist");
+			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
 		GameDto gameDto = new GameDto(currentGame);
@@ -155,6 +172,17 @@ public class GameService {
 
 	public void stopComputation() {
 		engineService.stopComputation();
+	}
+
+	public Move getLastMove(GameType gameType) {
+		Game currentGame = findCurrentGame(gameType);
+		
+		if (currentGame == null) {
+			throw new IllegalStateException(GAME_NOT_FOUND);
+		}
+		
+		return getLastMove(currentGame);
+		
 	}
 
 	private Game findCurrentGame(GameType gameType) {
@@ -186,16 +214,20 @@ public class GameService {
 	
 	private Move removeLastMove(Game game) {
 		
-		Move lastMove = game.getMove(game.getMoves().size() - 1);
+		Move lastMove = getLastMove(game);
 		
 		if (lastMove != null) {
 			game.getMoves().remove(lastMove);
-			lastMove.setColor(GomokuColor.NONE);
+			lastMove.setColor(GomokuColor.NONE.toNumber());
 			moveService.delete(lastMove);
 			return lastMove;
 		}
 		
 		return null;
+	}
+
+	private Move getLastMove(Game currentGame) {
+		return currentGame.getMove(currentGame.getMoves().size() - 1);
 	}
 
 }
