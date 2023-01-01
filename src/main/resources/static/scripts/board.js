@@ -45,6 +45,12 @@ const initButtonListeners = () => {
 	
 	var lastMoveButton = document.getElementById("lastMove");
 	lastMoveButton.addEventListener("click", onLastMoveAction);
+	
+	var downloadGameButton = document.getElementById("downloadGame");
+	downloadGameButton.addEventListener("click", onDownloadGameAction);
+	
+	var uploadGameButton = document.getElementById("uploadGame");
+	uploadGameButton.addEventListener("click", onUploadGameAction);
 }
 
 const onAddMoveAction = (event) => {
@@ -187,6 +193,24 @@ const onLastMoveAction = (event) => {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
 			var lastMove = JSON.parse(xhr.response);
 			displayLastMove(lastMove);
+		}
+	}
+
+	xhr.send("");
+}
+
+const onDownloadGameAction = (event) => {
+	event.stopPropagation();
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/downloadGame/" + gameType, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			var game = JSON.parse(xhr.response);
 		}
 	}
 

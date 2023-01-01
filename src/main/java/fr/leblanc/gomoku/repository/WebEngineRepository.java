@@ -19,10 +19,10 @@ import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.web.dto.CheckWinResult;
 import fr.leblanc.gomoku.web.dto.GameDto;
 import fr.leblanc.gomoku.web.dto.MoveDto;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.apachecommons.CommonsLog;
 
 @Repository
-@Log4j2
+@CommonsLog
 public class WebEngineRepository {
 	
 	@Autowired

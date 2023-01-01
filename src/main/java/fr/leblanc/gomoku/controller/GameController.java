@@ -2,6 +2,8 @@ package fr.leblanc.gomoku.controller;
 
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,4 +78,8 @@ public class GameController {
 		return gameService.getLastMove(GameType.valueOf(gameType.toUpperCase()));
 	}
 
+	@GetMapping("downloadGame/{gameType}")
+	public void downloadGame(@PathVariable String gameType, HttpServletResponse response) {
+		gameService.downloadGame(GameType.valueOf(gameType.toUpperCase()), null);
+	}
 }

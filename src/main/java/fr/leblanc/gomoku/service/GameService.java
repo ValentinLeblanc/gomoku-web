@@ -1,9 +1,14 @@
 package fr.leblanc.gomoku.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
@@ -16,10 +21,10 @@ import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDto;
 import fr.leblanc.gomoku.web.dto.SettingsDto;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.apachecommons.CommonsLog;
 
 @Service
-@Log4j2
+@CommonsLog
 public class GameService {
 
 	private static final String GAME_NOT_FOUND = "Game not found";
@@ -228,6 +233,16 @@ public class GameService {
 
 	private Move getLastMove(Game currentGame) {
 		return currentGame.getMove(currentGame.getMoves().size() - 1);
+	}
+
+	public void downloadGame(GameType gameType, HttpServletResponse response) {
+		InputStream is = null;
+		try {
+			IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
