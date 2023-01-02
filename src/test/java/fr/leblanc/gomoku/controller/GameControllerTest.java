@@ -2,7 +2,7 @@ package fr.leblanc.gomoku.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -120,7 +120,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertNotNull(currentGame);
 
-		assertNull(currentGame.getMoves());
+		assertTrue(currentGame.getMoves().isEmpty());
 
 	}
 
