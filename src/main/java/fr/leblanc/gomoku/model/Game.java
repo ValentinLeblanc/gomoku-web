@@ -62,15 +62,6 @@ public class Game {
 		return null;
 	}
 
-	public Move getMove(final int moveNumber) {
-		for (final Move move : this.moves) {
-			if (move.getNumber() == moveNumber) {
-				return move;
-			}
-		}
-		return null;
-	}
-
 	public Game() {
 		this.moves = new HashSet<>();
 		this.winCombination = new HashSet<>();

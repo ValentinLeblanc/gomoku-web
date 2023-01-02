@@ -15,6 +15,7 @@ public class SettingsDto {
 		this.minMaxDepth = settings.getMinMaxDepth();
 		this.evaluationDepth = settings.getEvaluationDepth();
 		this.strikeDepth = settings.getStrikeDepth();
+		this.strikeTimeout = settings.getStrikeTimeout();
 	}
 
 	private Boolean strikeEnabled;
@@ -24,5 +25,7 @@ public class SettingsDto {
 	private int strikeDepth;
 	
 	private int evaluationDepth;
+	
+	private int strikeTimeout;
 
 }

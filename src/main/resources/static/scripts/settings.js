@@ -15,6 +15,28 @@ const initializeView = (settings) => {
 		document.getElementById("boardSize15").checked = true;
 	}
 	
+	if (settings.strikeTimeout == 10) {
+		document.getElementById("strikeTimeout10").checked = true;
+		document.getElementById("strikeTimeout20").checked = false;
+		document.getElementById("strikeTimeout30").checked = false;
+		document.getElementById("strikeTimeoutInf").checked = false;
+	} else if (settings.strikeTimeout == 20) {
+		document.getElementById("strikeTimeout10").checked = false;
+		document.getElementById("strikeTimeout20").checked = true;
+		document.getElementById("strikeTimeout30").checked = false;
+		document.getElementById("strikeTimeoutInf").checked = false;
+	} else if (settings.strikeTimeout == 30) {
+		document.getElementById("strikeTimeout10").checked = false;
+		document.getElementById("strikeTimeout20").checked = false;
+		document.getElementById("strikeTimeout30").checked = true;
+		document.getElementById("strikeTimeoutInf").checked = false;
+	} else if (settings.strikeTimeout == -1) {
+		document.getElementById("strikeTimeout10").checked = false;
+		document.getElementById("strikeTimeout20").checked = false;
+		document.getElementById("strikeTimeout30").checked = false;
+		document.getElementById("strikeTimeoutInf").checked = true;
+	}
+	
 	if (settings.strikeDepth == 1) {
 		document.getElementById("strikeDepth1").checked = true;
 		document.getElementById("strikeDepth2").checked = false;
@@ -113,6 +135,10 @@ const initializeListeners = () => {
 	document.getElementById("evaluationDepth2").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("evaluationDepth3").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("evaluationDepth4").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("strikeTimeout10").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("strikeTimeout20").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("strikeTimeout30").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("strikeTimeoutInf").addEventListener("click", onUpdateSettingsClick);
 }
 
 const onUpdateSettingsClick = (event) => {
@@ -214,6 +240,30 @@ const onUpdateSettingsClick = (event) => {
 		document.getElementById("evaluationDepth2").checked = false;
 		document.getElementById("evaluationDepth3").checked = false;
 		settings.evaluationDepth = 4;
+		xhr.send(JSON.stringify(settings));
+	} else if (event.srcElement == document.getElementById("strikeTimeout10")) {
+		document.getElementById("strikeTimeout20").checked = false;
+		document.getElementById("strikeTimeout30").checked = false;
+		document.getElementById("strikeTimeoutInf").checked = false;
+		settings.strikeTimeout = 10;
+		xhr.send(JSON.stringify(settings));
+	} else if (event.srcElement == document.getElementById("strikeTimeout20")) {
+		document.getElementById("strikeTimeout10").checked = false;
+		document.getElementById("strikeTimeout30").checked = false;
+		document.getElementById("strikeTimeoutInf").checked = false;
+		settings.strikeTimeout = 20;
+		xhr.send(JSON.stringify(settings));
+	} else if (event.srcElement == document.getElementById("strikeTimeout30")) {
+		document.getElementById("strikeTimeout10").checked = false;
+		document.getElementById("strikeTimeout20").checked = false;
+		document.getElementById("strikeTimeoutInf").checked = false;
+		settings.strikeTimeout = 30;
+		xhr.send(JSON.stringify(settings));
+	} else if (event.srcElement == document.getElementById("strikeTimeoutInf")) {
+		document.getElementById("strikeTimeout10").checked = false;
+		document.getElementById("strikeTimeout20").checked = false;
+		document.getElementById("strikeTimeout30").checked = false;
+		settings.strikeTimeout = -1;
 		xhr.send(JSON.stringify(settings));
 	}
 }

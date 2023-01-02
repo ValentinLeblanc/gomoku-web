@@ -37,6 +37,18 @@ td {
 	border-radius: 50px;
 }
 
+.last:before {
+    position: absolute;
+    content: '';
+    background-color:#FF0000;
+    border-radius:50%;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    margin-left: -5px;
+    margin-top: -5px;
+}
+
 .analysis {
 	opacity:0.5;
 }

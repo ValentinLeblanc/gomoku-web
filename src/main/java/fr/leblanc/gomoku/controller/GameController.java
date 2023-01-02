@@ -2,9 +2,9 @@ package fr.leblanc.gomoku.controller;
 
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +18,7 @@ import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.service.GameService;
+import fr.leblanc.gomoku.web.dto.GameDto;
 import fr.leblanc.gomoku.web.dto.MoveDto;
 
 @RestController
@@ -79,7 +80,12 @@ public class GameController {
 	}
 
 	@GetMapping("downloadGame/{gameType}")
-	public void downloadGame(@PathVariable String gameType, HttpServletResponse response) {
-		gameService.downloadGame(GameType.valueOf(gameType.toUpperCase()), null);
+	public ResponseEntity<Resource> downloadGame(@PathVariable String gameType) {
+		return gameService.downloadGame(GameType.valueOf(gameType.toUpperCase()));
+	}
+	
+	@PostMapping("uploadGame/{gameType}")
+	public void uploadGame(@PathVariable String gameType, @RequestBody GameDto uploadedGame) {
+		gameService.uploadGame(GameType.valueOf(gameType.toUpperCase()), uploadedGame);
 	}
 }

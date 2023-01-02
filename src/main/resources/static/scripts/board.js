@@ -74,13 +74,16 @@ const onAddMoveAction = (event) => {
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
 			moves = JSON.parse(xhr.response);
-			for (const element of moves) {
-				sendDisplayMove(element);
-			}
-			updateEvaluation();
 			
-			if (gameType == "AI") {
-				onComputeMoveAction();
+			if (moves.length > 0) {
+				for (const element of moves) {
+					sendDisplayMove(element);
+				}
+				updateEvaluation();
+				
+				if (gameType == "AI") {
+					onComputeMoveAction();
+				}
 			}
 		}
 	}
@@ -149,6 +152,8 @@ const onComputeMoveAction = (event) => {
 			}
 			updateEvaluation();
 			
+			requestLastMove();
+			
 			isComputerRunning = false;
 		}
 	}
@@ -180,8 +185,7 @@ const onStopAction = (event) => {
 	xhr.send("");
 }
 
-const onLastMoveAction = (event) => {
-	event.stopPropagation();
+const requestLastMove = () => {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "/lastMove/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -199,43 +203,92 @@ const onLastMoveAction = (event) => {
 	xhr.send("");
 }
 
+const onLastMoveAction = (event) => {
+	event.stopPropagation();
+	requestLastMove();
+}
+
 const onDownloadGameAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/downloadGame/" + gameType, true);
+	xhr.responseType = 'blob';
+	xhr.open("GET", "/downloadGame/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			var game = JSON.parse(xhr.response);
+		if (this.readyState == 4 && this.status == 200) {
+		    var downloadUrl = window.URL.createObjectURL(xhr.response);
+		    var a = document.createElement("a");
+		    document.body.appendChild(a);
+		    a.style = "display: none";
+		    a.href = downloadUrl;
+		    a.download = "game.json";
+		    a.click();
 		}
 	}
 
 	xhr.send("");
 }
 
+const onUploadGameAction = (event) => {
+	event.stopPropagation();
+	
+	let input = document.createElement('input');
+	input.type = 'file';
+	input.onchange = _ => {
+		var files = Array.from(input.files);
+		
+		if (files.length > 0) {
+			var file = files[0];
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", "/uploadGame/" + gameType, true);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			var header = this._csrf.headerName;
+			var token = this._csrf.token;
+			xhr.setRequestHeader(header, token);
+			xhr.withCredentials = true;
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == XMLHttpRequest.DONE) {
+					sendReload();
+				}
+			}
+		
+			xhr.send(file);
+		}
+		
+	};
+	input.click();
+  
+}
+
 const displayLastMove = (move) => {
 
 	const cells = document.querySelectorAll(".emptyCell");
+	const lasts = document.querySelectorAll(".last");
 
+	for (const last of lasts) {
+		last.classList.remove('last');
+	}
+	
 	for (const element of cells) {
 		var cell = element;
 		var column = parseInt(cell.id.split("/")[0]);
 		var row = parseInt(cell.id.split("/")[1]);
 
 		if (column == move.columnIndex && row == move.rowIndex) {
-			cell.classList.add('green');
-			setTimeout(() => removeGreenClass(cell), 1000);
+			cell.classList.add('last');
+			setTimeout(() => removeLastClass(cell), 1000);
 			break;
 		}
 	}
 }
 
-const removeGreenClass = (cell) => {
-	cell.classList.remove('green');
+const removeLastClass = (cell) => {
+	cell.classList.remove('last');
 }
 
 const displayMove = (move) => {
@@ -262,6 +315,7 @@ const displayMove = (move) => {
 			}
 		}
 	}
+	
 }
 
 const displayAnalysisMove = (move) => {
@@ -411,6 +465,8 @@ function main() {
 	displayEvaluation(evaluation);
 	
 	updateComputeIcon(false);
+	
+	requestLastMove();
 }
 
 var isComputerRunning = false;

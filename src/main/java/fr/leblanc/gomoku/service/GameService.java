@@ -1,15 +1,17 @@
 package fr.leblanc.gomoku.service;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -20,6 +22,7 @@ import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDto;
+import fr.leblanc.gomoku.web.dto.MoveDto;
 import fr.leblanc.gomoku.web.dto.SettingsDto;
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -190,6 +193,44 @@ public class GameService {
 		
 	}
 
+	public ResponseEntity<Resource> downloadGame(GameType gameType) {
+		
+		Game currentGame = findCurrentGame(gameType);
+		
+		byte[] buffer = new JSONObject(new GameDto(currentGame)).toString().getBytes();
+		
+	    return ResponseEntity.ok()
+	            .contentLength(buffer.length)
+	            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+	            .body(new InputStreamResource(new ByteArrayInputStream(buffer)));
+	}
+
+	public void uploadGame(GameType gameType, GameDto uploadedGame) {
+		Game currentGame = findCurrentGame(gameType);
+		
+		if (currentGame != null) {
+			gameRepository.delete(currentGame);
+		}
+		
+		Game newGame = createGame(userService.getCurrentUser(), gameType);
+		
+		newGame = gameRepository.save(newGame);
+		
+		for (MoveDto moveDto : uploadedGame.getMoves()) {
+			
+			Move move = new Move();
+			
+			move.setColor(moveDto.getColor());
+			move.setColumnIndex(moveDto.getColumnIndex());
+			move.setRowIndex(moveDto.getRowIndex());
+			move.setNumber(moveDto.getNumber());
+			
+			newGame.getMoves().add(move);
+		}
+		
+		gameRepository.save(newGame);
+	}
+
 	private Game findCurrentGame(GameType gameType) {
 		Game currentGame = null;
 		
@@ -207,6 +248,8 @@ public class GameService {
 
 	private Game createGame(User user, GameType gameType) {
 		Game newGame = Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(gameType).build();
+		
+		newGame.setMoves(new HashSet<>());
 		
 		if (GameType.LOCAL.equals(gameType)) {
 			user.setCurrentLocalGame(newGame);
@@ -232,17 +275,14 @@ public class GameService {
 	}
 
 	private Move getLastMove(Game currentGame) {
-		return currentGame.getMove(currentGame.getMoves().size() - 1);
-	}
-
-	public void downloadGame(GameType gameType, HttpServletResponse response) {
-		InputStream is = null;
-		try {
-			IOUtils.copy(is, response.getOutputStream());
-			response.flushBuffer();
-		} catch (IOException e) {
-			e.printStackTrace();
+		
+		Optional<Move> lastMove = currentGame.getMoves().stream().sorted((m1, m2) -> - Integer.compare(m1.getNumber(), m2.getNumber())).findFirst();
+		
+		if (lastMove.isPresent()) {
+			return lastMove.get();
 		}
+
+		return null;
 	}
 
 }

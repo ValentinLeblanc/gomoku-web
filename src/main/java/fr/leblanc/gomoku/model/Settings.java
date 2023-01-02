@@ -28,6 +28,7 @@ public class Settings
 	private int minMaxDepth;
 	private int strikeDepth;
 	private int evaluationDepth;
+	private int strikeTimeout;
 
     public Settings() {
         this.boardSize = 15;
@@ -36,5 +37,6 @@ public class Settings
         this.minMaxDepth = 3;
         this.strikeDepth = 3;
         this.evaluationDepth = 3;
+        this.strikeTimeout = 20;
     }
 }
