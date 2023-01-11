@@ -4,5 +4,6 @@ public enum GameType
 {
     LOCAL, 
     ONLINE, 
-    AI;
+    AI,
+    AI_VS_AI;
 }

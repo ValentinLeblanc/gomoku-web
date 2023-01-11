@@ -241,6 +241,9 @@ public class GameService {
 		case AI:
 			currentGame = userService.getCurrentUser().getCurrentAIGame();
 			break;
+		case AI_VS_AI:
+			currentGame = userService.getCurrentUser().getCurrentAIvsAIGame();
+			break;
 		default:
 		}
 		return currentGame;
@@ -255,6 +258,8 @@ public class GameService {
 			user.setCurrentLocalGame(newGame);
 		} else if (GameType.AI.equals(gameType)) {
 			user.setCurrentAIGame(newGame);
+		} else if (GameType.AI_VS_AI.equals(gameType)) {
+			user.setCurrentAIvsAIGame(newGame);
 		}
 		
 		return newGame;

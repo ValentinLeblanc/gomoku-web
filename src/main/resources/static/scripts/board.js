@@ -154,7 +154,12 @@ const onComputeMoveAction = (event) => {
 			
 			requestLastMove();
 			
-			isComputerRunning = false;
+			if (gameType == "AI_VS_AI" && isComputerRunning) {
+				isComputerRunning = false;
+				onComputeMoveAction();
+			} else {
+				isComputerRunning = false;
+			}
 		}
 	}
 
@@ -220,17 +225,30 @@ const onDownloadGameAction = (event) => {
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-		    var downloadUrl = window.URL.createObjectURL(xhr.response);
-		    var a = document.createElement("a");
-		    document.body.appendChild(a);
-		    a.style = "display: none";
-		    a.href = downloadUrl;
-		    a.download = "game.json";
-		    a.click();
+			handleSaveImg(xhr.response);
 		}
 	}
 
 	xhr.send("");
+}
+
+async function handleSaveImg(response) {
+	if (window.showSaveFilePicker) {
+		const handle = await showSaveFilePicker();
+		const writable = await handle.createWritable();
+		await writable.write(response);
+		writable.close();
+	} else {
+		var downloadUrl = window.URL.createObjectURL(response);
+		var a = document.createElement("a");
+		document.body.appendChild(a);
+		a.style = "display: none";
+		a.href = downloadUrl;
+		a.download = "game.json";
+		a.click();
+		window.URL.revokeObjectURL(url);
+		a.remove();
+	}
 }
 
 const onUploadGameAction = (event) => {
