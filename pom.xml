@@ -96,22 +96,18 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.2.1</version>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.13</version>
 				<configuration>
-					<to>
-						<image>${project.artifactId}</image>
-						<tags>
-							<tag>${project.version}</tag>
-						</tags>
-					</to>
+					<repository>${project.artifactId}</repository>
+					<tag>${project.version}</tag>
 				</configuration>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<id>default</id>
 						<goals>
-							<goal>dockerBuild</goal>
+							<goal>build</goal>
 						</goals>
 					</execution>
 				</executions>
