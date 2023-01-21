@@ -81,26 +81,26 @@ const initializeView = (settings) => {
 		document.getElementById("minMaxDepth4").checked = true;
 	}
 	
-	if (settings.evaluationDepth == 1) {
-		document.getElementById("evaluationDepth1").checked = true;
-		document.getElementById("evaluationDepth2").checked = false;
-		document.getElementById("evaluationDepth3").checked = false;
-		document.getElementById("evaluationDepth4").checked = false;
-	} else if (settings.evaluationDepth == 2) {
-		document.getElementById("evaluationDepth1").checked = false;
-		document.getElementById("evaluationDepth2").checked = true;
-		document.getElementById("evaluationDepth3").checked = false;
-		document.getElementById("evaluationDepth4").checked = false;
-	} else if (settings.evaluationDepth == 3) {
-		document.getElementById("evaluationDepth1").checked = false;
-		document.getElementById("evaluationDepth2").checked = false;
-		document.getElementById("evaluationDepth3").checked = true;
-		document.getElementById("evaluationDepth4").checked = false;
-	} else if (settings.evaluationDepth == 4) {
-		document.getElementById("evaluationDepth1").checked = false;
-		document.getElementById("evaluationDepth2").checked = false;
-		document.getElementById("evaluationDepth3").checked = false;
-		document.getElementById("evaluationDepth4").checked = true;
+	if (settings.minMaxAnalysisExtent == 1) {
+		document.getElementById("minMaxAnalysisExtent1").checked = true;
+		document.getElementById("minMaxAnalysisExtent2").checked = false;
+		document.getElementById("minMaxAnalysisExtent3").checked = false;
+		document.getElementById("minMaxAnalysisExtent4").checked = false;
+	} else if (settings.minMaxAnalysisExtent == 2) {
+		document.getElementById("minMaxAnalysisExtent1").checked = false;
+		document.getElementById("minMaxAnalysisExtent2").checked = true;
+		document.getElementById("minMaxAnalysisExtent3").checked = false;
+		document.getElementById("minMaxAnalysisExtent4").checked = false;
+	} else if (settings.minMaxAnalysisExtent == 3) {
+		document.getElementById("minMaxAnalysisExtent1").checked = false;
+		document.getElementById("minMaxAnalysisExtent2").checked = false;
+		document.getElementById("minMaxAnalysisExtent3").checked = true;
+		document.getElementById("minMaxAnalysisExtent4").checked = false;
+	} else if (settings.minMaxAnalysisExtent == 4) {
+		document.getElementById("minMaxAnalysisExtent1").checked = false;
+		document.getElementById("minMaxAnalysisExtent2").checked = false;
+		document.getElementById("minMaxAnalysisExtent3").checked = false;
+		document.getElementById("minMaxAnalysisExtent4").checked = true;
 	}
 	
 	if (settings.displayAnalysis == true) {
@@ -131,10 +131,10 @@ const initializeListeners = () => {
 	document.getElementById("minMaxDepth2").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("minMaxDepth3").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("minMaxDepth4").addEventListener("click", onUpdateSettingsClick);
-	document.getElementById("evaluationDepth1").addEventListener("click", onUpdateSettingsClick);
-	document.getElementById("evaluationDepth2").addEventListener("click", onUpdateSettingsClick);
-	document.getElementById("evaluationDepth3").addEventListener("click", onUpdateSettingsClick);
-	document.getElementById("evaluationDepth4").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("minMaxAnalysisExtent1").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("minMaxAnalysisExtent2").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("minMaxAnalysisExtent3").addEventListener("click", onUpdateSettingsClick);
+	document.getElementById("minMaxAnalysisExtent4").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("strikeTimeout10").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("strikeTimeout20").addEventListener("click", onUpdateSettingsClick);
 	document.getElementById("strikeTimeout30").addEventListener("click", onUpdateSettingsClick);
@@ -217,29 +217,29 @@ const onUpdateSettingsClick = (event) => {
 		document.getElementById("minMaxDepth3").checked = false;
 		settings.minMaxDepth = 4;
 		xhr.send(JSON.stringify(settings));
-	} else if (event.srcElement == document.getElementById("evaluationDepth1")) {
-		document.getElementById("evaluationDepth2").checked = false;
-		document.getElementById("evaluationDepth3").checked = false;
-		document.getElementById("evaluationDepth4").checked = false;
-		settings.evaluationDepth = 1;
+	} else if (event.srcElement == document.getElementById("minMaxAnalysisExtent1")) {
+		document.getElementById("minMaxAnalysisExtent2").checked = false;
+		document.getElementById("minMaxAnalysisExtent3").checked = false;
+		document.getElementById("minMaxAnalysisExtent4").checked = false;
+		settings.minMaxAnalysisExtent = 1;
 		xhr.send(JSON.stringify(settings));
-	} else if (event.srcElement == document.getElementById("evaluationDepth2")) {
-		document.getElementById("evaluationDepth1").checked = false;
-		document.getElementById("evaluationDepth3").checked = false;
-		document.getElementById("evaluationDepth4").checked = false;
-		settings.evaluationDepth = 2;
+	} else if (event.srcElement == document.getElementById("minMaxAnalysisExtent2")) {
+		document.getElementById("minMaxAnalysisExtent1").checked = false;
+		document.getElementById("minMaxAnalysisExtent3").checked = false;
+		document.getElementById("minMaxAnalysisExtent4").checked = false;
+		settings.minMaxAnalysisExtent = 2;
 		xhr.send(JSON.stringify(settings));
-	} else if (event.srcElement == document.getElementById("evaluationDepth3")) {
-		document.getElementById("evaluationDepth1").checked = false;
-		document.getElementById("evaluationDepth2").checked = false;
-		document.getElementById("evaluationDepth4").checked = false;
-		settings.evaluationDepth = 3;
+	} else if (event.srcElement == document.getElementById("minMaxAnalysisExtent3")) {
+		document.getElementById("minMaxAnalysisExtent1").checked = false;
+		document.getElementById("minMaxAnalysisExtent2").checked = false;
+		document.getElementById("minMaxAnalysisExtent4").checked = false;
+		settings.minMaxAnalysisExtent = 3;
 		xhr.send(JSON.stringify(settings));
-	} else if (event.srcElement == document.getElementById("evaluationDepth4")) {
-		document.getElementById("evaluationDepth1").checked = false;
-		document.getElementById("evaluationDepth2").checked = false;
-		document.getElementById("evaluationDepth3").checked = false;
-		settings.evaluationDepth = 4;
+	} else if (event.srcElement == document.getElementById("minMaxAnalysisExtent4")) {
+		document.getElementById("minMaxAnalysisExtent1").checked = false;
+		document.getElementById("minMaxAnalysisExtent2").checked = false;
+		document.getElementById("minMaxAnalysisExtent3").checked = false;
+		settings.minMaxAnalysisExtent = 4;
 		xhr.send(JSON.stringify(settings));
 	} else if (event.srcElement == document.getElementById("strikeTimeout10")) {
 		document.getElementById("strikeTimeout20").checked = false;

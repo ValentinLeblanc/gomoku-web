@@ -13,7 +13,7 @@ public class SettingsDto {
 	public SettingsDto(Settings settings) {
 		this.strikeEnabled = settings.getStrikeEnabled();
 		this.minMaxDepth = settings.getMinMaxDepth();
-		this.evaluationDepth = settings.getEvaluationDepth();
+		this.minMaxAnalysisExtent = settings.getMinMaxAnalysisExtent();
 		this.strikeDepth = settings.getStrikeDepth();
 		this.strikeTimeout = settings.getStrikeTimeout();
 	}
@@ -24,7 +24,7 @@ public class SettingsDto {
 	
 	private int strikeDepth;
 	
-	private int evaluationDepth;
+	private int minMaxAnalysisExtent;
 	
 	private int strikeTimeout;
 

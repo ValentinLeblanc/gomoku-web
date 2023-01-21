@@ -27,7 +27,7 @@ public class Settings
 	private Boolean strikeEnabled;
 	private int minMaxDepth;
 	private int strikeDepth;
-	private int evaluationDepth;
+	private int minMaxAnalysisExtent;
 	private int strikeTimeout;
 
     public Settings() {
@@ -36,7 +36,7 @@ public class Settings
         this.strikeEnabled = Boolean.TRUE;
         this.minMaxDepth = 3;
         this.strikeDepth = 3;
-        this.evaluationDepth = 3;
+        this.minMaxAnalysisExtent = -1;
         this.strikeTimeout = 20;
     }
 }

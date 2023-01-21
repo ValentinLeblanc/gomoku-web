@@ -23,7 +23,7 @@ public class SettingsController
         settings.setStrikeEnabled(jsonBody.getBoolean("strikeEnabled"));
         settings.setStrikeDepth(jsonBody.getInt("strikeDepth"));
         settings.setMinMaxDepth(jsonBody.getInt("minMaxDepth"));
-        settings.setEvaluationDepth(jsonBody.getInt("evaluationDepth"));
+        settings.setMinMaxAnalysisExtent(jsonBody.getInt("minMaxAnalysisExtent"));
         settings.setStrikeTimeout(jsonBody.getInt("strikeTimeout"));
         this.settingsService.updateSettings(settings);
     }
