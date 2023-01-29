@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: gomoku-db
+  name: gomoku-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: gomoku-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: gomoku-db
+    spec:
+      containers:
+        - env:
+            - name: MYSQL_DATABASE
+              value: root
+            - name: MYSQL_ROOT_PASSWORD
+              value: leblanc
+          image: mysql:5.7
+          name: gomoku-db
+          ports:
+            - containerPort: 3306
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: db
+      restartPolicy: Always
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: db
+status: {}
