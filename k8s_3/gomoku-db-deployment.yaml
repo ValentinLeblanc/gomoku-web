@@ -1,12 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f docker-compose.yml
-    kompose.version: 1.26.0 (40646f47)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: gomoku-db
   name: gomoku-db
 spec:
   replicas: 1
@@ -16,13 +10,6 @@ spec:
   strategy:
     type: Recreate
   template:
-    metadata:
-      annotations:
-        kompose.cmd: kompose convert -f docker-compose.yml
-        kompose.version: 1.26.0 (40646f47)
-      creationTimestamp: null
-      labels:
-        io.kompose.service: gomoku-db
     spec:
       containers:
         - env:
@@ -32,6 +19,8 @@ spec:
               value: leblanc
           image: mysql:5.7
           name: gomoku-db
+          args:
+            - "--ignore-db-dir=lost+found"
           ports:
             - containerPort: 3306
           resources: {}
@@ -43,4 +32,3 @@ spec:
         - name: db
           persistentVolumeClaim:
             claimName: db
-status: {}

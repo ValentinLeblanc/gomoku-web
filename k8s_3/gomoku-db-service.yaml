@@ -1,19 +1,13 @@
 apiVersion: v1
+
 kind: Service
+
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f docker-compose.yml
-    kompose.version: 1.26.0 (40646f47)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: gomoku-db
   name: gomoku-db
+  
 spec:
   ports:
-    - name: "33066"
-      port: 33066
+      port: 3306
       targetPort: 3306
   selector:
     io.kompose.service: gomoku-db
-status:
-  loadBalancer: {}
