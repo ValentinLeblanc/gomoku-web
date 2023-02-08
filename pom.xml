@@ -101,23 +101,23 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
-				<version>1.4.13</version>
-				<configuration>
-					<repository>${project.artifactId}</repository>
-					<tag>${project.version}</tag>
-				</configuration>
-				<executions>
-					<execution>
-						<id>default</id>
-						<goals>
-							<goal>build</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>com.spotify</groupId> -->
+<!-- 				<artifactId>dockerfile-maven-plugin</artifactId> -->
+<!-- 				<version>1.4.13</version> -->
+<!-- 				<configuration> -->
+<!-- 					<repository>${project.artifactId}</repository> -->
+<!-- 					<tag>${project.version}</tag> -->
+<!-- 				</configuration> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>default</id> -->
+<!-- 						<goals> -->
+<!-- 							<goal>build</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>

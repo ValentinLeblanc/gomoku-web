@@ -16,19 +16,16 @@ public class SettingsService
     @Autowired
     private SettingsRepository settingsRepository;
     
-    public void updateSettings(final Settings settings) {
-        this.userService.getCurrentUser().setSettings(settings);
-        this.userService.save(this.userService.getCurrentUser());
+    public void save(final Settings settings) {
+        userService.getCurrentUser().setSettings(settings);
+        userService.save(this.userService.getCurrentUser());
     }
     
-    public Settings findById(final Long id) {
-    	
-    	Optional<Settings> findById = settingsRepository.findById(id);
-    	
-		if (findById.isPresent()) {
-    		return findById.get();
-    	}
-		
-    	return null;
+    public Optional<Settings> findById(final Long id) {
+    	return  settingsRepository.findById(id);
     }
+
+	public Settings getCurrentSettings() {
+		return userService.getCurrentUser().getSettings();
+	}
 }

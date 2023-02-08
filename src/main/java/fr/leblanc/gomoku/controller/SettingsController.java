@@ -1,30 +1,37 @@
 package fr.leblanc.gomoku.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import fr.leblanc.gomoku.model.Settings;
-import org.json.JSONObject;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
-import fr.leblanc.gomoku.service.SettingsService;
-import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
-@Controller
+import fr.leblanc.gomoku.model.Settings;
+import fr.leblanc.gomoku.service.SettingsService;
+import fr.leblanc.gomoku.web.dto.SettingsDto;
+
+@RestController
 public class SettingsController
 {
     @Autowired
     private SettingsService settingsService;
     
     @PostMapping({ "/settings" })
-    public void updateSettings(@RequestBody final String body) {
-        final JSONObject jsonBody = new JSONObject(body);
-        final Settings settings = this.settingsService.findById(jsonBody.getLong("id"));
-        settings.setBoardSize(jsonBody.getInt("boardSize"));
-        settings.setDisplayAnalysis(jsonBody.getBoolean("displayAnalysis"));
-        settings.setStrikeEnabled(jsonBody.getBoolean("strikeEnabled"));
-        settings.setStrikeDepth(jsonBody.getInt("strikeDepth"));
-        settings.setMinMaxDepth(jsonBody.getInt("minMaxDepth"));
-        settings.setMinMaxAnalysisExtent(jsonBody.getInt("minMaxAnalysisExtent"));
-        settings.setStrikeTimeout(jsonBody.getInt("strikeTimeout"));
-        this.settingsService.updateSettings(settings);
+    public RedirectView updateSettings(SettingsDto settingsDto, Model model) {
+    	
+    	Settings settings = settingsService.getCurrentSettings();
+    	settings.setBoardSize(settingsDto.getBoardSize());
+    	settings.setDisplayAnalysis(settingsDto.isDisplayAnalysis());
+    	settings.setMinMaxDepth(settingsDto.getMinMaxDepth());
+    	settings.setMinMaxExtent(settingsDto.getMinMaxExtent());
+    	settings.setStrikeDepth(settingsDto.getStrikeDepth());
+    	settings.setStrikeTimeout(settingsDto.getStrikeTimeout());
+    	settings.setStrikeEnabled(settingsDto.isStrikeEnabled());
+    	
+        settingsService.save(settings);
+        
+        model.addAttribute("settings", settings);
+		
+		return new RedirectView("/settings");
     }
 }

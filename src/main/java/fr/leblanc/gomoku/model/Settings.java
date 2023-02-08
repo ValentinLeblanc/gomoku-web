@@ -1,42 +1,93 @@
 package fr.leblanc.gomoku.model;
 
 import javax.persistence.Column;
-import javax.persistence.GenerationType;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.Entity;
 
 @Entity
 @Table(name = "settings")
-@Data
 @EqualsAndHashCode
 public class Settings
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     @Column(name = "board_size")
-    private Integer boardSize;
+    private int boardSize = 15;
     @Column(name = "display_analysis")
-    private Boolean displayAnalysis;
-	private Boolean strikeEnabled;
-	private int minMaxDepth;
-	private int strikeDepth;
-	private int minMaxAnalysisExtent;
-	private int strikeTimeout;
+    private boolean displayAnalysis = false;
+	private boolean strikeEnabled = false;
+	private int minMaxDepth = 2;;
+	private int strikeDepth = 4;
+	private int minMaxExtent = 0;
+	private int strikeTimeout = 20;
 
-    public Settings() {
-        this.boardSize = 15;
-        this.displayAnalysis = Boolean.FALSE;
-        this.strikeEnabled = Boolean.TRUE;
-        this.minMaxDepth = 3;
-        this.strikeDepth = 3;
-        this.minMaxAnalysisExtent = -1;
-        this.strikeTimeout = 20;
-    }
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Integer getBoardSize() {
+		return boardSize;
+	}
+
+	public void setBoardSize(Integer boardSize) {
+		this.boardSize = boardSize;
+	}
+
+	public boolean isDisplayAnalysis() {
+		return displayAnalysis;
+	}
+
+	public void setDisplayAnalysis(boolean displayAnalysis) {
+		this.displayAnalysis = displayAnalysis;
+	}
+
+	public boolean isStrikeEnabled() {
+		return strikeEnabled;
+	}
+
+	public void setStrikeEnabled(boolean strikeEnabled) {
+		this.strikeEnabled = strikeEnabled;
+	}
+
+	public int getMinMaxDepth() {
+		return minMaxDepth;
+	}
+
+	public void setMinMaxDepth(int minMaxDepth) {
+		this.minMaxDepth = minMaxDepth;
+	}
+
+	public int getStrikeDepth() {
+		return strikeDepth;
+	}
+
+	public void setStrikeDepth(int strikeDepth) {
+		this.strikeDepth = strikeDepth;
+	}
+
+	public int getMinMaxExtent() {
+		return minMaxExtent;
+	}
+
+	public void setMinMaxExtent(int minMaxExtent) {
+		this.minMaxExtent = minMaxExtent;
+	}
+
+	public int getStrikeTimeout() {
+		return strikeTimeout;
+	}
+
+	public void setStrikeTimeout(int strikeTimeout) {
+		this.strikeTimeout = strikeTimeout;
+	}
 }

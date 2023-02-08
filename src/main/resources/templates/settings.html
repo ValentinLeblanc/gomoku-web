@@ -3,124 +3,41 @@
 <head>
 <meta charset="utf-8" />
 <title>Settings</title>
-<meta th:name="_csrf" th:content="${_csrf.token}"/>
-<meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 	<div th:insert="~{menu}"></div>
 	<div class="container-fluid container special">
-		<label style="padding-right: 60px;">Board size</label>
-		<span>
-			<input class="form-check-input" type="radio" name="boardSize11" id="boardSize11">
-			<label class="form-check-label" for="flexRadioDefault1"> 11 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="boardSize13" id="boardSize13">
-			<label class="form-check-label" for="flexRadioDefault2"> 13 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="boardSize15" id="boardSize15">
-			<label class="form-check-label" for="flexRadioDefault3"> 15 </label>
-		</span>
+		<form method="post" action="#" th:action="@{/settings}" th:object="${settings}" style="margin-right:1000px;">
+		  <div class="form-check">
+		    <label class="form-check-label">Display analysis</label>
+		    <input type="checkbox" class="form-check-input" th:field="*{displayAnalysis}">
+		  </div>
+		  <div class="form-check">
+		    <label class="form-check-label">Strike enabled</label>
+		    <input type="checkbox" class="form-check-input" th:field="*{strikeEnabled}">
+		  </div>
+		  <div class="form-outline">
+		    <label>Board size</label>
+		    <input type="number" class="form-control" th:field="*{boardSize}" id="boardSize">
+		  </div>
+		  <div class="form-outline">
+		    <label>Strike timeout (s)</label>
+		    <input type="number" class="form-control" th:field="*{strikeTimeout}" id="strikeTimeout">
+		  </div>
+		  <div class="form-group">
+		    <label>Strike depth</label>
+		    <input type="number" class="form-control" th:field="*{strikeDepth}">
+		  </div>
+		  <div class="form-group">
+		    <label>MinMax depth</label>
+		    <input type="number" class="form-control" th:field="*{minMaxDepth}">
+		  </div>
+		  <div class="form-group">
+		    <label>MinMax extent</label>
+		    <input type="number" class="form-control" th:field="*{minMaxExtent}">
+		  </div>
+		  <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+		</form>
 	</div>
-	<div class="container-fluid container special">
-		<div>
-		  <label style="padding-right: 23px;"class="form-check-label" for="displayAnalysis">
-		    Display analysis
-		  </label>
-		  <input class="form-check-input" type="checkbox" value="" id="displayAnalysis">
-		</div>
-	</div>
-	<div class="container-fluid container special">
-		<div>
-		  <label style="padding-right: 32px;"class="form-check-label" for="strikeEnabled">
-		    Strike enabled
-		  </label>
-		  <input class="form-check-input" type="checkbox" value="" id="strikeEnabled">
-		</div>
-	</div>
-	<div class="container-fluid container special">
-		<label style="padding-right: 12px;">Strike timeout (s)</label>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeTimeout10" id="strikeTimeout10">
-			<label class="form-check-label" for="strikeTimeout10"> 10 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeTimeout20" id="strikeTimeout20">
-			<label class="form-check-label" for="strikeTimeout20"> 20 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeTimeout30" id="strikeTimeout30">
-			<label class="form-check-label" for="strikeTimeout30"> 30 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeTimeoutInf" id="strikeTimeoutInf">
-			<label class="form-check-label" for="strikeTimeoutInf"> Inf </label>
-		</span>
-	</div>
-	<div class="container-fluid container special">
-		<label style="padding-right: 47px;">Strike depth</label>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeDepth1" id="strikeDepth1">
-			<label class="form-check-label" for="strikeDepth1"> 1 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeDepth2" id="strikeDepth2">
-			<label class="form-check-label" for="strikeDepth2"> 2 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeDepth3" id="strikeDepth3">
-			<label class="form-check-label" for="strikeDepth3"> 3 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="strikeDepth4" id="strikeDepth4">
-			<label class="form-check-label" for="strikeDepth4"> 4 </label>
-		</span>
-	</div>
-	<div class="container-fluid container special">
-		<label style="padding-right: 29px;">MinMax depth</label>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxDepth1" id="minMaxDepth1">
-			<label class="form-check-label" for="minMaxDepth1"> 1 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxDepth2" id="minMaxDepth2">
-			<label class="form-check-label" for="minMaxDepth2"> 2 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxDepth3" id="minMaxDepth3">
-			<label class="form-check-label" for="minMaxDepth3"> 3 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxDepth4" id="minMaxDepth4">
-			<label class="form-check-label" for="minMaxDepth4"> 4 </label>
-		</span>
-	</div>
-	<div class="container-fluid container special">
-		<label style="padding-right: 14px;">MinMax analysis extent</label>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxAnalysisExtent1" id="minMaxAnalysisExtent1">
-			<label class="form-check-label" for="minMaxAnalysisExtent1"> 1 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxAnalysisExtent2" id="minMaxAnalysisExtent2">
-			<label class="form-check-label" for="minMaxAnalysisExtent2"> 2 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxAnalysisExtent3" id="minMaxAnalysisExtent3">
-			<label class="form-check-label" for="minMaxAnalysisExtent3"> 3 </label>
-		</span>
-		<span>
-			<input class="form-check-input" type="radio" name="minMaxAnalysisExtent4" id="minMaxAnalysisExtent4">
-			<label class="form-check-label" for="minMaxAnalysisExtent4"> 4 </label>
-		</span>
-	</div>
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		var settings = /*[[${settings}]]*/'default';
-		var _csrf = /*[[${_csrf}]]*/'default';
-		/*]]>*/
-	</script>
-	<script type="text/javascript" th:src="@{/scripts/settings.js}"></script>
 </body>
 </html>
