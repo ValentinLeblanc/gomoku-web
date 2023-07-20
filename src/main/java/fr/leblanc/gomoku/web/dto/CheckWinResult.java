@@ -7,8 +7,9 @@ import lombok.Data;
 
 @Data
 public class CheckWinResult {
-
-	private boolean isWin = false;
-	
 	private Set<MoveDto> winMoves = new HashSet<>();
+	
+	public boolean isWin() {
+		return !winMoves.isEmpty();
+	}
 }
