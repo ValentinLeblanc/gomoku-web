@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.leblanc.gomoku.exception.RegistrationException;
 import fr.leblanc.gomoku.service.UserService;
-import fr.leblanc.gomoku.web.dto.UserRegistrationDto;
+import fr.leblanc.gomoku.web.dto.UserRegistrationDTO;
 
 @Controller
 @RequestMapping({ "/registration" })
@@ -22,8 +22,8 @@ public class UserRegistrationController {
 	}
 
 	@ModelAttribute("user")
-	public UserRegistrationDto userRegistrationDto() {
-		return new UserRegistrationDto();
+	public UserRegistrationDTO userRegistrationDto() {
+		return new UserRegistrationDTO(null, null, null, null);
 	}
 
 	@GetMapping
@@ -32,7 +32,7 @@ public class UserRegistrationController {
 	}
 
 	@PostMapping
-	public String registerUserAccount(@ModelAttribute("user") final UserRegistrationDto registrationDto) {
+	public String registerUserAccount(@ModelAttribute("user") final UserRegistrationDTO registrationDto) {
 		try {
 			this.userService.registerUserAccount(registrationDto);
 		} catch (RegistrationException e) {

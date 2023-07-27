@@ -1,6 +1,6 @@
 package fr.leblanc.gomoku.service;
 
-import fr.leblanc.gomoku.model.Settings;
+import fr.leblanc.gomoku.model.UserSettings;
 import fr.leblanc.gomoku.repository.SettingsRepository;
 
 import java.util.Optional;
@@ -16,16 +16,16 @@ public class SettingsService
     @Autowired
     private SettingsRepository settingsRepository;
     
-    public void save(final Settings settings) {
+    public void save(final UserSettings settings) {
         userService.getCurrentUser().setSettings(settings);
         userService.save(this.userService.getCurrentUser());
     }
     
-    public Optional<Settings> findById(final Long id) {
+    public Optional<UserSettings> findById(final Long id) {
     	return  settingsRepository.findById(id);
     }
 
-	public Settings getCurrentSettings() {
+	public UserSettings getCurrentSettings() {
 		return userService.getCurrentUser().getSettings();
 	}
 }

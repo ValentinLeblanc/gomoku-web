@@ -26,7 +26,7 @@ import com.google.gson.Gson;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.GomokuColor;
-import fr.leblanc.gomoku.web.dto.MoveDto;
+import fr.leblanc.gomoku.web.dto.MoveDTO;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,20 +59,14 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertNotNull(currentGame);
 
-		MoveDto move = new MoveDto();
-
-		move.setColor(GomokuColor.BLACK.toNumber());
-		move.setColumnIndex(5);
-		move.setRowIndex(6);
+		MoveDTO move = new MoveDTO(1, 5, 6, GomokuColor.BLACK.toNumber());
 
 		Gson gson = new Gson();
 
 		mockMvc.perform(post("/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
 				.contentType(MediaType.APPLICATION_JSON).with(csrf())).andExpect(status().isOk());
 
-		move.setColor(GomokuColor.WHITE.toNumber());
-		move.setColumnIndex(5);
-		move.setRowIndex(7);
+		move = new MoveDTO(2, 5, 7, GomokuColor.WHITE.toNumber());
 
 		assertEquals(1, currentGame.getMoves().size());
 		

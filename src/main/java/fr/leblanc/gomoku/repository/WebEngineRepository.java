@@ -16,9 +16,9 @@ import fr.leblanc.gomoku.model.CustomProperties;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GomokuColor;
 import fr.leblanc.gomoku.model.Move;
-import fr.leblanc.gomoku.web.dto.CheckWinResult;
-import fr.leblanc.gomoku.web.dto.GameDto;
-import fr.leblanc.gomoku.web.dto.MoveDto;
+import fr.leblanc.gomoku.web.dto.CheckWinResultDTO;
+import fr.leblanc.gomoku.web.dto.GameDTO;
+import fr.leblanc.gomoku.web.dto.MoveDTO;
 import lombok.extern.apachecommons.CommonsLog;
 
 @Repository
@@ -33,21 +33,21 @@ public class WebEngineRepository {
 		String checkWinUrl = customProperties.getEngineUrl() + "/checkWin";
 		
 		RestTemplate restTemplate = new RestTemplate();
-		HttpEntity<GameDto> request = new HttpEntity<>(new GameDto(game));
+		
+		HttpEntity<GameDTO> request = new HttpEntity<>(new GameDTO(game));
 		
 		try {
-			ResponseEntity<CheckWinResult> response = restTemplate.exchange(
+			ResponseEntity<CheckWinResultDTO> response = restTemplate.exchange(
 					checkWinUrl, 
 					HttpMethod.POST, 
 					request, 
-					CheckWinResult.class);
+					CheckWinResultDTO.class);
 			
-			CheckWinResult checkWinResult = response.getBody();
+			CheckWinResultDTO checkWinResult = response.getBody();
 			if (checkWinResult != null && checkWinResult.isWin()) {
-				
 				Set<Move> result = new HashSet<>();
-				for (MoveDto move : checkWinResult.getWinMoves()) {
-					result.add(Move.builder().color(GomokuColor.GREEN.toNumber()).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
+				for (MoveDTO move : checkWinResult.winMoves()) {
+					result.add(Move.builder().color(GomokuColor.GREEN.toNumber()).columnIndex(move.columnIndex()).rowIndex(move.rowIndex()).build());
 				}
 				
 				return result;
@@ -60,23 +60,23 @@ public class WebEngineRepository {
 		
 	}
 
-	public Move computeMove(GameDto game) {
+	public Move computeMove(GameDTO game) {
 		
 		String computeMoveUrl = customProperties.getEngineUrl() + "/computeMove";
 		
 		RestTemplate restTemplate = new RestTemplate();
-		HttpEntity<GameDto> request = new HttpEntity<>(game);
+		HttpEntity<GameDTO> request = new HttpEntity<>(game);
 		
 		try {
-			ResponseEntity<MoveDto> response = restTemplate.exchange(
+			ResponseEntity<MoveDTO> response = restTemplate.exchange(
 					computeMoveUrl, 
 					HttpMethod.POST, 
 					request, 
-					MoveDto.class);
+					MoveDTO.class);
 			
-			MoveDto computedMove = response.getBody();
+			MoveDTO computedMove = response.getBody();
 			if (computedMove != null) {
-				return Move.builder().color(computedMove.getColor()).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
+				return Move.builder().color(computedMove.color()).columnIndex(computedMove.columnIndex()).rowIndex(computedMove.rowIndex()).build();
 			}
 			
 			return null;
@@ -87,12 +87,12 @@ public class WebEngineRepository {
 		
 	}
 
-	public Double computeEvaluation(GameDto game) {
+	public Double computeEvaluation(GameDTO game) {
 		
 		String computeEvaluationUrl = customProperties.getEngineUrl() + "/computeEvaluation";
 
 		RestTemplate restTemplate = new RestTemplate();
-		HttpEntity<GameDto> request = new HttpEntity<>(game);
+		HttpEntity<GameDTO> request = new HttpEntity<>(game);
 
 		try {
 			ResponseEntity<Double> response = restTemplate.exchange(

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.repository.WebEngineRepository;
-import fr.leblanc.gomoku.web.dto.GameDto;
+import fr.leblanc.gomoku.web.dto.GameDTO;
 
 @Service
 public class EngineService {
@@ -20,11 +20,11 @@ public class EngineService {
 		 return engineRepository.checkWin(game);
 	 }
 
-	public Move computeMove(GameDto game) {
+	public Move computeMove(GameDTO game) {
 		return engineRepository.computeMove(game);
 	}
 
-	public Double computeEvaluation(GameDto game) {
+	public Double computeEvaluation(GameDTO game) {
 		return engineRepository.computeEvaluation(game);
 	}
 

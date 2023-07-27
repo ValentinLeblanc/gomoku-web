@@ -18,8 +18,8 @@ import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.service.GameService;
-import fr.leblanc.gomoku.web.dto.GameDto;
-import fr.leblanc.gomoku.web.dto.MoveDto;
+import fr.leblanc.gomoku.web.dto.GameDTO;
+import fr.leblanc.gomoku.web.dto.MoveDTO;
 
 @RestController
 public class GameController {
@@ -50,8 +50,8 @@ public class GameController {
 	}
 	
 	@PostMapping("/add-move/{gameType}")
-	public Set<Move> addMove(@PathVariable String gameType, @RequestBody MoveDto move) {
-		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.getColumnIndex(), move.getRowIndex());
+	public Set<Move> addMove(@PathVariable String gameType, @RequestBody MoveDTO move) {
+		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.columnIndex(), move.rowIndex());
 	}
 	
 	@PostMapping("/compute-move/{gameType}")
@@ -85,7 +85,7 @@ public class GameController {
 	}
 	
 	@PostMapping("uploadGame/{gameType}")
-	public void uploadGame(@PathVariable String gameType, @RequestBody GameDto uploadedGame) {
+	public void uploadGame(@PathVariable String gameType, @RequestBody GameDTO uploadedGame) {
 		gameService.uploadGame(GameType.valueOf(gameType.toUpperCase()), uploadedGame);
 	}
 }

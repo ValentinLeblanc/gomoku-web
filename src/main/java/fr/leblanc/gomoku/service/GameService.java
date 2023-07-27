@@ -21,9 +21,8 @@ import fr.leblanc.gomoku.model.GomokuColor;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.GameRepository;
-import fr.leblanc.gomoku.web.dto.GameDto;
-import fr.leblanc.gomoku.web.dto.MoveDto;
-import fr.leblanc.gomoku.web.dto.SettingsDto;
+import fr.leblanc.gomoku.web.dto.GameDTO;
+import fr.leblanc.gomoku.web.dto.MoveDTO;
 import lombok.extern.apachecommons.CommonsLog;
 
 @Service
@@ -150,9 +149,7 @@ public class GameService {
 			throw new IllegalStateException("Not supported for online game");
 		} 
 		
-		GameDto gameDto = new GameDto(currentGame);
-		
-		gameDto.setSettings(new SettingsDto(userService.getCurrentUser().getSettings()));
+		GameDTO gameDto = new GameDTO(currentGame, userService.getCurrentUser().getSettings());
 		
 		Move computedMove = engineService.computeMove(gameDto);
 		
@@ -171,9 +168,7 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		GameDto gameDto = new GameDto(currentGame);
-		
-		gameDto.setSettings(new SettingsDto(userService.getCurrentUser().getSettings()));
+		GameDTO gameDto = new GameDTO(currentGame, userService.getCurrentUser().getSettings());
 		
 		return engineService.computeEvaluation(gameDto);
 	}
@@ -197,7 +192,7 @@ public class GameService {
 		
 		Game currentGame = findCurrentGame(gameType);
 		
-		byte[] buffer = new JSONObject(new GameDto(currentGame)).toString().getBytes();
+		byte[] buffer = new JSONObject(new GameDTO(currentGame)).toString().getBytes();
 		
 	    return ResponseEntity.ok()
 	            .contentLength(buffer.length)
@@ -205,7 +200,7 @@ public class GameService {
 	            .body(new InputStreamResource(new ByteArrayInputStream(buffer)));
 	}
 
-	public void uploadGame(GameType gameType, GameDto uploadedGame) {
+	public void uploadGame(GameType gameType, GameDTO uploadedGame) {
 		Game currentGame = findCurrentGame(gameType);
 		
 		if (currentGame != null) {
@@ -216,14 +211,14 @@ public class GameService {
 		
 		newGame = gameRepository.save(newGame);
 		
-		for (MoveDto moveDto : uploadedGame.getMoves()) {
+		for (MoveDTO moveDto : uploadedGame.moves()) {
 			
 			Move move = new Move();
 			
-			move.setColor(moveDto.getColor());
-			move.setColumnIndex(moveDto.getColumnIndex());
-			move.setRowIndex(moveDto.getRowIndex());
-			move.setNumber(moveDto.getNumber());
+			move.setColor(moveDto.color());
+			move.setColumnIndex(moveDto.columnIndex());
+			move.setRowIndex(moveDto.rowIndex());
+			move.setNumber(moveDto.number());
 			
 			newGame.getMoves().add(move);
 		}

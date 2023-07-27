@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "settings")
 @EqualsAndHashCode
-public class Settings
+public class UserSettings
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

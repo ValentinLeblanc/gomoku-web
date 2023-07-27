@@ -4,17 +4,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import fr.leblanc.gomoku.exception.RegistrationException;
 import fr.leblanc.gomoku.model.User;
-import fr.leblanc.gomoku.web.dto.UserRegistrationDto;
+import fr.leblanc.gomoku.web.dto.UserRegistrationDTO;
 
 public interface UserService extends UserDetailsService
 {
-    User save(final UserRegistrationDto registrationDto);
+    User save(final UserRegistrationDTO registrationDto);
     
     User findUserByEmail(final String email);
     
     User getCurrentUser();
     
-    void registerUserAccount(final UserRegistrationDto registrationDto) throws RegistrationException;
+    void registerUserAccount(final UserRegistrationDTO registrationDto) throws RegistrationException;
     
     User save(final User currentUser);
 

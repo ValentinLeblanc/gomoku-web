@@ -16,7 +16,7 @@ import fr.leblanc.gomoku.exception.RegistrationException;
 import fr.leblanc.gomoku.model.Role;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.repository.UserRepository;
-import fr.leblanc.gomoku.web.dto.UserRegistrationDto;
+import fr.leblanc.gomoku.web.dto.UserRegistrationDTO;
 
 @Service
 public class UserServiceImpl implements UserService
@@ -33,8 +33,8 @@ public class UserServiceImpl implements UserService
     }
     
     @Override
-    public User save(final UserRegistrationDto registrationDto) {
-        final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(), registrationDto.getEmail(), this.passwordEncoder().encode(registrationDto.getPassword()), Arrays.asList(new Role("ROLE_USER")));
+    public User save(final UserRegistrationDTO registrationDto) {
+        final User user = new User(registrationDto.firstName(), registrationDto.lastName(), registrationDto.email(), this.passwordEncoder().encode(registrationDto.password()), Arrays.asList(new Role("ROLE_USER")));
         return userRepository.save(user);
     }
     
@@ -62,8 +62,8 @@ public class UserServiceImpl implements UserService
     }
     
     @Override
-    public void registerUserAccount(final UserRegistrationDto registrationDto) throws RegistrationException {
-        final User user = this.findUserByEmail(registrationDto.getEmail());
+    public void registerUserAccount(final UserRegistrationDTO registrationDto) throws RegistrationException {
+        final User user = this.findUserByEmail(registrationDto.email());
         if (user != null) {
             throw new RegistrationException("This email is already used in database.");
         }

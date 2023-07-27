@@ -40,7 +40,7 @@ public class User
     private String password;
     @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "settings_id")
-    private Settings settings;
+    private UserSettings settings;
     @OneToOne
     @JoinColumn(name = "current_game_id")
     @JsonIgnore
@@ -61,12 +61,12 @@ public class User
     private Collection<Role> roles;
     
     public User() {
-        this.settings = new Settings();
+        this.settings = new UserSettings();
         this.games = new ArrayList<>();
     }
     
     public User(final String firstName, final String lastName, final String email, final String password, final Collection<Role> roles) {
-        this.settings = new Settings();
+        this.settings = new UserSettings();
         this.games = new ArrayList<>();
         this.firstName = firstName;
         this.lastName = lastName;

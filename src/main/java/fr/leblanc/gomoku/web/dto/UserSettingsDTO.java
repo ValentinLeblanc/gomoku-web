@@ -1,8 +1,8 @@
 package fr.leblanc.gomoku.web.dto;
 
-import fr.leblanc.gomoku.model.Settings;
+import fr.leblanc.gomoku.model.UserSettings;
 
-public class SettingsDto {
+public class UserSettingsDTO {
 
 	private int boardSize;
 
@@ -10,11 +10,11 @@ public class SettingsDto {
 	
 	private boolean displayAnalysis;
 	
-	public SettingsDto() {
+	public UserSettingsDTO() {
 		
 	}
 	
-	public SettingsDto(Settings settings) {
+	public UserSettingsDTO(UserSettings settings) {
     	setBoardSize(settings.getBoardSize());
     	setDisplayAnalysis(settings.isDisplayAnalysis());
     	setMinMaxDepth(settings.getMinMaxDepth());
