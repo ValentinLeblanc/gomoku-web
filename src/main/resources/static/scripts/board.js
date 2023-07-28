@@ -133,7 +133,7 @@ const onComputeMoveAction = (event) => {
 	
 	isComputerRunning = true;
 	
-	displayComputeProgress(1, 0);
+	displayComputeProgress(0);
 	if (event) {
 		event.stopPropagation();
 	}
@@ -184,7 +184,7 @@ const onStopAction = (event) => {
 		}
 		
 		isComputerRunning = false;
-		setTimeout(() => displayComputeProgress(1, 0), 100);
+		setTimeout(() => displayComputeProgress(0), 100);
 	}
 
 	xhr.send("");
@@ -362,9 +362,9 @@ const displayAnalysisMove = (move) => {
 	}
 }
 
-const displayComputeProgress = (index, progress) => {
+const displayComputeProgress = (progress) => {
 	
-	const progressBar = document.getElementById("progressBar" + index);
+	const progressBar = document.getElementById("progressBar1");
 
 	progressBar.style.width = (progress + "%");
 }
@@ -451,15 +451,15 @@ const onReceive = (payload) => {
 		displayMove(webSocketMessage.content);
 	} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
 		displayEvaluation(webSocketMessage.content);
-	} else if (webSocketMessage.type == "COMPUTE_PROGRESS") {
-		const contentJson = webSocketMessage.content;
-		displayComputeProgress(contentJson.index, contentJson.percent);
+	} else if (webSocketMessage.type == "COMPUTING_PROGRESS") {
+		const percent = webSocketMessage.content;
+		displayComputeProgress(percent);
 	} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
 		if (userSettings.displayAnalysis) {
 			displayAnalysisMove(webSocketMessage.content);
 		}
 		updateComputeIcon(true);
-	} else if (webSocketMessage.type == "IS_RUNNING") {
+	} else if (webSocketMessage.type == "IS_COMPUTING") {
 		updateComputeIcon(webSocketMessage.content);
 	}
 }
