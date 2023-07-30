@@ -55,7 +55,7 @@ const initButtonListeners = () => {
 
 const onAddMoveAction = (event) => {
 	
-	if (isComputerRunning) {
+	if (isComputing) {
 		return;	
 	}
 	
@@ -131,11 +131,9 @@ const onComputeMoveAction = (event) => {
 		event.stopPropagation();
 	}
 	
-	if (isComputerRunning) {
+	if (isComputing) {
 		return;
 	}
-	
-	isComputerRunning = true;
 	
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-move/" + gameType, true);
@@ -154,11 +152,8 @@ const onComputeMoveAction = (event) => {
 			
 			requestLastMove(true);
 			
-			if (gameType == "AI_VS_AI" && isComputerRunning) {
-				isComputerRunning = false;
+			if (gameType == "AI_VS_AI") {
 				onComputeMoveAction();
-			} else {
-				isComputerRunning = false;
 			}
 		}
 	}
@@ -183,7 +178,6 @@ const onStopAction = (event) => {
 			element.classList.remove("white");
 		}
 		
-		isComputerRunning = false;
 		setTimeout(() => displayMinMaxProgress(0), 100);
 	}
 
@@ -391,7 +385,7 @@ const displayEvaluation = (evaluation) => {
 	evaluationValue.innerText = evaluation;
 }
 
-const updateComputeIcon = (isComputing) => {
+const updateComputeIcon = () => {
 
 	const computeIcon = document.getElementById("computeIcon");
 	
@@ -491,9 +485,9 @@ const onReceive = (payload) => {
 			if (userSettings.displayAnalysis) {
 				displayAnalysisMove(webSocketMessage.content);
 			}
-			updateComputeIcon(true);
 		} else if (webSocketMessage.type == "IS_COMPUTING") {
-			updateComputeIcon(webSocketMessage.content);
+			isComputing = webSocketMessage.content;
+			updateComputeIcon();
 		} else if (webSocketMessage.type == "DISPLAY_LAST_MOVE") {
 			displayLastMove(webSocketMessage.content);
 		}
@@ -502,22 +496,18 @@ const onReceive = (payload) => {
 }
 
 var stompClient;
-
 var stompClientEngine;
 
 function main() {
-
 	connectToWebSocket();
 	connectToEngineSocket();
 	initCellListeners();
 	initButtonListeners();
 	refreshGame(moves);
 	displayEvaluation(evaluation);
-	updateComputeIcon(isComputing);
+	updateComputeIcon();
 	requestLastMove(false);
 }
-
-var isComputerRunning = false;
 
 main();
 
