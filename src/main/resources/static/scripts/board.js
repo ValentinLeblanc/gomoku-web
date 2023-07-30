@@ -184,7 +184,7 @@ const onStopAction = (event) => {
 		}
 		
 		isComputerRunning = false;
-		setTimeout(() => displayComputeProgress(0), 100);
+		setTimeout(() => displayMinMaxProgress(0), 100);
 	}
 
 	xhr.send("");
@@ -366,11 +366,22 @@ const displayAnalysisMove = (move) => {
 	}
 }
 
-const displayComputeProgress = (progress) => {
-	
+const displayMinMaxProgress = (progress) => {
 	const progressBar = document.getElementById("progressBar1");
-
 	progressBar.style.width = (progress + "%");
+}
+
+const displayStrikeProgress = (progress) => {
+	const progressBar = document.getElementById("progressBar1");
+	if (progress) {
+		progressBar.style.width = "100%";
+		progressBar.classList.remove("minMaxProgressBar");
+		progressBar.classList.add("strikeProgressBar");
+	} else {
+		progressBar.style.width = "0%";
+		progressBar.classList.remove("strikeProgressBar");
+		progressBar.classList.add("minMaxProgressBar");
+	}
 }
 
 const displayEvaluation = (evaluation) => {
@@ -470,9 +481,12 @@ const onReceive = (payload) => {
 			displayMove(webSocketMessage.content);
 		} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
 			displayEvaluation(webSocketMessage.content);
-		} else if (webSocketMessage.type == "COMPUTING_PROGRESS") {
-			const percent = webSocketMessage.content;
-			displayComputeProgress(percent);
+		} else if (webSocketMessage.type == "MINMAX_PROGRESS") {
+			const progress = webSocketMessage.content;
+			displayMinMaxProgress(progress);
+		} else if (webSocketMessage.type == "STRIKE_PROGRESS") {
+			const progress = webSocketMessage.content;
+			displayStrikeProgress(progress);
 		} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
 			if (userSettings.displayAnalysis) {
 				displayAnalysisMove(webSocketMessage.content);
@@ -494,19 +508,12 @@ var stompClientEngine;
 function main() {
 
 	connectToWebSocket();
-	
 	connectToEngineSocket();
-
 	initCellListeners();
-
 	initButtonListeners();
-
 	refreshGame(moves);
-	
 	displayEvaluation(evaluation);
-	
 	updateComputeIcon(isComputing);
-	
 	requestLastMove(false);
 }
 

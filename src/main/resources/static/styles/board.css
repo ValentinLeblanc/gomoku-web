@@ -115,8 +115,14 @@ span {
 	background-color: grey;
 }
 
-.progressBar {
+.minMaxProgressBar {
 	width: 0%;
 	height: 30px;
 	background-color: green;
+}
+
+.strikeProgressBar {
+	width: 0%;
+	height: 30px;
+	background-color: orange;
 }
