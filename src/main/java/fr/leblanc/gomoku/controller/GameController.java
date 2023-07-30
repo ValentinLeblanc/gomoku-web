@@ -27,16 +27,17 @@ public class GameController {
 	@Autowired
 	private GameService gameService;
 	
-	@GetMapping("/game/{gameType}")
-	public ModelAndView displayGame(@PathVariable String gameType, Model model) {
+	@GetMapping("/game/{gameTypeString}")
+	public ModelAndView displayGame(@PathVariable String gameTypeString, Model model) {
 		
-		Game game = gameService.getCurrentGame(GameType.valueOf(gameType.toUpperCase()));
+		GameType gameType = GameType.valueOf(gameTypeString.toUpperCase());
+		
+		Game game = gameService.getCurrentGame(gameType);
 		
 		model.addAttribute("game", game);
-		
-		model.addAttribute("evaluation", gameService.computeEvaluation(GameType.valueOf(gameType.toUpperCase())));
-		
+		model.addAttribute("evaluation", gameService.computeEvaluation(gameType));
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
+		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
 		
 		return new ModelAndView("forward:/board");
 	}
@@ -69,9 +70,9 @@ public class GameController {
 		return gameService.computeEvaluation(GameType.valueOf(gameType.toUpperCase()));
 	}
 	
-	@PostMapping("/stop")
-	public void stopComputation() {
-		gameService.stopComputation();
+	@PostMapping("/stop/{gameId}")
+	public void stopComputation(@PathVariable Long gameId) {
+		gameService.stopComputation(gameId);
 	}
 	
 	@GetMapping("/lastMove/{gameType}")
@@ -87,5 +88,10 @@ public class GameController {
 	@PostMapping("uploadGame/{gameType}")
 	public void uploadGame(@PathVariable String gameType, @RequestBody GameDTO uploadedGame) {
 		gameService.uploadGame(GameType.valueOf(gameType.toUpperCase()), uploadedGame);
+	}
+	
+	@GetMapping("isComputing/{gameId}")
+	public void isComputing(@PathVariable Long gameId) {
+		gameService.isComputing(gameId);
 	}
 }

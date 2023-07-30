@@ -28,8 +28,12 @@ public class EngineService {
 		return engineRepository.computeEvaluation(game);
 	}
 
-	public void stopComputation() {
-		engineRepository.stopComputation();
+	public void stopComputation(Long gameId) {
+		engineRepository.stopComputation(gameId);
+	}
+
+	public Boolean isComputing(Long id) {
+		return engineRepository.isComputing(id);
 	}
 	
 }

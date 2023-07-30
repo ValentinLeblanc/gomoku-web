@@ -127,16 +127,16 @@ const onResetGameAction = (event) => {
 
 const onComputeMoveAction = (event) => {
 	
+	if (event) {
+		event.stopPropagation();
+	}
+	
 	if (isComputerRunning) {
 		return;
 	}
 	
 	isComputerRunning = true;
 	
-	displayComputeProgress(0);
-	if (event) {
-		event.stopPropagation();
-	}
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -152,7 +152,7 @@ const onComputeMoveAction = (event) => {
 			}
 			updateEvaluation();
 			
-			requestLastMove();
+			requestLastMove(true);
 			
 			if (gameType == "AI_VS_AI" && isComputerRunning) {
 				isComputerRunning = false;
@@ -169,7 +169,7 @@ const onComputeMoveAction = (event) => {
 const onStopAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/stop", true);
+	xhr.open("POST", "/stop/" + gameId, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -190,7 +190,7 @@ const onStopAction = (event) => {
 	xhr.send("");
 }
 
-const requestLastMove = () => {
+const requestLastMove = (propagate) => {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "/lastMove/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -201,7 +201,11 @@ const requestLastMove = () => {
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
 			var lastMove = JSON.parse(xhr.response);
-			displayLastMove(lastMove);
+			if (propagate) {
+				sendDisplayLastMove(lastMove);
+			} else {
+				displayLastMove(lastMove);
+			}
 		}
 	}
 
@@ -210,7 +214,7 @@ const requestLastMove = () => {
 
 const onLastMoveAction = (event) => {
 	event.stopPropagation();
-	requestLastMove();
+	requestLastMove(false);
 }
 
 const onDownloadGameAction = (event) => {
@@ -376,11 +380,11 @@ const displayEvaluation = (evaluation) => {
 	evaluationValue.innerText = evaluation;
 }
 
-const updateComputeIcon = (isRunning) => {
+const updateComputeIcon = (isComputing) => {
 
 	const computeIcon = document.getElementById("computeIcon");
 	
-	if (isRunning) {
+	if (isComputing) {
 		computeIcon.classList.add("fa-spin");
 	} else {
 		computeIcon.classList.remove("fa-spin");
@@ -396,6 +400,7 @@ const refreshGame = (moves) => {
 const sendReload = () => {
 	if (stompClient) {
 		const webSocketMessage = {
+			gameId: gameId,
 			type: "RELOAD"
 		}
 		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
@@ -404,7 +409,8 @@ const sendReload = () => {
 
 const sendDisplayMove = (move) => {
 	if (stompClient) {
-		var webSocketMessage = {
+		var webSocketMessage = {	
+			gameId: gameId,
 			content: move,
 			type: "REFRESH_MOVE"
 		};
@@ -415,8 +421,20 @@ const sendDisplayMove = (move) => {
 const sendDisplayEvaluation = (evaluation) => {
 	if (stompClient) {
 		var webSocketMessage = {
+			gameId: gameId,
 			content: evaluation,
 			type: "REFRESH_EVALUATION"
+		};
+		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
+	}
+}
+
+const sendDisplayLastMove = (lastMove) => {
+	if (stompClient) {
+		var webSocketMessage = {
+			gameId: gameId,
+			content: lastMove,
+			type: "DISPLAY_LAST_MOVE"
 		};
 		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
 	}
@@ -445,23 +463,28 @@ const onEngineConnected = () => {
 const onReceive = (payload) => {
 	const webSocketMessage = JSON.parse(payload.body);
 
-	if (webSocketMessage.type == "RELOAD") {
-		location.reload();
-	} else if (webSocketMessage.type == "REFRESH_MOVE") {
-		displayMove(webSocketMessage.content);
-	} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
-		displayEvaluation(webSocketMessage.content);
-	} else if (webSocketMessage.type == "COMPUTING_PROGRESS") {
-		const percent = webSocketMessage.content;
-		displayComputeProgress(percent);
-	} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
-		if (userSettings.displayAnalysis) {
-			displayAnalysisMove(webSocketMessage.content);
+	if (webSocketMessage.gameId == gameId) {
+		if (webSocketMessage.type == "RELOAD") {
+			location.reload();
+		} else if (webSocketMessage.type == "REFRESH_MOVE") {
+			displayMove(webSocketMessage.content);
+		} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
+			displayEvaluation(webSocketMessage.content);
+		} else if (webSocketMessage.type == "COMPUTING_PROGRESS") {
+			const percent = webSocketMessage.content;
+			displayComputeProgress(percent);
+		} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
+			if (userSettings.displayAnalysis) {
+				displayAnalysisMove(webSocketMessage.content);
+			}
+			updateComputeIcon(true);
+		} else if (webSocketMessage.type == "IS_COMPUTING") {
+			updateComputeIcon(webSocketMessage.content);
+		} else if (webSocketMessage.type == "DISPLAY_LAST_MOVE") {
+			displayLastMove(webSocketMessage.content);
 		}
-		updateComputeIcon(true);
-	} else if (webSocketMessage.type == "IS_COMPUTING") {
-		updateComputeIcon(webSocketMessage.content);
 	}
+	
 }
 
 var stompClient;
@@ -482,9 +505,9 @@ function main() {
 	
 	displayEvaluation(evaluation);
 	
-	updateComputeIcon(false);
+	updateComputeIcon(isComputing);
 	
-	requestLastMove();
+	requestLastMove(false);
 }
 
 var isComputerRunning = false;

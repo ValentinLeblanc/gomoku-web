@@ -108,8 +108,8 @@ public class WebEngineRepository {
 		}
 	}
 
-	public void stopComputation() {
-		String computeEvaluationUrl = customProperties.getEngineUrl() + "/stop";
+	public void stopComputation(Long gameId) {
+		String computeEvaluationUrl = customProperties.getEngineUrl() + "/stop/" + gameId;
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<String> request = new HttpEntity<>("");
@@ -124,6 +124,26 @@ public class WebEngineRepository {
 		} catch (RestClientException e) {
 			log.error("Error while stopping computation : " + e.getMessage());
 		}
+	}
+
+	public Boolean isComputing(Long id) {
+		String isComputingUrl = customProperties.getEngineUrl() + "/isComputing/" + id;
+		
+		RestTemplate restTemplate = new RestTemplate();
+		HttpEntity<String> request = new HttpEntity<>("");
+
+		try {
+			return restTemplate.exchange(
+					isComputingUrl, 
+					HttpMethod.GET, 
+					request, 
+					Boolean.class).getBody();
+			
+		} catch (RestClientException e) {
+			log.error("Error while stopping computation : " + e.getMessage());
+		}
+		
+		return Boolean.FALSE;
 	}
 
 }

@@ -5,5 +5,6 @@ public enum MessageType
 {
     REFRESH_MOVE,
     REFRESH_EVALUATION,
-    RELOAD;
+    RELOAD,
+    DISPLAY_LAST_MOVE;
 }

@@ -173,8 +173,8 @@ public class GameService {
 		return engineService.computeEvaluation(gameDto);
 	}
 
-	public void stopComputation() {
-		engineService.stopComputation();
+	public void stopComputation(Long gameId) {
+		engineService.stopComputation(gameId);
 	}
 
 	public Move getLastMove(GameType gameType) {
@@ -224,6 +224,10 @@ public class GameService {
 		}
 		
 		gameRepository.save(newGame);
+	}
+
+	public Boolean isComputing(Long gameId) {
+		return engineService.isComputing(gameId);
 	}
 
 	private Game findCurrentGame(GameType gameType) {

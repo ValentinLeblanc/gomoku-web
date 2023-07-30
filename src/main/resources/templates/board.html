@@ -114,18 +114,28 @@
 					</div>
 				</div>
 			</div>
+			<div class="form-floating" style="display: inline-block">
+				<div class="row">
+					<div>
+						<span style="margin: 30px;" th:text="${game.type}"></span>
+					</div>
+				</div>
+			</div>
 			<div class="computeProgress" id="computeProgress1">
-				<div class="progressBar" id="progressBar1"></div>
+				<div class="progressBar" id="progressBar1">
+				</div>
 			</div>
 		</div>
 	</div>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
+		var gameId = /*[[${game.id}]]*/'default';
 		var moves = /*[[${game.moves}]]*/'default';
 		var userSettings = /*[[${userSettings}]]*/'default';
 		var gameType = /*[[${game.type}]]*/'default';
 		var boardSize = /*[[${game.boardSize}]]*/'default';
 		var evaluation = /*[[${evaluation}]]*/'default';
+		var isComputing = /*[[${isComputing}]]*/'default';
 		var _csrf = /*[[${_csrf}]]*/'default';
 		/*]]>*/
 	</script>
