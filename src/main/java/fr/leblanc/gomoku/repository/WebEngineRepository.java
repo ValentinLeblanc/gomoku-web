@@ -13,7 +13,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import fr.leblanc.gomoku.model.CustomProperties;
-import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GomokuColor;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.web.dto.CheckWinResultDTO;
@@ -28,13 +27,13 @@ public class WebEngineRepository {
 	@Autowired
 	private CustomProperties customProperties;
 
-	public Set<Move> checkWin(Game game) {
+	public Set<Move> checkWin(GameDTO game) {
 		
 		String checkWinUrl = customProperties.getEngineUrl() + "/checkWin";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		
-		HttpEntity<GameDTO> request = new HttpEntity<>(new GameDTO(game));
+		HttpEntity<GameDTO> request = new HttpEntity<>(game);
 		
 		try {
 			ResponseEntity<CheckWinResultDTO> response = restTemplate.exchange(
@@ -144,6 +143,25 @@ public class WebEngineRepository {
 		}
 		
 		return Boolean.FALSE;
+	}
+
+	public void clearGame(Long id) {
+		String clearGameUrl = customProperties.getEngineUrl() + "/clearGame";
+		
+		RestTemplate restTemplate = new RestTemplate();
+		HttpEntity<Long> request = new HttpEntity<>(id);
+
+		try {
+			restTemplate.exchange(
+					clearGameUrl, 
+					HttpMethod.DELETE, 
+					request, 
+					Void.class);
+			
+		} catch (RestClientException e) {
+			log.error("Error while deleting game : " + e.getMessage());
+		}
+		
 	}
 
 }

@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.repository.WebEngineRepository;
 import fr.leblanc.gomoku.web.dto.GameDTO;
@@ -16,7 +15,7 @@ public class EngineService {
 	 @Autowired
 	 private WebEngineRepository engineRepository;
 	 
-	 public Set<Move> checkWin(Game game) {
+	 public Set<Move> checkWin(GameDTO game) {
 		 return engineRepository.checkWin(game);
 	 }
 
@@ -34,6 +33,10 @@ public class EngineService {
 
 	public Boolean isComputing(Long id) {
 		return engineRepository.isComputing(id);
+	}
+
+	public void deleteGame(Long id) {
+		engineRepository.clearGame(id);
 	}
 	
 }

@@ -63,9 +63,14 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		gameRepository.delete(currentGame);
+		deleteGame(currentGame);
 		
 		return gameRepository.save(createGame(userService.getCurrentUser(), gameType));
+	}
+	
+	public void deleteGame(Game game) {
+		engineService.deleteGame(game.getId());
+		gameRepository.delete(game);
 	}
 
 	public Set<Move> addMove(GameType gameType, int columnIndex, int rowIndex) {
@@ -93,7 +98,7 @@ public class GameService {
 		Set<Move> winningMoves = null;
 		
 		try {
-			winningMoves = engineService.checkWin(currentGame);
+			winningMoves = engineService.checkWin(new GameDTO(currentGame));
 		} catch (ResourceAccessException e) {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
