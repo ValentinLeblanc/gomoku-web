@@ -6,5 +6,6 @@ public enum MessageType
     REFRESH_MOVE,
     REFRESH_EVALUATION,
     RELOAD,
-    DISPLAY_LAST_MOVE;
+    DISPLAY_LAST_MOVE,
+	IS_WIN;
 }

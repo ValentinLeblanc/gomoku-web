@@ -59,6 +59,10 @@ const onAddMoveAction = (event) => {
 		return;	
 	}
 	
+	if (winningMoves != null && winningMoves.length > 0) {
+		return;
+	}
+	
 	event.stopPropagation();
 	var cell = event.srcElement;
 	var column = parseInt(cell.id.split("/")[0]);
@@ -72,16 +76,13 @@ const onAddMoveAction = (event) => {
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
 	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			moves = JSON.parse(xhr.response);
+		if (xhr.status != 500 && xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			var move = JSON.parse(xhr.response);
 			
-			if (moves.length > 0) {
-				for (const element of moves) {
-					sendDisplayMove(element);
-				}
+			if (move) {
+				sendDisplayMove(move);
 				updateEvaluation();
-				
-				if (gameType == "AI") {
+				if (gameType == "AI" && (winningMoves == null || winningMoves.length == 0)) {
 					onComputeMoveAction();
 				}
 			}
@@ -135,6 +136,10 @@ const onComputeMoveAction = (event) => {
 		return;
 	}
 	
+	if (winningMoves != null && winningMoves.length > 0) {
+		return;
+	}
+	
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -143,11 +148,9 @@ const onComputeMoveAction = (event) => {
 	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			moves = JSON.parse(xhr.response);
-			for (const element of moves) {
-				sendDisplayMove(element);
-			}
+		if (xhr.status != 500 && xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			var move = JSON.parse(xhr.response);
+			sendDisplayMove(move);
 			updateEvaluation();
 			
 			requestLastMove(true);
@@ -396,9 +399,11 @@ const updateComputeIcon = () => {
 	}
 }
 
-const refreshGame = (moves) => {
-	for (const element of moves) {
-		displayMove(element);
+const displayMoves = (moves) => {
+	if (moves) {
+		for (const element of moves) {
+			displayMove(element);
+		}
 	}
 }
 
@@ -490,6 +495,9 @@ const onReceive = (payload) => {
 			updateComputeIcon();
 		} else if (webSocketMessage.type == "DISPLAY_LAST_MOVE") {
 			displayLastMove(webSocketMessage.content);
+		} else if (webSocketMessage.type == "IS_WIN") {
+			winningMoves = webSocketMessage.content;
+			displayMoves(winningMoves);
 		}
 	}
 	
@@ -503,7 +511,8 @@ function main() {
 	connectToEngineSocket();
 	initCellListeners();
 	initButtonListeners();
-	refreshGame(moves);
+	displayMoves(moves);
+	displayMoves(winningMoves);
 	displayEvaluation(evaluation);
 	updateComputeIcon();
 	requestLastMove(false);

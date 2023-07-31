@@ -1,7 +1,6 @@
 package fr.leblanc.gomoku.service;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -15,11 +14,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
+import fr.leblanc.gomoku.controller.WebSocketController;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.GomokuColor;
+import fr.leblanc.gomoku.model.MessageType;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.model.User;
+import fr.leblanc.gomoku.model.WebSocketMessage;
 import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
@@ -42,6 +44,9 @@ public class GameService {
 	
 	@Autowired
 	private EngineService engineService;
+	
+	@Autowired
+	private WebSocketController webSocketService;
 	
 	public Game getCurrentGame(GameType gameType) {
 		
@@ -73,7 +78,7 @@ public class GameService {
 		gameRepository.delete(game);
 	}
 
-	public Set<Move> addMove(GameType gameType, int columnIndex, int rowIndex) {
+	public Move addMove(GameType gameType, int columnIndex, int rowIndex) {
 		
 		Game currentGame = findCurrentGame(gameType);
 
@@ -81,41 +86,36 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		if (currentGame.getMove(columnIndex, rowIndex) != null) {
-			return Collections.emptySet();
-		}
-		
 		if (!currentGame.getWinCombination().isEmpty()) {
-			return Collections.emptySet();
+			throw new IllegalStateException("Game is already over");
 		}
 		
-		int color = currentGame.getMoves().size() % 2 == 0 ? GomokuColor.BLACK.toNumber() : GomokuColor.WHITE.toNumber();
+		if (currentGame.getMove(columnIndex, rowIndex) != null) {
+			throw new IllegalStateException("Move already set");
+		}
 		
+		int color = extractPlayingColor(currentGame);
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
-		
 		currentGame.getMoves().add(newMove);
-		
-		Set<Move> winningMoves = null;
-		
+		checkWin(currentGame);
+		gameRepository.save(currentGame);
+		return newMove;
+	}
+
+	private void checkWin(Game currentGame) {
 		try {
-			winningMoves = engineService.checkWin(new GameDTO(currentGame));
+			Set<Move> winningMoves = engineService.checkWin(new GameDTO(currentGame));
+			if (winningMoves != null && !winningMoves.isEmpty()) {
+				currentGame.setWinCombination(winningMoves);
+				webSocketService.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves).build());
+			}
 		} catch (ResourceAccessException e) {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
-		
-		Set<Move> result = new HashSet<>();	
-		
-		result.addAll(currentGame.getMoves());
-		
-		if (winningMoves != null && !winningMoves.isEmpty()) {
-			currentGame.setWinCombination(winningMoves);
-			
-			result.addAll(winningMoves);
-		}
-		
-		gameRepository.save(currentGame);
-		
-		return result;
+	}
+
+	private int extractPlayingColor(Game currentGame) {
+		return currentGame.getMoves().size() % 2 == 0 ? GomokuColor.BLACK.toNumber() : GomokuColor.WHITE.toNumber();
 	}
 
 	public Set<Move> undoMove(GameType gameType) {
@@ -142,7 +142,7 @@ public class GameService {
 		
 	}
 
-	public Set<Move> computeMove(GameType gameType) {
+	public Move computeMove(GameType gameType) {
 		
 		Game currentGame = findCurrentGame(gameType);
 
@@ -162,7 +162,7 @@ public class GameService {
 			return addMove(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex());
 		}
 		
-		return Collections.emptySet();
+		throw new IllegalStateException("Move could not be computed");
 	}
 
 	public Double computeEvaluation(GameType gameType) {
@@ -292,6 +292,11 @@ public class GameService {
 		}
 
 		return null;
+	}
+
+	public Set<Move> getWinningMoves(GameType gameType) {
+		Game currentGame = findCurrentGame(gameType);
+		return engineService.checkWin(new GameDTO(currentGame));
 	}
 
 }

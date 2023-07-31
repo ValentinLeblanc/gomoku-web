@@ -38,6 +38,7 @@ public class GameController {
 		model.addAttribute("evaluation", gameService.computeEvaluation(gameType));
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
 		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
+		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
 		
 		return new ModelAndView("forward:/board");
 	}
@@ -51,12 +52,12 @@ public class GameController {
 	}
 	
 	@PostMapping("/add-move/{gameType}")
-	public Set<Move> addMove(@PathVariable String gameType, @RequestBody MoveDTO move) {
+	public Move addMove(@PathVariable String gameType, @RequestBody MoveDTO move) {
 		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.columnIndex(), move.rowIndex());
 	}
 	
 	@PostMapping("/compute-move/{gameType}")
-	public Set<Move> computeMove(@PathVariable String gameType) {
+	public Move computeMove(@PathVariable String gameType) {
 		return gameService.computeMove(GameType.valueOf(gameType.toUpperCase()));
 	}
 

@@ -10,8 +10,7 @@ import org.springframework.stereotype.Controller;
 import fr.leblanc.gomoku.model.WebSocketMessage;
 
 @Controller
-public class WebSocketController
-{
+public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate template;
     
