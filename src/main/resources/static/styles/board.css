@@ -49,6 +49,18 @@ td {
     margin-top: -5px;
 }
 
+.win:before {
+    position: absolute;
+    content: '';
+    background-color:green;
+    border-radius:50%;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+    margin-left: -11px;
+    margin-top: -11px;
+}
+
 .analysis {
 	opacity:0.5;
 }
@@ -59,10 +71,6 @@ td {
 
 .white {
 	background-color: white;
-}
-
-.green {
-	background-color: green;
 }
 
 p {

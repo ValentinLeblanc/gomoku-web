@@ -321,15 +321,17 @@ const displayMove = (move) => {
 			var row = parseInt(cell.id.split("/")[1]);
 	
 			if (column == move.columnIndex && row == move.rowIndex) {
-				cell.classList.add('stone');
-				cell.classList.remove('white');
-				cell.classList.remove('black');
-				if (move.color == 1) {
-					cell.classList.add('black');
-				} else if (move.color == -1) {
-					cell.classList.add('white');
-				} else if (move.color == 2) {
-					cell.classList.add('green');
+				if (move.color == 2) {
+					cell.classList.add('win');
+				} else {
+					cell.classList.add('stone');
+					cell.classList.remove('white');
+					cell.classList.remove('black');
+					if (move.color == 1) {
+						cell.classList.add('black');
+					} else if (move.color == -1) {
+						cell.classList.add('white');
+					}
 				}
 			}
 		}
