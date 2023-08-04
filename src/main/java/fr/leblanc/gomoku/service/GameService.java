@@ -1,9 +1,12 @@
 package fr.leblanc.gomoku.service;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Stack;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,8 @@ import lombok.extern.apachecommons.CommonsLog;
 @CommonsLog
 public class GameService {
 
+	private static final String NOT_SUPPORTED_FOR_ONLINE_GAME = "Not supported for online game";
+
 	private static final String GAME_NOT_FOUND = "Game not found";
 
 	@Autowired
@@ -41,13 +46,12 @@ public class GameService {
 	private UserService userService;
 	
 	@Autowired
-	private MoveService moveService;
-	
-	@Autowired
 	private EngineService engineService;
 	
 	@Autowired
 	private WebSocketController webSocketService;
+	
+	private Map<Long, Stack<Move>> undoMoveStack = new HashMap<>();
 	
 	public Game getCurrentGame(GameType gameType) {
 		
@@ -95,6 +99,8 @@ public class GameService {
 			throw new IllegalStateException("Move already set");
 		}
 		
+		undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>()).clear();
+		
 		int color = extractPlayingColor(currentGame);
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
 		currentGame.getMoves().add(newMove);
@@ -128,10 +134,12 @@ public class GameService {
 		}
 		
 		if (currentGame.getType() == GameType.ONLINE) {
-			throw new IllegalStateException("Not supported for online game");
+			throw new IllegalStateException(NOT_SUPPORTED_FOR_ONLINE_GAME);
 		} 
 		
-		removeLastMove(currentGame);
+		Move lastMove = removeLastMove(currentGame);
+		
+		undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>()).push(lastMove);
 		
 		if (!currentGame.getWinCombination().isEmpty()) {
 			currentGame.getWinCombination().clear();
@@ -143,6 +151,29 @@ public class GameService {
 		
 	}
 
+	public Set<Move> redoMove(GameType gameType) {
+		
+		Game currentGame = findCurrentGame(gameType);
+
+		if (currentGame == null) {
+			throw new IllegalStateException(GAME_NOT_FOUND);
+		}
+		
+		if (currentGame.getType() == GameType.ONLINE) {
+			throw new IllegalStateException(NOT_SUPPORTED_FOR_ONLINE_GAME);
+		}
+		
+		Move lastMove = undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>()).pop();
+		
+		if (lastMove != null) {
+			currentGame.getMoves().add(lastMove);
+			checkWin(currentGame);
+			gameRepository.save(currentGame);
+		}
+		
+		return currentGame.getMoves();
+	}
+
 	public Move computeMove(GameType gameType) {
 		
 		Game currentGame = findCurrentGame(gameType);
@@ -152,7 +183,7 @@ public class GameService {
 		}
 		
 		if (currentGame.getType() == GameType.ONLINE) {
-			throw new IllegalStateException("Not supported for online game");
+			throw new IllegalStateException(NOT_SUPPORTED_FOR_ONLINE_GAME);
 		} 
 		
 		GameDTO gameDto = new GameDTO(currentGame);
@@ -280,8 +311,6 @@ public class GameService {
 		
 		if (lastMove != null) {
 			game.getMoves().remove(lastMove);
-			lastMove.setColor(GomokuColor.NONE.toNumber());
-			moveService.delete(lastMove);
 			return lastMove;
 		}
 		

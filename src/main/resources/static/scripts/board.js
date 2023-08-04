@@ -33,6 +33,9 @@ const updateEvaluation = () => {
 const initButtonListeners = () => {
 	var undoMoveButton = document.getElementById("undo-move");
 	undoMoveButton.addEventListener("click", onUndoMoveAction);
+	
+	var redoMoveButton = document.getElementById("redo-move");
+	redoMoveButton.addEventListener("click", onRedoMoveAction);
 
 	var resetGameButton = document.getElementById("reset-game");
 	resetGameButton.addEventListener("click", onResetGameAction);
@@ -98,6 +101,22 @@ const onUndoMoveAction = (event) => {
 	event.stopPropagation();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/undo-move/" + gameType, true);
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+			sendReload();
+		}
+	}
+	xhr.send("");
+}
+
+const onRedoMoveAction = (event) => {
+	event.stopPropagation();
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/redo-move/" + gameType, true);
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);

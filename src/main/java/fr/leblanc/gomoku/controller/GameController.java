@@ -66,6 +66,11 @@ public class GameController {
 		return gameService.undoMove(GameType.valueOf(gameType.toUpperCase()));
 	}
 	
+	@PostMapping("/redo-move/{gameType}")
+	public Set<Move> redoMove(@PathVariable String gameType) {
+		return gameService.redoMove(GameType.valueOf(gameType.toUpperCase()));
+	}
+	
 	@PostMapping("/compute-evaluation/{gameType}")
 	public Double computeEvaluation(@PathVariable String gameType) {
 		return gameService.computeEvaluation(GameType.valueOf(gameType.toUpperCase()));
