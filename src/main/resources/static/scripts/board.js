@@ -489,9 +489,7 @@ const onReceive = (payload) => {
 			const progress = webSocketMessage.content;
 			displayStrikeProgress(progress);
 		} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
-			if (userSettings.displayAnalysis) {
-				displayAnalysisMove(webSocketMessage.content);
-			}
+			displayAnalysisMove(webSocketMessage.content);
 		} else if (webSocketMessage.type == "IS_COMPUTING") {
 			isComputing = webSocketMessage.content;
 			updateComputeIcon();

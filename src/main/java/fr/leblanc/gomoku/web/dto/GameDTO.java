@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GameDTO {
 
+	private Long id;
+	
 	private int boardSize;
 	
 	private Set<MoveDTO> moves = new HashSet<>();
@@ -21,6 +23,9 @@ public class GameDTO {
 	private UserSettingsDTO settings;
 	
 	public GameDTO(Game game) {
+		
+		id = game.getId();
+		
 		boardSize = game.getBoardSize();
 		
 		for (Move move : game.getMoves()) {
