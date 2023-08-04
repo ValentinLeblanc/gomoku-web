@@ -53,7 +53,7 @@ public class GameController {
 	
 	@PostMapping("/add-move/{gameType}")
 	public Move addMove(@PathVariable String gameType, @RequestBody MoveDTO move) {
-		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.columnIndex(), move.rowIndex());
+		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.getColumnIndex(), move.getRowIndex());
 	}
 	
 	@PostMapping("/compute-move/{gameType}")

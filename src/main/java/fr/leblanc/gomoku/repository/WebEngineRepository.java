@@ -46,7 +46,7 @@ public class WebEngineRepository {
 			if (checkWinResult != null && checkWinResult.isWin()) {
 				Set<Move> result = new HashSet<>();
 				for (MoveDTO move : checkWinResult.winMoves()) {
-					result.add(Move.builder().color(GomokuColor.GREEN.toNumber()).columnIndex(move.columnIndex()).rowIndex(move.rowIndex()).build());
+					result.add(Move.builder().color(GomokuColor.GREEN.toNumber()).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
 				}
 				
 				return result;
@@ -75,7 +75,7 @@ public class WebEngineRepository {
 			
 			MoveDTO computedMove = response.getBody();
 			if (computedMove != null) {
-				return Move.builder().color(computedMove.color()).columnIndex(computedMove.columnIndex()).rowIndex(computedMove.rowIndex()).build();
+				return Move.builder().color(computedMove.getColor()).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
 			}
 			
 			return null;

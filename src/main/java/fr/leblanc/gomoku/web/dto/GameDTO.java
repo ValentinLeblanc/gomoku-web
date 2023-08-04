@@ -1,19 +1,30 @@
 package fr.leblanc.gomoku.web.dto;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import fr.leblanc.gomoku.model.Game;
-import fr.leblanc.gomoku.model.UserSettings;
+import fr.leblanc.gomoku.model.Move;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record GameDTO(Long id, int boardSize, Set<MoveDTO> moves, UserSettingsDTO settings) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class GameDTO {
 
-	public GameDTO(Game game) {
-		this(game.getId(), game.getBoardSize(), game.getMoves().stream().map(MoveDTO::new).collect(Collectors.toSet()), null);
-	}
+	private int boardSize;
 	
-	public GameDTO(Game game, UserSettings settings) {
-		this(game.getId(), game.getBoardSize(), game.getMoves().stream().map(MoveDTO::new).collect(Collectors.toSet()), new UserSettingsDTO(settings));
+	private Set<MoveDTO> moves = new HashSet<>();
+	
+	private UserSettingsDTO settings;
+	
+	public GameDTO(Game game) {
+		boardSize = game.getBoardSize();
+		
+		for (Move move : game.getMoves()) {
+			moves.add(new MoveDTO(move));
+		}
 	}
-
 }

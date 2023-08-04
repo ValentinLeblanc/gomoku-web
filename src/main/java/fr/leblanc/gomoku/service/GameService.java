@@ -25,6 +25,7 @@ import fr.leblanc.gomoku.model.WebSocketMessage;
 import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
+import fr.leblanc.gomoku.web.dto.UserSettingsDTO;
 import lombok.extern.apachecommons.CommonsLog;
 
 @Service
@@ -154,7 +155,9 @@ public class GameService {
 			throw new IllegalStateException("Not supported for online game");
 		} 
 		
-		GameDTO gameDto = new GameDTO(currentGame, userService.getCurrentUser().getSettings());
+		GameDTO gameDto = new GameDTO(currentGame);
+		
+		gameDto.setSettings(new UserSettingsDTO(userService.getCurrentUser().getSettings()));
 		
 		Move computedMove = engineService.computeMove(gameDto);
 		
@@ -173,7 +176,9 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		GameDTO gameDto = new GameDTO(currentGame, userService.getCurrentUser().getSettings());
+		GameDTO gameDto = new GameDTO(currentGame);
+		
+		gameDto.setSettings(new UserSettingsDTO(userService.getCurrentUser().getSettings()));
 		
 		return engineService.computeEvaluation(gameDto);
 	}
@@ -216,14 +221,14 @@ public class GameService {
 		
 		newGame = gameRepository.save(newGame);
 		
-		for (MoveDTO moveDto : uploadedGame.moves()) {
+		for (MoveDTO moveDto : uploadedGame.getMoves()) {
 			
 			Move move = new Move();
 			
-			move.setColor(moveDto.color());
-			move.setColumnIndex(moveDto.columnIndex());
-			move.setRowIndex(moveDto.rowIndex());
-			move.setNumber(moveDto.number());
+			move.setColor(moveDto.getColor());
+			move.setColumnIndex(moveDto.getColumnIndex());
+			move.setRowIndex(moveDto.getRowIndex());
+			move.setNumber(moveDto.getNumber());
 			
 			newGame.getMoves().add(move);
 		}

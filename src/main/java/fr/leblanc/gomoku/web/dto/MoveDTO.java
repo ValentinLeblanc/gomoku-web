@@ -1,15 +1,23 @@
 package fr.leblanc.gomoku.web.dto;
 
 import fr.leblanc.gomoku.model.Move;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record MoveDTO(int number, int columnIndex, int rowIndex, int color) {
+@Data
+@NoArgsConstructor
+public class MoveDTO {
 
-	public MoveDTO() {
-		this(0, 0, 0, 0);
-	}
-	
+    private int number;
+    private int columnIndex;
+    private int rowIndex;
+    private int color;
+
     public MoveDTO(Move move) {
-    	this(move.getNumber(), move.getColumnIndex(), move.getRowIndex(), move.getColor());
+    	columnIndex = move.getColumnIndex();
+    	rowIndex = move.getRowIndex();
+    	color = move.getColor();
+    	number = move.getNumber();
     }
 }
 	

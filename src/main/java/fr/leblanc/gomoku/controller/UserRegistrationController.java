@@ -23,7 +23,7 @@ public class UserRegistrationController {
 
 	@ModelAttribute("user")
 	public UserRegistrationDTO userRegistrationDto() {
-		return new UserRegistrationDTO(null, null, null, null);
+		return new UserRegistrationDTO();
 	}
 
 	@GetMapping
