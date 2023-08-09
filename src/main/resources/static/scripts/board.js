@@ -40,13 +40,15 @@ const initButtonListeners = () => {
 }
 
 const onAddMoveAction = (event) => {
+	if (event) {
+		event.stopPropagation();
+	}
 	if (isComputing) {
 		return;	
 	}
 	if (winningMoves != null && winningMoves.length > 0) {
 		return;
 	}
-	event.stopPropagation();
 	var cell = event.srcElement;
 	var column = parseInt(cell.id.split("/")[0]);
 	var row = parseInt(cell.id.split("/")[1]);
@@ -65,8 +67,10 @@ const onAddMoveAction = (event) => {
 }
 
 const onUndoMoveAction = (event) => {
-	event.stopPropagation();
-	onStopAction(event);
+	if (event) {
+		event.stopPropagation();
+	}
+	onStopAction();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/undo-move/" + gameType, true);
 	var header = this._csrf.headerName;
@@ -82,8 +86,13 @@ const onUndoMoveAction = (event) => {
 }
 
 const onRedoMoveAction = (event) => {
-	event.stopPropagation();
-	onStopAction(event);
+	if (event) {
+		event.stopPropagation();
+	}
+	if (winningMoves != null && winningMoves.length > 0) {
+		return;
+	}
+	onStopAction();
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/redo-move/" + gameType, true);
 	var header = this._csrf.headerName;
@@ -99,7 +108,9 @@ const onRedoMoveAction = (event) => {
 }
 
 const onResetGameAction = (event) => {
-	event.stopPropagation();
+	if (event) {
+		event.stopPropagation();
+	}
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/reset-game/" + gameType, true);
 	var header = this._csrf.headerName;
@@ -135,7 +146,9 @@ const onComputeMoveAction = (event) => {
 }
 
 const onStopAction = (event) => {
-	event.stopPropagation();
+	if (event) {
+		event.stopPropagation();
+	}
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/stop/" + gameId, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -176,12 +189,16 @@ const requestLastMove = () => {
 }
 
 const onLastMoveAction = (event) => {
-	event.stopPropagation();
+	if (event) {
+		event.stopPropagation();
+	}
 	requestLastMove();
 }
 
 const onDownloadGameAction = (event) => {
-	event.stopPropagation();
+	if (event) {
+		event.stopPropagation();
+	}
 	var xhr = new XMLHttpRequest();
 	xhr.responseType = 'blob';
 	xhr.open("GET", "/downloadGame/" + gameType, true);
@@ -219,8 +236,9 @@ async function handleSaveImg(response) {
 }
 
 const onUploadGameAction = (event) => {
-	event.stopPropagation();
-	
+	if (event) {
+		event.stopPropagation();
+	}
 	let input = document.createElement('input');
 	input.type = 'file';
 	input.onchange = _ => {
