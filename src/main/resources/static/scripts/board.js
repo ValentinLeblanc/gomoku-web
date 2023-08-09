@@ -478,7 +478,7 @@ const connectToWebSocket = () => {
 }
 
 const connectToEngineSocket = () => {
-	const socket = new SockJS('http://localhost:8081/engineMessages')
+	const socket = new SockJS(webSocketEngineUrl)
 	stompClientEngine = Stomp.over(socket)
 	stompClientEngine.connect({}, onEngineConnected)
 }

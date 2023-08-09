@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
 import fr.leblanc.gomoku.controller.WebSocketController;
+import fr.leblanc.gomoku.exception.EngineException;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.GomokuColor;
@@ -49,7 +50,7 @@ public class GameService {
 	private EngineService engineService;
 	
 	@Autowired
-	private WebSocketController webSocketService;
+	private WebSocketController webSocketController;
 	
 	private Map<Long, Stack<Move>> undoMoveStack = new HashMap<>();
 	
@@ -75,16 +76,22 @@ public class GameService {
 		
 		deleteGame(currentGame);
 		
-		return gameRepository.save(createGame(userService.getCurrentUser(), gameType));
+		Game newGame = createGame(userService.getCurrentUser(), gameType);
+		
+		return gameRepository.save(newGame);
 	}
 	
 	public void deleteGame(Game game) {
-		engineService.deleteGame(game.getId());
+		engineService.clearGame(game.getId());
 		gameRepository.delete(game);
 	}
 
 	public Move addMove(GameType gameType, int columnIndex, int rowIndex) {
-		
+		boolean computeNextMove = gameType == GameType.AI;
+		return addMoveInternal(gameType, columnIndex, rowIndex, computeNextMove);
+	}
+
+	private Move addMoveInternal(GameType gameType, int columnIndex, int rowIndex, boolean computeNextMove) {
 		Game currentGame = findCurrentGame(gameType);
 
 		if (currentGame == null) {
@@ -106,6 +113,11 @@ public class GameService {
 		currentGame.getMoves().add(newMove);
 		checkWin(currentGame);
 		gameRepository.save(currentGame);
+		
+		if (computeNextMove) {
+			computeMove(gameType);
+		}
+		
 		return newMove;
 	}
 
@@ -114,7 +126,7 @@ public class GameService {
 			Set<Move> winningMoves = engineService.checkWin(new GameDTO(currentGame));
 			if (winningMoves != null && !winningMoves.isEmpty()) {
 				currentGame.setWinCombination(winningMoves);
-				webSocketService.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves).build());
+				webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves).build());
 			}
 		} catch (ResourceAccessException e) {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
@@ -192,11 +204,12 @@ public class GameService {
 		
 		Move computedMove = engineService.computeMove(gameDto);
 		
-		if (computedMove != null && computedMove.getColumnIndex() != -1 && computedMove.getRowIndex() != -1) {
-			return addMove(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex());
+		if (computedMove == null) {
+			throw new EngineException("Move could not be computed");
 		}
 		
-		throw new IllegalStateException("Move could not be computed");
+		boolean computeNextMove = gameType == GameType.AI || gameType == GameType.AI_VS_AI;
+		return addMoveInternal(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex(), computeNextMove);
 	}
 
 	public Double computeEvaluation(GameType gameType) {
@@ -285,6 +298,7 @@ public class GameService {
 			currentGame = userService.getCurrentUser().getCurrentAIvsAIGame();
 			break;
 		default:
+			throw new IllegalStateException("Unknown game type: " + gameType);
 		}
 		return currentGame;
 	}

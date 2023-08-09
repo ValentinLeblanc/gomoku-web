@@ -35,7 +35,7 @@ public class EngineService {
 		return engineRepository.isComputing(id);
 	}
 
-	public void deleteGame(Long id) {
+	public void clearGame(Long id) {
 		engineRepository.clearGame(id);
 	}
 	

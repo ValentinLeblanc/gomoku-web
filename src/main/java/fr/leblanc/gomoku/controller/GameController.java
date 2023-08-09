@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import fr.leblanc.gomoku.configuration.GomokuWebConfiguration;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.Move;
@@ -27,6 +28,9 @@ public class GameController {
 	@Autowired
 	private GameService gameService;
 	
+    @Autowired
+    private GomokuWebConfiguration webConfiguration;
+	
 	@GetMapping("/game/{gameTypeString}")
 	public ModelAndView displayGame(@PathVariable String gameTypeString, Model model) {
 		
@@ -39,6 +43,7 @@ public class GameController {
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
 		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
 		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
+		model.addAttribute("webSocketEngineUrl", webConfiguration.getEngineUrl() + "/engineMessages");
 		
 		return new ModelAndView("forward:/board");
 	}
