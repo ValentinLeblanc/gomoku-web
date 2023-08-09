@@ -111,26 +111,33 @@ public class GameService {
 		int color = extractPlayingColor(currentGame);
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
 		currentGame.getMoves().add(newMove);
-		checkWin(currentGame);
+		
 		gameRepository.save(currentGame);
 		
-		if (computeNextMove) {
+		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.MOVE).content(newMove).build());
+
+		Double newEvaluation = engineService.computeEvaluation(new GameDTO(currentGame));
+		
+		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation).build());
+		
+		if (!checkWin(currentGame) && computeNextMove) {
 			computeMove(gameType);
 		}
 		
 		return newMove;
 	}
 
-	private void checkWin(Game currentGame) {
+	private boolean checkWin(Game currentGame) {
 		try {
 			Set<Move> winningMoves = engineService.checkWin(new GameDTO(currentGame));
 			if (winningMoves != null && !winningMoves.isEmpty()) {
-				currentGame.setWinCombination(winningMoves);
 				webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves).build());
+				return true;
 			}
 		} catch (ResourceAccessException e) {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
+		return false;
 	}
 
 	private int extractPlayingColor(Game currentGame) {
@@ -202,13 +209,15 @@ public class GameService {
 		
 		gameDto.setSettings(new UserSettingsDTO(userService.getCurrentUser().getSettings()));
 		
+		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(true).build());
 		Move computedMove = engineService.computeMove(gameDto);
+		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(false).build());
 		
 		if (computedMove == null) {
 			throw new EngineException("Move could not be computed");
 		}
 		
-		boolean computeNextMove = gameType == GameType.AI || gameType == GameType.AI_VS_AI;
+		boolean computeNextMove = gameType == GameType.AI_VS_AI;
 		return addMoveInternal(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex(), computeNextMove);
 	}
 
@@ -238,8 +247,11 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		return getLastMove(currentGame);
+		Move lastMove = getLastMove(currentGame);
 		
+		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.LAST_MOVE).content(lastMove).build());
+		
+		return lastMove;
 	}
 
 	public ResponseEntity<Resource> downloadGame(GameType gameType) {

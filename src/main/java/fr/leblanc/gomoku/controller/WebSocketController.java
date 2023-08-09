@@ -14,7 +14,7 @@ public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate template;
     
-    @MessageMapping({ "/refresh" })
+    @MessageMapping({ "/refreshBoard" })
     @SendTo({ "/web/public" })
     public WebSocketMessage refreshBoard(@Payload final WebSocketMessage boardMessage) {
         return boardMessage;

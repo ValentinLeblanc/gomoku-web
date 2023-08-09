@@ -3,9 +3,10 @@ package fr.leblanc.gomoku.model;
 
 public enum MessageType
 {
-    REFRESH_MOVE,
-    REFRESH_EVALUATION,
-    RELOAD,
-    DISPLAY_LAST_MOVE,
-	IS_WIN;
+    MOVE,
+    EVALUATION,
+    REFRESH_BOARD,
+    LAST_MOVE,
+	IS_WIN,
+	IS_COMPUTING;
 }

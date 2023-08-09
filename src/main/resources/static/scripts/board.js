@@ -13,23 +13,6 @@ const initCellListeners = () => {
 	}
 }
 
-const updateEvaluation = () => {
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/compute-evaluation/" + gameType, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	var header = this._csrf.headerName;
-	var token = this._csrf.token;
-	xhr.setRequestHeader(header, token);
-	xhr.withCredentials = true;
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			var evaluation = xhr.response;
-			sendDisplayEvaluation(evaluation);
-		}
-	}
-	xhr.send("");
-}
-
 const initButtonListeners = () => {
 	var undoMoveButton = document.getElementById("undo-move");
 	undoMoveButton.addEventListener("click", onUndoMoveAction);
@@ -57,15 +40,12 @@ const initButtonListeners = () => {
 }
 
 const onAddMoveAction = (event) => {
-	
 	if (isComputing) {
 		return;	
 	}
-	
 	if (winningMoves != null && winningMoves.length > 0) {
 		return;
 	}
-	
 	event.stopPropagation();
 	var cell = event.srcElement;
 	var column = parseInt(cell.id.split("/")[0]);
@@ -78,19 +58,6 @@ const onAddMoveAction = (event) => {
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
-	xhr.onreadystatechange = function() {
-		if (xhr.status != 500 && xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			var move = JSON.parse(xhr.response);
-			
-			if (move) {
-				sendDisplayMove(move);
-				updateEvaluation();
-				if (gameType == "AI" && (winningMoves == null || winningMoves.length == 0)) {
-					onComputeMoveAction();
-				}
-			}
-		}
-	}
 	xhr.send(JSON.stringify({
 		columnIndex: column,
 		rowIndex: row
@@ -99,6 +66,7 @@ const onAddMoveAction = (event) => {
 
 const onUndoMoveAction = (event) => {
 	event.stopPropagation();
+	onStopAction(event);
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/undo-move/" + gameType, true);
 	var header = this._csrf.headerName;
@@ -107,7 +75,7 @@ const onUndoMoveAction = (event) => {
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			sendReload();
+			sendRefreshBoard();
 		}
 	}
 	xhr.send("");
@@ -115,6 +83,7 @@ const onUndoMoveAction = (event) => {
 
 const onRedoMoveAction = (event) => {
 	event.stopPropagation();
+	onStopAction(event);
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/redo-move/" + gameType, true);
 	var header = this._csrf.headerName;
@@ -123,7 +92,7 @@ const onRedoMoveAction = (event) => {
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			sendReload();
+			sendRefreshBoard();
 		}
 	}
 	xhr.send("");
@@ -139,26 +108,22 @@ const onResetGameAction = (event) => {
 	xhr.withCredentials = true;
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE) {
-			sendReload();
+			sendRefreshBoard();
 		}
 	}
 	xhr.send("");
 }
 
 const onComputeMoveAction = (event) => {
-	
 	if (event) {
 		event.stopPropagation();
 	}
-	
 	if (isComputing) {
 		return;
 	}
-	
 	if (winningMoves != null && winningMoves.length > 0) {
 		return;
 	}
-	
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/compute-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -166,20 +131,6 @@ const onComputeMoveAction = (event) => {
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
 	xhr.withCredentials = true;
-	xhr.onreadystatechange = function() {
-		if (xhr.status != 500 && xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			var move = JSON.parse(xhr.response);
-			sendDisplayMove(move);
-			updateEvaluation();
-			
-			requestLastMove(true);
-			
-			if (gameType == "AI_VS_AI") {
-				onComputeMoveAction();
-			}
-		}
-	}
-
 	xhr.send("");
 }
 
@@ -206,7 +157,7 @@ const onStopAction = (event) => {
 	xhr.send("");
 }
 
-const requestLastMove = (propagate) => {
+const requestLastMove = () => {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "/lastMove/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -217,11 +168,7 @@ const requestLastMove = (propagate) => {
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
 			var lastMove = JSON.parse(xhr.response);
-			if (propagate) {
-				sendDisplayLastMove(lastMove);
-			} else {
-				displayLastMove(lastMove);
-			}
+			displayLastMove(lastMove);
 		}
 	}
 
@@ -230,7 +177,7 @@ const requestLastMove = (propagate) => {
 
 const onLastMoveAction = (event) => {
 	event.stopPropagation();
-	requestLastMove(false);
+	requestLastMove();
 }
 
 const onDownloadGameAction = (event) => {
@@ -291,7 +238,7 @@ const onUploadGameAction = (event) => {
 			xhr.withCredentials = true;
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState == XMLHttpRequest.DONE) {
-					sendReload();
+					sendRefreshBoard();
 				}
 			}
 		
@@ -403,16 +350,12 @@ const displayStrikeProgress = (progress) => {
 }
 
 const displayEvaluation = (evaluation) => {
-
 	const evaluationValue = document.getElementById("evaluationValue");
-
 	evaluationValue.innerText = evaluation;
 }
 
 const updateComputeIcon = () => {
-
 	const computeIcon = document.getElementById("computeIcon");
-	
 	if (isComputing) {
 		computeIcon.classList.add("fa-spin");
 	} else {
@@ -428,56 +371,23 @@ const displayMoves = (moves) => {
 	}
 }
 
-const sendReload = () => {
+const sendRefreshBoard = () => {
 	if (stompClient) {
 		const webSocketMessage = {
 			gameId: gameId,
-			type: "RELOAD"
+			type: "REFRESH_BOARD"
 		}
-		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
+		stompClient.send("/app/refreshBoard", {}, JSON.stringify(webSocketMessage))
 	}
 }
 
-const sendDisplayMove = (move) => {
-	if (stompClient) {
-		var webSocketMessage = {	
-			gameId: gameId,
-			content: move,
-			type: "REFRESH_MOVE"
-		};
-		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
-	}
-}
-
-const sendDisplayEvaluation = (evaluation) => {
-	if (stompClient) {
-		var webSocketMessage = {
-			gameId: gameId,
-			content: evaluation,
-			type: "REFRESH_EVALUATION"
-		};
-		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
-	}
-}
-
-const sendDisplayLastMove = (lastMove) => {
-	if (stompClient) {
-		var webSocketMessage = {
-			gameId: gameId,
-			content: lastMove,
-			type: "DISPLAY_LAST_MOVE"
-		};
-		stompClient.send("/app/refresh", {}, JSON.stringify(webSocketMessage))
-	}
-}
-
-const connectToWebSocket = () => {
-	const socket = new SockJS('/board-moves')
+const connectToGameWebSocket = () => {
+	const socket = new SockJS('/gameMessages')
 	stompClient = Stomp.over(socket)
 	stompClient.connect({}, onConnected)
 }
 
-const connectToEngineSocket = () => {
+const connectToEngineWebSocket = () => {
 	const socket = new SockJS(webSocketEngineUrl)
 	stompClientEngine = Stomp.over(socket)
 	stompClientEngine.connect({}, onEngineConnected)
@@ -495,11 +405,12 @@ const onReceive = (payload) => {
 	const webSocketMessage = JSON.parse(payload.body);
 
 	if (webSocketMessage.gameId == gameId) {
-		if (webSocketMessage.type == "RELOAD") {
+		if (webSocketMessage.type == "REFRESH_BOARD") {
 			location.reload();
-		} else if (webSocketMessage.type == "REFRESH_MOVE") {
+		} else if (webSocketMessage.type == "MOVE") {
 			displayMove(webSocketMessage.content);
-		} else if (webSocketMessage.type == "REFRESH_EVALUATION") {
+			requestLastMove();
+		} else if (webSocketMessage.type == "EVALUATION") {
 			displayEvaluation(webSocketMessage.content);
 		} else if (webSocketMessage.type == "MINMAX_PROGRESS") {
 			const progress = webSocketMessage.content;
@@ -512,7 +423,7 @@ const onReceive = (payload) => {
 		} else if (webSocketMessage.type == "IS_COMPUTING") {
 			isComputing = webSocketMessage.content;
 			updateComputeIcon();
-		} else if (webSocketMessage.type == "DISPLAY_LAST_MOVE") {
+		} else if (webSocketMessage.type == "LAST_MOVE") {
 			displayLastMove(webSocketMessage.content);
 		} else if (webSocketMessage.type == "IS_WIN") {
 			winningMoves = webSocketMessage.content;
@@ -526,15 +437,15 @@ var stompClient;
 var stompClientEngine;
 
 function main() {
-	connectToWebSocket();
-	connectToEngineSocket();
+	connectToGameWebSocket();
+	connectToEngineWebSocket();
 	initCellListeners();
 	initButtonListeners();
 	displayMoves(moves);
 	displayMoves(winningMoves);
 	displayEvaluation(evaluation);
 	updateComputeIcon();
-	requestLastMove(false);
+	requestLastMove();
 }
 
 main();
