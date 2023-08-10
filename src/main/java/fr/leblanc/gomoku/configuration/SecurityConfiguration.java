@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -18,7 +19,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private UserService userService;
-
+	
+	@Autowired
+	private SessionRegistry sessionRegistry;
+	
 	@Override
 	protected void configure(final AuthenticationManagerBuilder authBuilder) throws Exception {
 		final DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
@@ -29,10 +33,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		http.cors().disable().authorizeRequests().antMatchers( "/registration**", "/js/**", "/css/**", "/img/**" )
-				.permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll().and()
-				.logout().invalidateHttpSession(true).clearAuthentication(true)
-				.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-				.logoutSuccessUrl("/login?logout").permitAll();
+		http
+		.cors().disable()
+		.authorizeRequests().antMatchers( "/registration**", "/js/**", "/css/**", "/img/**" ).permitAll()
+		.anyRequest().authenticated()
+		.and()
+		.formLogin().loginPage("/login").permitAll()
+		.and()
+		.logout().invalidateHttpSession(true).clearAuthentication(true)
+		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+		.logoutSuccessUrl("/login?logout").permitAll()
+		.and()
+		.sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistry);
 	}
 }

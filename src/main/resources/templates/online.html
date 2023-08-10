@@ -21,31 +21,58 @@
 	<div class="container special">
 		<div id="onlineBoards" style="width: fit-content">
 			<div class="container">
-			
-				<th:block th:each="onlineBoard: ${onlineBoards}">
-				  <div class="row">
-				    <div id="" class="col" th:utext="${onlineBoard.owner.email}">
-				    </div>
-				  </div>
-			  </th:block>
-			</div>
-			<div class="container special">
-		</div>
-		<div id="buttons">
-			<div class="form-floating" style="display: inline-block">
 				<div class="row">
-					<div class="col-sm-6 col-sm-offset-3">
-						<button type="submit" name="add-board" id="add-board"
-							class="btn btn-primary" value="Add Board">Add Board</button>
+					<div class="col" id="connectedUsersContainer">
+						Connected users:
+						<th:block th:each="connectedUser: ${connectedUsers}">
+							<div class="row align-items-center mb-2">
+								<div class="col">
+									<span th:text="${connectedUser}"></span>
+								</div>
+								<div class="col">
+									<button th:id="'challenge-' + ${connectedUser}"
+										class="btn btn-primary" th:text="Challenge"></button>
+								</div>
+							</div>
+						</th:block>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col" id="challengesReceivedContainer">
+						Challenges received:
+						<th:block th:each="challenger: ${challengers}">
+							<div class="row align-items-center mb-2">
+								<div class="col">
+									<span th:text="${challenger}"></span>
+								</div>
+								<div class="col">
+									<button th:id="'accept-' + ${challenger}"
+										class="btn btn-primary">Accept</button>
+								</div>
+								<div class="col">
+									<button th:id="'decline-' + ${challenger}"
+										class="btn btn-primary">Decline</button>
+								</div>
+							</div>
+						</th:block>
 					</div>
 				</div>
 			</div>
+
 		</div>
 	</div>
-	</div>
-	
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var connectedUsers = /*[[${connectedUsers}]]*/'default';
+		var challengers = /*[[${challengers}]]*/'default';
+		var username = /*[[${username}]]*/'default';
+		var _csrf = /*[[${_csrf}]]*/'default';
+		/*]]>*/
+	</script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 	<script type="text/javascript" th:src="@{/scripts/online.js}"></script>
 </body>
 </html>

@@ -65,23 +65,49 @@ public class GameService {
 		
 		return currentGame;
 	}
+	
+	public void createOnlineGame(String player1Username, String player2Username) {
+		User player1 = userService.findUserByEmail(player1Username);
+		User player2 = userService.findUserByEmail(player2Username);
+		boolean isBlackPlayer = Math.random() > 0.5;
+		Game onlineGame = createGame(isBlackPlayer ? player1 : player2, isBlackPlayer ? player2 : player1, GameType.ONLINE);
+		gameRepository.save(onlineGame);
+		userService.save(player1);
+		userService.save(player2);
+	}
 
-	public Game resetGame(GameType gameType) {
+	public void resetGame(GameType gameType) {
 		
 		Game currentGame = findCurrentGame(gameType);
-		
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
 		deleteGame(currentGame);
 		
-		Game newGame = createGame(userService.getCurrentUser(), gameType);
-		
-		return gameRepository.save(newGame);
+		if (gameType == GameType.ONLINE) {
+			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
+			userService.save(currentGame.getBlackPlayer());
+			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
+			userService.save(currentGame.getWhitePlayer());
+			webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.ONLINE_GAME_ABORTED).build());
+		} else {
+			Game newGame = createGame(userService.getCurrentUser(), gameType);
+			gameRepository.save(newGame);
+		}
 	}
 	
-	public void deleteGame(Game game) {
+	public void deleteGame(GameType gameType) {
+		Game game = findCurrentGame(gameType);
+		
+		if (game == null) {
+			throw new IllegalStateException(GAME_NOT_FOUND);
+		}
+		
+		deleteGame(game);
+	}
+	
+	private void deleteGame(Game game) {
 		engineService.clearGame(game.getId());
 		gameRepository.delete(game);
 	}
@@ -106,9 +132,18 @@ public class GameService {
 			throw new IllegalStateException("Move already set");
 		}
 		
+		int color = extractPlayingColor(currentGame);
+		
+		if (color == GomokuColor.BLACK.toNumber() && !userService.getCurrentUser().equals(currentGame.getBlackPlayer())) {
+			return null;
+		}
+		
+		if (color == GomokuColor.WHITE.toNumber() && !userService.getCurrentUser().equals(currentGame.getWhitePlayer())) {
+			return null;
+		}
+		
 		undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>()).clear();
 		
-		int color = extractPlayingColor(currentGame);
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
 		currentGame.getMoves().add(newMove);
 		
@@ -240,7 +275,7 @@ public class GameService {
 		engineService.stopComputation(gameId);
 	}
 
-	public Move getLastMove(GameType gameType) {
+	public Move getLastMove(GameType gameType, boolean propagate) {
 		Game currentGame = findCurrentGame(gameType);
 		
 		if (currentGame == null) {
@@ -249,7 +284,9 @@ public class GameService {
 		
 		Move lastMove = getLastMove(currentGame);
 		
-		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.LAST_MOVE).content(lastMove).build());
+		if (propagate) {
+			webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.LAST_MOVE).content(lastMove).build());
+		}
 		
 		return lastMove;
 	}
@@ -309,6 +346,9 @@ public class GameService {
 		case AI_VS_AI:
 			currentGame = userService.getCurrentUser().getCurrentAIvsAIGame();
 			break;
+		case ONLINE:
+			currentGame = userService.getCurrentUser().getCurrentOnlineGame();
+			break;
 		default:
 			throw new IllegalStateException("Unknown game type: " + gameType);
 		}
@@ -326,6 +366,30 @@ public class GameService {
 			user.setCurrentAIGame(newGame);
 		} else if (GameType.AI_VS_AI.equals(gameType)) {
 			user.setCurrentAIvsAIGame(newGame);
+		} else {
+			throw new IllegalStateException("gameType not implemented:" + gameType);
+		}
+		
+		return newGame;
+	}
+	
+	private Game createGame(User blackPlayer, User whitePlayer, GameType gameType) {
+		Game newGame = Game.builder().blackPlayer(blackPlayer).whitePlayer(whitePlayer).boardSize(blackPlayer.getSettings().getBoardSize()).type(gameType).build();
+		
+		newGame.setMoves(new HashSet<>());
+		
+		if (GameType.LOCAL.equals(gameType)) {
+			blackPlayer.setCurrentLocalGame(newGame);
+			whitePlayer.setCurrentLocalGame(newGame);
+		} else if (GameType.AI.equals(gameType)) {
+			blackPlayer.setCurrentAIGame(newGame);
+			whitePlayer.setCurrentAIGame(newGame);
+		} else if (GameType.AI_VS_AI.equals(gameType)) {
+			blackPlayer.setCurrentAIvsAIGame(newGame);
+			whitePlayer.setCurrentAIvsAIGame(newGame);
+		} else if (GameType.ONLINE.equals(gameType)) {
+			blackPlayer.setCurrentOnlineGame(newGame);
+			whitePlayer.setCurrentOnlineGame(newGame);
 		}
 		
 		return newGame;

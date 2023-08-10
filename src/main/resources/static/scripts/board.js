@@ -13,21 +13,31 @@ const initCellListeners = () => {
 	}
 }
 
+const hideButtonIfOnline = (button) => {
+	if (gameType == "ONLINE") {
+		button.parentNode.parentNode.parentNode.parentNode.removeChild(button.parentNode.parentNode.parentNode);
+	}
+}
+
 const initButtonListeners = () => {
 	var undoMoveButton = document.getElementById("undo-move");
 	undoMoveButton.addEventListener("click", onUndoMoveAction);
+	hideButtonIfOnline(undoMoveButton);
 	
 	var redoMoveButton = document.getElementById("redo-move");
 	redoMoveButton.addEventListener("click", onRedoMoveAction);
+	hideButtonIfOnline(redoMoveButton);
 
 	var resetGameButton = document.getElementById("reset-game");
 	resetGameButton.addEventListener("click", onResetGameAction);
 
 	var computeMoveButton = document.getElementById("compute-move");
 	computeMoveButton.addEventListener("click", onComputeMoveAction);
+	hideButtonIfOnline(computeMoveButton);
 	
 	var stopButton = document.getElementById("stop");
 	stopButton.addEventListener("click", onStopAction);
+	hideButtonIfOnline(stopButton);
 	
 	var lastMoveButton = document.getElementById("lastMove");
 	lastMoveButton.addEventListener("click", onLastMoveAction);
@@ -37,6 +47,7 @@ const initButtonListeners = () => {
 	
 	var uploadGameButton = document.getElementById("uploadGame");
 	uploadGameButton.addEventListener("click", onUploadGameAction);
+	hideButtonIfOnline(uploadGameButton);
 }
 
 const onAddMoveAction = (event) => {
@@ -170,9 +181,9 @@ const onStopAction = (event) => {
 	xhr.send("");
 }
 
-const requestLastMove = () => {
+const requestLastMove = (propagate) => {
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "/lastMove/" + gameType, true);
+	xhr.open("GET", "/lastMove/" + gameType + "/" + propagate, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -192,7 +203,7 @@ const onLastMoveAction = (event) => {
 	if (event) {
 		event.stopPropagation();
 	}
-	requestLastMove();
+	requestLastMove(false);
 }
 
 const onDownloadGameAction = (event) => {
@@ -427,7 +438,7 @@ const onReceive = (payload) => {
 			location.reload();
 		} else if (webSocketMessage.type == "MOVE") {
 			displayMove(webSocketMessage.content);
-			requestLastMove();
+			requestLastMove(true);
 		} else if (webSocketMessage.type == "EVALUATION") {
 			displayEvaluation(webSocketMessage.content);
 		} else if (webSocketMessage.type == "MINMAX_PROGRESS") {
@@ -446,9 +457,10 @@ const onReceive = (payload) => {
 		} else if (webSocketMessage.type == "IS_WIN") {
 			winningMoves = webSocketMessage.content;
 			displayMoves(winningMoves);
+		} else if (webSocketMessage.type == "ONLINE_GAME_ABORTED") {
+			window.location.href = "/online";
 		}
 	}
-	
 }
 
 var stompClient;
@@ -463,7 +475,7 @@ function main() {
 	displayMoves(winningMoves);
 	displayEvaluation(evaluation);
 	updateComputeIcon();
-	requestLastMove();
+	requestLastMove(true);
 }
 
 main();

@@ -29,8 +29,14 @@ public class MainController
     }
     
     @GetMapping({ "/online" })
-    public String online() {
-        return "online";
+    public String online(Model model) {
+    	if (userService.getCurrentUser().getCurrentOnlineGame() == null) {
+    		model.addAttribute("username", userService.getCurrentUser().getEmail());
+    		model.addAttribute("connectedUsers", userService.getConnectedUsers());
+    		model.addAttribute("challengers", userService.getCurrentChallengers());
+    		return "online";
+    	}
+    	return "redirect:/game/online";
     }
     
     @GetMapping({ "/settings" })

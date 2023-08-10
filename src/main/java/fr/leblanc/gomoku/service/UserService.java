@@ -1,5 +1,7 @@
 package fr.leblanc.gomoku.service;
 
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import fr.leblanc.gomoku.exception.RegistrationException;
@@ -19,4 +21,13 @@ public interface UserService extends UserDetailsService
     User save(final User currentUser);
 
 	void deleteUserAccount(String username);
+	
+	List<String> getConnectedUsers();
+	
+	List<String> getCurrentChallengers();
+	
+	boolean addChallengerTo(String username);
+
+	void removeChallenger(String challengerUsername);
+	
 }

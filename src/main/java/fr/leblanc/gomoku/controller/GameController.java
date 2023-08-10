@@ -19,6 +19,7 @@ import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.service.GameService;
+import fr.leblanc.gomoku.service.UserService;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
 
@@ -27,6 +28,9 @@ public class GameController {
 
 	@Autowired
 	private GameService gameService;
+	
+	@Autowired
+	private UserService userService;
 	
     @Autowired
     private GomokuWebConfiguration webConfiguration;
@@ -37,13 +41,13 @@ public class GameController {
 		GameType gameType = GameType.valueOf(gameTypeString.toUpperCase());
 		
 		Game game = gameService.getCurrentGame(gameType);
-		
 		model.addAttribute("game", game);
 		model.addAttribute("evaluation", gameService.computeEvaluation(gameType));
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
 		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
 		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
 		model.addAttribute("webSocketEngineUrl", webConfiguration.getEngineUrl() + "/engineMessages");
+		model.addAttribute("username", userService.getCurrentUser().getEmail());
 		
 		return new ModelAndView("forward:/board");
 	}
@@ -86,9 +90,9 @@ public class GameController {
 		gameService.stopComputation(gameId);
 	}
 	
-	@GetMapping("/lastMove/{gameType}")
-	public Move lastMove(@PathVariable String gameType) {
-		return gameService.getLastMove(GameType.valueOf(gameType.toUpperCase()));
+	@GetMapping("/lastMove/{gameType}/{propagate}")
+	public Move lastMove(@PathVariable String gameType, @PathVariable boolean propagate) {
+		return gameService.getLastMove(GameType.valueOf(gameType.toUpperCase()), propagate);
 	}
 
 	@GetMapping("downloadGame/{gameType}")
