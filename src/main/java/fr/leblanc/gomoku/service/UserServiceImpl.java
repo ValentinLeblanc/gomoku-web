@@ -56,6 +56,11 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
+	public List<String> getCurrentChallengeTargets() {
+		return getConnectedUsers().stream().filter(u -> findUserByEmail(u).getChallengers().contains(getCurrentUser())).toList();
+	}
+	
+	@Override
 	public List<String> getConnectedUsers() {
 		List<String> connectedUsers = new ArrayList<>();
 		String currentUsername = getCurrentUser().getEmail();

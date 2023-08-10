@@ -34,6 +34,7 @@ public class MainController
     		model.addAttribute("username", userService.getCurrentUser().getEmail());
     		model.addAttribute("connectedUsers", userService.getConnectedUsers());
     		model.addAttribute("challengers", userService.getCurrentChallengers());
+    		model.addAttribute("challengeTargets", userService.getCurrentChallengeTargets());
     		return "online";
     	}
     	return "redirect:/game/online";

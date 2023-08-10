@@ -1,8 +1,9 @@
 
 const onChallengeAction = (event) => {
 	event.stopPropagation();
-	var username = event.target.id.replace("challenge-", "");
-
+	var challengeButton = event.target;
+	challengeButton.disabled = true;
+	var username = challengeButton.id.replace("challenge-", "");
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/challenge/" + username, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -16,7 +17,6 @@ const onChallengeAction = (event) => {
 const onAcceptAction = (event) => {
 	event.stopPropagation();
 	var username = event.target.id.replace("accept-", "");
-
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/accept/" + username, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -30,7 +30,6 @@ const onAcceptAction = (event) => {
 const onDeclineAction = (event) => {
 	event.stopPropagation();
 	var username = event.target.id.replace("decline-", "");
-
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/decline/" + username, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
@@ -79,7 +78,7 @@ function addChallenger(challengerInfo) {
 		return;
 	}
 	
-	var challengesContainer = document.getElementById("challengesReceivedContainer");
+	var challengesContainer = document.getElementById("challengesContainer");
 
 	var newChallengeBlock = document.createElement("div");
 	newChallengeBlock.classList.add("row", "align-items-center", "mb-2");
@@ -125,14 +124,27 @@ function removeConnectedUser(disconnectedUsername) {
 }
 
 function removeChallenger(challengerName) {
-	var challengesContainer = document.getElementById("challengesReceivedContainer");
+	var challengesContainer = document.getElementById("challengesContainer");
 	var challengerBlocks = challengesContainer.getElementsByClassName("row","align-items-center", "mb-2");
-
 	for (const element of challengerBlocks) {
 		var col1 = element.querySelector(".col:nth-child(1)");
 		if (col1 && col1.innerText == challengerName) {
 			challengesContainer.removeChild(element);
-			break; // Remove only the first match (if there are multiple challengers with the same name)
+			break;
+		}
+	}
+}
+
+function enableChallengeButton(targetUserName) {
+	var connectedUsersContainer = document.getElementById("connectedUsersContainer");
+	var connectedUsersBlocks = connectedUsersContainer.getElementsByClassName("row","align-items-center", "mb-2");
+	for (const element of connectedUsersBlocks) {
+		var col1 = element.querySelector(".col:nth-child(1)");
+		if (col1 && col1.innerText == targetUserName) {
+			var col2 = element.querySelector(".col:nth-child(2)");
+			var challengeButton = col2.children[0];
+			challengeButton.disabled = false;
+			break;
 		}
 	}
 }
@@ -143,13 +155,29 @@ function challengeAccepted(usernames) {
 	}
 }
 
-const initButtonListeners = () => {
+function challengeDeclined(challengerInfo) {
+	
+	var targetUserName = challengerInfo.split("=>")[0];
+	var challengerUsername = challengerInfo.split("=>")[1];
+	
+	if (username == targetUserName) {
+		removeChallenger(challengerUsername);
+	} else if (username == challengerUsername) {
+		enableChallengeButton(targetUserName);
+	}
+}
+
+const initButtons = () => {
 	var challengeButtons = document.querySelectorAll('[id^="challenge-"]');
 	for (const challengeButton of challengeButtons) {
-		if (challengeButton.id.replace("challenge-", "") == username) {
+		var challengeTarget = challengeButton.id.replace("challenge-", "");
+		if (challengeTarget == username) {
 			challengeButton.hidden = true;
 		} else {
 			challengeButton.addEventListener("click", onChallengeAction);
+			if (challengeTargets.includes(challengeTarget)) {
+				challengeButton.disabled = true;
+			}
 		}
 	}
 	var acceptButtons = document.querySelectorAll('[id^="accept-"]');
@@ -174,17 +202,19 @@ const onConnected = () => {
 
 const onReceive = (payload) => {
 	const webSocketMessage = JSON.parse(payload.body);
-	if (webSocketMessage.type == "NEW_CHALLENGER") {
+	if (webSocketMessage.type == "NEW_CHALLENGE") {
 		addChallenger(webSocketMessage.content);
-		initButtonListeners();
-	} else if (webSocketMessage.type == "REMOVE_CHALLENGER") {
-		removeChallenger(webSocketMessage.content);
+		initButtons();
+	} else if (webSocketMessage.type == "CHALLENGE_DECLINED") {
+		challengeDeclined(webSocketMessage.content);
 	} else if (webSocketMessage.type == "CHALLENGE_ACCEPTED") {
 		challengeAccepted(webSocketMessage.content);
 	} else if (webSocketMessage.type == "CONNECTED_USER") {
 		addConnectedUser(webSocketMessage.content);
+		initButtons();
 	} else if (webSocketMessage.type == "DISCONNECTED_USER") {
 		removeConnectedUser(webSocketMessage.content);
+		initButtons();
 	}
 }
 
@@ -192,7 +222,7 @@ var stompClient;
 
 function main() {
 	connectToGameWebSocket();
-	initButtonListeners();
+	initButtons();
 }
 
 main();

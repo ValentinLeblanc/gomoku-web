@@ -26,6 +26,8 @@ public interface UserService extends UserDetailsService
 	
 	List<String> getCurrentChallengers();
 	
+	List<String> getCurrentChallengeTargets();
+	
 	boolean addChallengerTo(String username);
 
 	void removeChallenger(String challengerUsername);

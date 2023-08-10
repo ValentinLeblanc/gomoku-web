@@ -27,7 +27,7 @@ public class OnlineController {
 	public void challenge(@PathVariable String targetUsername) {
 		if (onlineService.challenge(targetUsername)) {
 			String challengeInfo = userService.getCurrentUser().getEmail() + "=>" + targetUsername;
-			webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.NEW_CHALLENGER).content(challengeInfo).build());
+			webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.NEW_CHALLENGE).content(challengeInfo).build());
 		}
 	}
 	
@@ -41,6 +41,7 @@ public class OnlineController {
 	@PostMapping("/decline/{challengerUsername}")
 	public void decline(@PathVariable String challengerUsername) {
 		onlineService.declineChallenge(challengerUsername);
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.REMOVE_CHALLENGER).content(challengerUsername).build());
+		String challengeInfo = userService.getCurrentUser().getEmail() + "=>" + challengerUsername;
+		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_DECLINED).content(challengeInfo).build());
 	}
 }

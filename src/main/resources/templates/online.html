@@ -38,8 +38,8 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="col" id="challengesReceivedContainer">
-						Challenges received:
+					<div class="col" id="challengesContainer">
+						Challengers:
 						<th:block th:each="challenger: ${challengers}">
 							<div class="row align-items-center mb-2">
 								<div class="col">
@@ -65,6 +65,7 @@
 		/*<![CDATA[*/
 		var connectedUsers = /*[[${connectedUsers}]]*/'default';
 		var challengers = /*[[${challengers}]]*/'default';
+		var challengeTargets = /*[[${challengeTargets}]]*/'default';
 		var username = /*[[${username}]]*/'default';
 		var _csrf = /*[[${_csrf}]]*/'default';
 		/*]]>*/
