@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user", uniqueConstraints = { @UniqueConstraint(columnNames = { "email" }) })
+@Table(name = "user", uniqueConstraints = { @UniqueConstraint(columnNames = { "username" }) })
 @Getter
 @Setter
 public class User
@@ -36,7 +36,7 @@ public class User
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
-    private String email;
+    private String username;
     private String password;
     @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "settings_id")
@@ -60,11 +60,8 @@ public class User
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "users_games", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "game_id", referencedColumnName = "id") })
     private List<Game> games;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
-    @JoinTable(name = "users_roles", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "role_id", referencedColumnName = "id") })
-    private Collection<Role> roles;
     
-    @ManyToMany
+    @ManyToMany(fetch=FetchType.EAGER)
     private List<User> challengers;
     
     public User() {
@@ -73,15 +70,14 @@ public class User
         this.challengers = new ArrayList<>();
     }
     
-    public User(final String firstName, final String lastName, final String email, final String password, final Collection<Role> roles) {
+    public User(final String firstName, final String lastName, final String username, final String password, final Collection<Role> roles) {
         this.settings = new UserSettings();
         this.games = new ArrayList<>();
         this.challengers = new ArrayList<>();
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
+        this.username = username;
         this.password = password;
-        this.roles = roles;
     }
 
 }

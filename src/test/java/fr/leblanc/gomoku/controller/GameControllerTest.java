@@ -43,7 +43,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertEquals("/board", result.getResponse().getForwardedUrl());
 
-		Game currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		Game currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertNotNull(currentGame);
 
@@ -55,7 +55,7 @@ class GameControllerTest extends AbstractControllerTest {
 	@Order(3)
 	void addMoveTest() throws Exception {
 
-		Game currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		Game currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertNotNull(currentGame);
 
@@ -79,7 +79,7 @@ class GameControllerTest extends AbstractControllerTest {
 		mockMvc.perform(post("/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
 				.contentType(MediaType.APPLICATION_JSON).with(csrf())).andExpect(status().isOk());
 
-		currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertEquals(2, currentGame.getMoves().size());
 
@@ -89,7 +89,7 @@ class GameControllerTest extends AbstractControllerTest {
 	@Order(4)
 	void undoMoveTest() throws Exception {
 
-		Game currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		Game currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertNotNull(currentGame);
 
@@ -97,7 +97,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		mockMvc.perform(post("/undo-move/LOCAL").with(user(USER).password(PASSWORD)).with(csrf())).andExpect(status().isOk());
 
-		currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertEquals(1, currentGame.getMoves().size());
 
@@ -107,7 +107,7 @@ class GameControllerTest extends AbstractControllerTest {
 	@Order(5)
 	void resetLocalGameTest() throws Exception {
 
-		Game currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		Game currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertNotNull(currentGame);
 
@@ -116,7 +116,7 @@ class GameControllerTest extends AbstractControllerTest {
 		mockMvc.perform(post("/reset-game/LOCAL").content("").contentType(MediaType.APPLICATION_JSON)
 				.with(user(USER).password(PASSWORD)).with(csrf())).andExpect(status().isFound());
 
-		currentGame = userService.findUserByEmail(USER).getCurrentLocalGame();
+		currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
 		assertNotNull(currentGame);
 

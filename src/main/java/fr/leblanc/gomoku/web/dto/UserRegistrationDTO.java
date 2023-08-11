@@ -4,16 +4,16 @@ public class UserRegistrationDTO
 {
     private String firstName;
     private String lastName;
-    private String email;
+    private String username;
     private String password;
     
     public UserRegistrationDTO() {
     }
     
-    public UserRegistrationDTO(final String firstName, final String lastName, final String email, final String password) {
+    public UserRegistrationDTO(final String firstName, final String lastName, final String username, final String password) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
+        this.username = username;
         this.password = password;
     }
     
@@ -33,12 +33,12 @@ public class UserRegistrationDTO
         this.lastName = lastName;
     }
     
-    public String getEmail() {
-        return this.email;
+    public String getUsername() {
+        return this.username;
     }
     
-    public void setEmail(final String email) {
-        this.email = email;
+    public void setUsername(final String username) {
+        this.username = username;
     }
     
     public String getPassword() {

@@ -23,6 +23,7 @@ main {
 .emptyCell {
 	background-color: #deba96;
 	border: 1px solid black;
+	caret-color: transparent;
 }
 
 td {

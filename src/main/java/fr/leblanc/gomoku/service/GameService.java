@@ -54,21 +54,18 @@ public class GameService {
 	
 	private Map<Long, Stack<Move>> undoMoveStack = new HashMap<>();
 	
-	public Game getCurrentGame(GameType gameType) {
-		
-		Game currentGame = findCurrentGame(gameType);
-		
+	public Game getOrCreateGame(GameType gameType) {
+		Game currentGame = getCurrentGame(gameType);
 		if (currentGame == null) {
 			currentGame = createGame(userService.getCurrentUser(), gameType);
 			gameRepository.save(currentGame);
 		}
-		
 		return currentGame;
 	}
 	
 	public void createOnlineGame(String player1Username, String player2Username) {
-		User player1 = userService.findUserByEmail(player1Username);
-		User player2 = userService.findUserByEmail(player2Username);
+		User player1 = userService.findUserByUsername(player1Username);
+		User player2 = userService.findUserByUsername(player2Username);
 		boolean isBlackPlayer = Math.random() > 0.5;
 		Game onlineGame = createGame(isBlackPlayer ? player1 : player2, isBlackPlayer ? player2 : player1, GameType.ONLINE);
 		gameRepository.save(onlineGame);
@@ -78,7 +75,7 @@ public class GameService {
 
 	public void resetGame(GameType gameType) {
 		
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
@@ -98,7 +95,7 @@ public class GameService {
 	}
 	
 	public void deleteGame(GameType gameType) {
-		Game game = findCurrentGame(gameType);
+		Game game = getCurrentGame(gameType);
 		
 		if (game == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -118,7 +115,7 @@ public class GameService {
 	}
 
 	private Move addMoveInternal(GameType gameType, int columnIndex, int rowIndex, boolean computeNextMove) {
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -181,7 +178,7 @@ public class GameService {
 
 	public Set<Move> undoMove(GameType gameType) {
 		
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -207,7 +204,7 @@ public class GameService {
 
 	public Set<Move> redoMove(GameType gameType) {
 		
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -230,7 +227,7 @@ public class GameService {
 
 	public Move computeMove(GameType gameType) {
 		
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -258,7 +255,7 @@ public class GameService {
 
 	public Double computeEvaluation(GameType gameType) {
 		
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 	
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -276,7 +273,7 @@ public class GameService {
 	}
 
 	public Move getLastMove(GameType gameType, boolean propagate) {
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 		
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
@@ -293,7 +290,7 @@ public class GameService {
 
 	public ResponseEntity<Resource> downloadGame(GameType gameType) {
 		
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 		
 		byte[] buffer = new JSONObject(new GameDTO(currentGame)).toString().getBytes();
 		
@@ -304,7 +301,7 @@ public class GameService {
 	}
 
 	public void uploadGame(GameType gameType, GameDTO uploadedGame) {
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 		
 		if (currentGame != null) {
 			gameRepository.delete(currentGame);
@@ -333,7 +330,7 @@ public class GameService {
 		return engineService.isComputing(gameId);
 	}
 
-	private Game findCurrentGame(GameType gameType) {
+	public Game getCurrentGame(GameType gameType) {
 		Game currentGame = null;
 		
 		switch (gameType) {
@@ -419,7 +416,7 @@ public class GameService {
 	}
 
 	public Set<Move> getWinningMoves(GameType gameType) {
-		Game currentGame = findCurrentGame(gameType);
+		Game currentGame = getCurrentGame(gameType);
 		return engineService.checkWin(new GameDTO(currentGame));
 	}
 

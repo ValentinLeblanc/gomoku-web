@@ -35,7 +35,7 @@
 
 				<!-- failure message -->
 				<div th:if="${param.failure}">
-					<div class="alert alert-danger">User email already used.</div>
+					<div class="alert alert-danger">Username already used.</div>
 				</div>
 
 				<h1 class="h2" style="margin-bottom:30px"> Registration </h1>
@@ -52,8 +52,8 @@
 					</div>
 
 					<div class="form-floating mb-3">
-					  <input type="text" name = "username" class="form-control" id="username" th:field="*{email}" placeholder="Email address">
-					  <label for="username">Email address</label>
+					  <input type="text" name = "username" class="form-control" id="username" th:field="*{username}" placeholder="Username">
+					  <label for="username">Username</label>
 					</div>
 
 					<div class="form-floating" style="margin-bottom:15px">

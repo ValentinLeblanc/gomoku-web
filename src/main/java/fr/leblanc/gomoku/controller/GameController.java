@@ -40,14 +40,23 @@ public class GameController {
 		
 		GameType gameType = GameType.valueOf(gameTypeString.toUpperCase());
 		
-		Game game = gameService.getCurrentGame(gameType);
+		if (gameType == GameType.ONLINE && gameService.getCurrentGame(GameType.ONLINE) == null) {
+			return new ModelAndView("redirect:/online");
+		}
+		
+		Game game = gameService.getOrCreateGame(gameType);
+		
 		model.addAttribute("game", game);
 		model.addAttribute("evaluation", gameService.computeEvaluation(gameType));
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
 		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
 		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
 		model.addAttribute("webSocketEngineUrl", webConfiguration.getEngineUrl() + "/engineMessages");
-		model.addAttribute("username", userService.getCurrentUser().getEmail());
+		model.addAttribute("username", userService.getCurrentUser().getUsername());
+		if (gameType == GameType.ONLINE) {
+			model.addAttribute("blackPlayer", game.getBlackPlayer().getUsername());
+			model.addAttribute("whitePlayer", game.getWhitePlayer().getUsername());
+		}
 		
 		return new ModelAndView("forward:/board");
 	}

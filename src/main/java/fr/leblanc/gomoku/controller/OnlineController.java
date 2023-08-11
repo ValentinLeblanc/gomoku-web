@@ -26,22 +26,22 @@ public class OnlineController {
 	@PostMapping("/challenge/{targetUsername}")
 	public void challenge(@PathVariable String targetUsername) {
 		if (onlineService.challenge(targetUsername)) {
-			String challengeInfo = userService.getCurrentUser().getEmail() + "=>" + targetUsername;
-			webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.NEW_CHALLENGE).content(challengeInfo).build());
+			String newChallengerInfo = userService.getCurrentUser().getUsername() + ">" + targetUsername;
+			webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.NEW_CHALLENGER).content(newChallengerInfo).build());
 		}
 	}
 	
 	@PostMapping("/accept/{challengerUsername}")
 	public void accept(@PathVariable String challengerUsername, RedirectAttributes redirectAttributes) {
 		onlineService.acceptChallenge(challengerUsername);
-		String currentUsername = userService.getCurrentUser().getEmail();
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_ACCEPTED).content(String.join(",", challengerUsername, currentUsername)).build());
+		String acceptChallengeInfo = String.join(",", challengerUsername, userService.getCurrentUser().getUsername());
+		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_ACCEPTED).content(acceptChallengeInfo).build());
 	}
 	
 	@PostMapping("/decline/{challengerUsername}")
 	public void decline(@PathVariable String challengerUsername) {
 		onlineService.declineChallenge(challengerUsername);
-		String challengeInfo = userService.getCurrentUser().getEmail() + "=>" + challengerUsername;
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_DECLINED).content(challengeInfo).build());
+		String declineChallengeInfo = challengerUsername + ">" + userService.getCurrentUser().getUsername();
+		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_DECLINED).content(declineChallengeInfo).build());
 	}
 }

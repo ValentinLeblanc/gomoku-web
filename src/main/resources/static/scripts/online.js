@@ -42,10 +42,6 @@ const onDeclineAction = (event) => {
 
 function addConnectedUser(connectedUsername) {
 	
-	if (connectedUsername == username) {
-		return;
-	}
-	
 	var connectedUsersContainer = document.getElementById("connectedUsersContainer");
 
 	var newConnectedUserBlock = document.createElement("div");
@@ -54,29 +50,28 @@ function addConnectedUser(connectedUsername) {
 	var col1 = document.createElement("div");
 	col1.classList.add("col");
 	col1.textContent = connectedUsername;
-
-	var col2 = document.createElement("div");
-	col2.classList.add("col");
-	var challengeButton = document.createElement("button");
-	challengeButton.classList.add("btn", "btn-primary");
-	challengeButton.textContent = "Challenge";
-	challengeButton.id = "challenge-" + connectedUsername;
-	col2.appendChild(challengeButton);
-
+	
 	newConnectedUserBlock.appendChild(col1);
-	newConnectedUserBlock.appendChild(col2);
+	
+	if (connectedUsername != username) {
+		var col2 = document.createElement("div");
+		col2.classList.add("col");
+		var challengeButton = document.createElement("button");
+		challengeButton.classList.add("btn", "btn-primary");
+		challengeButton.textContent = "Challenge";
+		challengeButton.id = "challenge-" + connectedUsername;
+		col2.appendChild(challengeButton);
+		challengeButton.addEventListener("click", onChallengeAction);
+		if (challengeTargets.includes(connectedUsername)) {
+			challengeButton.disabled = true;
+		}
+		newConnectedUserBlock.appendChild(col2);
+	}
 
 	connectedUsersContainer.appendChild(newConnectedUserBlock);
 }
 
-function addChallenger(challengerInfo) {
-	
-	var challengerName = challengerInfo.split("=>")[0];
-	var targetName = challengerInfo.split("=>")[1];
-	
-	if (targetName != username) {
-		return;
-	}
+function addChallenger(challengerName) {
 	
 	var challengesContainer = document.getElementById("challengesContainer");
 
@@ -93,6 +88,7 @@ function addChallenger(challengerInfo) {
 	acceptButton.classList.add("btn", "btn-primary");
 	acceptButton.textContent = "Accept";
 	acceptButton.id = "accept-" + challengerName;
+	acceptButton.addEventListener("click", onAcceptAction);
 	col2.appendChild(acceptButton);
 
 	var col3 = document.createElement("div");
@@ -101,6 +97,7 @@ function addChallenger(challengerInfo) {
 	declineButton.classList.add("btn", "btn-primary");
 	declineButton.textContent = "Decline";
 	declineButton.id = "decline-" + challengerName;
+	declineButton.addEventListener("click", onDeclineAction);
 	col3.appendChild(declineButton);
 
 	newChallengeBlock.appendChild(col1);
@@ -108,31 +105,6 @@ function addChallenger(challengerInfo) {
 	newChallengeBlock.appendChild(col3);
 
 	challengesContainer.appendChild(newChallengeBlock);
-}
-
-function removeConnectedUser(disconnectedUsername) {
-	var connectedUsersContainer = document.getElementById("connectedUsersContainer");
-	var connectedUsersBlocks = connectedUsersContainer.getElementsByClassName("row","align-items-center", "mb-2");
-
-	for (const element of connectedUsersBlocks) {
-		var col1 = element.querySelector(".col:nth-child(1)");
-		if (col1 && col1.innerText == disconnectedUsername) {
-			connectedUsersContainer.removeChild(element);
-			break; // Remove only the first match (if there are multiple challengers with the same name)
-		}
-	}
-}
-
-function removeChallenger(challengerName) {
-	var challengesContainer = document.getElementById("challengesContainer");
-	var challengerBlocks = challengesContainer.getElementsByClassName("row","align-items-center", "mb-2");
-	for (const element of challengerBlocks) {
-		var col1 = element.querySelector(".col:nth-child(1)");
-		if (col1 && col1.innerText == challengerName) {
-			challengesContainer.removeChild(element);
-			break;
-		}
-	}
 }
 
 function enableChallengeButton(targetUserName) {
@@ -144,52 +116,35 @@ function enableChallengeButton(targetUserName) {
 			var col2 = element.querySelector(".col:nth-child(2)");
 			var challengeButton = col2.children[0];
 			challengeButton.disabled = false;
-			break;
+			return;
 		}
 	}
 }
 
-function challengeAccepted(usernames) {
-	if (usernames.split(",").includes(username)) {
-		window.location.href = "/game/online";
-	}
-}
+function removeConnectedUser(disconnectedUsername) {
+	var connectedUsersContainer = document.getElementById("connectedUsersContainer");
+	var connectedUsersBlocks = connectedUsersContainer.getElementsByClassName("row","align-items-center", "mb-2");
 
-function challengeDeclined(challengerInfo) {
-	
-	var targetUserName = challengerInfo.split("=>")[0];
-	var challengerUsername = challengerInfo.split("=>")[1];
-	
-	if (username == targetUserName) {
-		removeChallenger(challengerUsername);
-	} else if (username == challengerUsername) {
-		enableChallengeButton(targetUserName);
-	}
-}
-
-const initButtons = () => {
-	var challengeButtons = document.querySelectorAll('[id^="challenge-"]');
-	for (const challengeButton of challengeButtons) {
-		var challengeTarget = challengeButton.id.replace("challenge-", "");
-		if (challengeTarget == username) {
-			challengeButton.hidden = true;
-		} else {
-			challengeButton.addEventListener("click", onChallengeAction);
-			if (challengeTargets.includes(challengeTarget)) {
-				challengeButton.disabled = true;
-			}
+	for (const element of connectedUsersBlocks) {
+		var col1 = element.querySelector(".col:nth-child(1)");
+		if (col1 && col1.innerText == disconnectedUsername) {
+			connectedUsersContainer.removeChild(element);
+			return;
 		}
 	}
-	var acceptButtons = document.querySelectorAll('[id^="accept-"]');
-	for (const acceptButton of acceptButtons) {
-		acceptButton.addEventListener("click", onAcceptAction);
-	}
-	var declineButtons = document.querySelectorAll('[id^="decline-"]');
-	for (const declineButton of declineButtons) {
-		declineButton.addEventListener("click", onDeclineAction);
-	}
 }
 
+function removeChallenger(challenger) {
+	var challengesContainer = document.getElementById("challengesContainer");
+	var challengerBlocks = challengesContainer.getElementsByClassName("row","align-items-center", "mb-2");
+	for (const element of challengerBlocks) {
+		var col1 = element.querySelector(".col:nth-child(1)");
+		if (col1 && col1.innerText == challenger) {
+			challengesContainer.removeChild(element);
+			return;
+		}
+	}
+}
 const connectToGameWebSocket = () => {
 	const socket = new SockJS('/gameMessages')
 	stompClient = Stomp.over(socket)
@@ -202,19 +157,36 @@ const onConnected = () => {
 
 const onReceive = (payload) => {
 	const webSocketMessage = JSON.parse(payload.body);
-	if (webSocketMessage.type == "NEW_CHALLENGE") {
-		addChallenger(webSocketMessage.content);
-		initButtons();
-	} else if (webSocketMessage.type == "CHALLENGE_DECLINED") {
-		challengeDeclined(webSocketMessage.content);
+	
+	if (webSocketMessage.type == "USER_CONNECTED") {
+		var connectedUser = webSocketMessage.content;
+		if (connectedUser != username) {
+			addConnectedUser(connectedUser);
+		}
+	} else if (webSocketMessage.type == "USER_DISCONNECTED") {
+		var disconnectedUser = webSocketMessage.content;
+		removeConnectedUser(disconnectedUser);
+ 	} else if (webSocketMessage.type == "NEW_CHALLENGER") {
+		var newChallengerInfo = webSocketMessage.content;
+		var challenger = newChallengerInfo.split(">")[0];
+		var challengeTarget = newChallengerInfo.split(">")[1];
+		if (challengeTarget == username) {
+			addChallenger(challenger);
+		}
 	} else if (webSocketMessage.type == "CHALLENGE_ACCEPTED") {
-		challengeAccepted(webSocketMessage.content);
-	} else if (webSocketMessage.type == "CONNECTED_USER") {
-		addConnectedUser(webSocketMessage.content);
-		initButtons();
-	} else if (webSocketMessage.type == "DISCONNECTED_USER") {
-		removeConnectedUser(webSocketMessage.content);
-		initButtons();
+		var acceptChallengeInfo = webSocketMessage.content;
+		if (acceptChallengeInfo.split(",").includes(username)) {
+			window.location.href = "/game/online";
+		}
+	} else if (webSocketMessage.type == "CHALLENGE_DECLINED") {
+		var declineChallengeInfo = webSocketMessage.content;
+		var challenger = declineChallengeInfo.split(">")[0];
+		var challengeTarget = declineChallengeInfo.split(">")[1];
+		if (challengeTarget == username) {
+			removeChallenger(challenger);
+		} else if (challenger == username) {
+			enableChallengeButton(challengeTarget);
+		}
 	}
 }
 
@@ -222,7 +194,15 @@ var stompClient;
 
 function main() {
 	connectToGameWebSocket();
-	initButtons();
+	addConnectedUser(username);
+	for (var i in connectedUsers) {
+		var connectedUser = connectedUsers[i];
+		addConnectedUser(connectedUser);
+	}
+	for (var j in challengers) {
+		var challenger = challengers[j];
+		addChallenger(challenger);
+	}
 }
 
 main();

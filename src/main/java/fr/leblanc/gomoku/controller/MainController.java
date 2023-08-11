@@ -1,11 +1,12 @@
 
 package fr.leblanc.gomoku.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import fr.leblanc.gomoku.service.UserService;
-import org.springframework.stereotype.Controller;
 
 @Controller
 public class MainController
@@ -31,10 +32,10 @@ public class MainController
     @GetMapping({ "/online" })
     public String online(Model model) {
     	if (userService.getCurrentUser().getCurrentOnlineGame() == null) {
-    		model.addAttribute("username", userService.getCurrentUser().getEmail());
+    		model.addAttribute("username", userService.getCurrentUser().getUsername());
     		model.addAttribute("connectedUsers", userService.getConnectedUsers());
-    		model.addAttribute("challengers", userService.getCurrentChallengers());
-    		model.addAttribute("challengeTargets", userService.getCurrentChallengeTargets());
+    		model.addAttribute("challengers", userService.getChallengers(userService.getCurrentUser()));
+    		model.addAttribute("challengeTargets", userService.getChallengeTargets(userService.getCurrentUser()));
     		return "online";
     	}
     	return "redirect:/game/online";

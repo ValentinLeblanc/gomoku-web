@@ -18,7 +18,7 @@ public class OnlineService {
 
 	public void acceptChallenge(String challengerUsername) {
 		userService.removeChallenger(challengerUsername);
-		String currentUsername = userService.getCurrentUser().getEmail();
+		String currentUsername = userService.getCurrentUser().getUsername();
 		gameService.createOnlineGame(currentUsername, challengerUsername);
 	}
 

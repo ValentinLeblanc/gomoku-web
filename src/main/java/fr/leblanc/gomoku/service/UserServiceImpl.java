@@ -1,9 +1,12 @@
 package fr.leblanc.gomoku.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -42,53 +45,56 @@ public class UserServiceImpl implements UserService {
 	private WebSocketController webSocketController;
 	
 	public UserServiceImpl(final UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
-	
-	@EventListener
-    public void onSuccess(AuthenticationSuccessEvent event) {
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CONNECTED_USER).content(event.getAuthentication().getName()).build());
-    }
-	
-	@EventListener
-	public void onLogout(LogoutSuccessEvent event) {
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.DISCONNECTED_USER).content(event.getAuthentication().getName()).build());
-	}
-	
-	@Override
-	public List<String> getCurrentChallengeTargets() {
-		return getConnectedUsers().stream().filter(u -> findUserByEmail(u).getChallengers().contains(getCurrentUser())).toList();
+		this.userRepository = userRepository;	
 	}
 	
 	@Override
 	public List<String> getConnectedUsers() {
-		List<String> connectedUsers = new ArrayList<>();
-		String currentUsername = getCurrentUser().getEmail();
-		connectedUsers.add(currentUsername);
-		connectedUsers.addAll(sessionRegistry.getAllPrincipals()
-				.stream()
-				.filter(p -> p instanceof org.springframework.security.core.userdetails.User)
-				.map(p -> ((org.springframework.security.core.userdetails.User) p).getUsername())
-				.filter(u -> !u.equals(currentUsername))
-				.toList());
-		return connectedUsers;
+		return getAllConnectedUsers().stream().filter(u -> u != getCurrentUser()).map(User::getUsername).toList();
+	}
+	
+	@EventListener
+    public void onSuccess(AuthenticationSuccessEvent event) {
+		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.USER_CONNECTED).content(event.getAuthentication().getName()).build());
+    }
+	
+	@EventListener
+	public void onLogout(LogoutSuccessEvent event) {
+		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.USER_DISCONNECTED).content(event.getAuthentication().getName()).build());
 	}
 	
 	@Override
-	public List<String> getCurrentChallengers() {
-		return getCurrentUser().getChallengers().stream().map(User::getEmail).toList();
+	public List<String> getChallengeTargets(User user) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(userRepository.findAll().iterator(), Spliterator.ORDERED), false)
+				.filter(u -> u.getChallengers().contains(user))
+				.map(User::getUsername)
+				.toList();
+	}
+	
+	private List<User> getAllConnectedUsers() {
+		return sessionRegistry.getAllPrincipals()
+				.stream()
+				.filter(org.springframework.security.core.userdetails.User.class::isInstance)
+				.map(org.springframework.security.core.userdetails.User.class::cast)
+				.map(u -> findUserByUsername(u.getUsername()))
+				.toList();
+	}
+	
+	@Override
+	public List<String> getChallengers(User user) {
+		return user.getChallengers().stream().map(User::getUsername).toList();
 	}
 	
 	@Override
 	public void removeChallenger(String challengerUsername) {
 		User currentUser = getCurrentUser();
-		currentUser.getChallengers().remove(findUserByEmail(challengerUsername));
+		currentUser.getChallengers().remove(findUserByUsername(challengerUsername));
 		save(currentUser);
 	}
 	
 	@Override
 	public boolean addChallengerTo(String targetUsername) {
-		User targetUser = findUserByEmail(targetUsername);
+		User targetUser = findUserByUsername(targetUsername);
 		User currentUser = getCurrentUser();
 		if (!targetUser.getChallengers().contains(currentUser)) {
 			targetUser.getChallengers().add(currentUser);
@@ -101,18 +107,18 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(final UserRegistrationDTO registrationDto) {
 		final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(),
-				registrationDto.getEmail(), passwordEncoder.encode(registrationDto.getPassword()),
+				registrationDto.getUsername(), passwordEncoder.encode(registrationDto.getPassword()),
 				Arrays.asList(new Role("ROLE_USER")));
 		return userRepository.save(user);
 	}
 
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-		final User user = this.findUserByEmail(username);
+		final User user = this.findUserByUsername(username);
 		if (user == null) {
 			throw new UsernameNotFoundException("Invalid username or password.");
 		}
-		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
-				mapRolesToAuthorities(user.getRoles()));
+		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+				mapRolesToAuthorities(Collections.emptyList()));
 	}
 
 	private Collection<? extends GrantedAuthority> mapRolesToAuthorities(final Collection<Role> roles) {
@@ -120,22 +126,22 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User findUserByEmail(final String email) {
-		return this.userRepository.findByEmail(email);
+	public User findUserByUsername(final String username) {
+		return this.userRepository.findByUsername(username);
 	}
 
 	@Override
 	public User getCurrentUser() {
 		final org.springframework.security.core.userdetails.User springUser = (org.springframework.security.core.userdetails.User) SecurityContextHolder
 				.getContext().getAuthentication().getPrincipal();
-		return this.findUserByEmail(springUser.getUsername());
+		return this.findUserByUsername(springUser.getUsername());
 	}
 
 	@Override
 	public void registerUserAccount(final UserRegistrationDTO registrationDto) throws RegistrationException {
-		final User user = this.findUserByEmail(registrationDto.getEmail());
+		final User user = this.findUserByUsername(registrationDto.getUsername());
 		if (user != null) {
-			throw new RegistrationException("This email is already used in database.");
+			throw new RegistrationException("This username is already used in database.");
 		}
 		this.save(registrationDto);
 	}
@@ -148,10 +154,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void deleteUserAccount(String username) {
 
-		User user = findUserByEmail(username);
+		User user = findUserByUsername(username);
 
 		if (user != null) {
-			userRepository.delete(findUserByEmail(username));
+			userRepository.delete(findUserByUsername(username));
 		}
 	}
 }

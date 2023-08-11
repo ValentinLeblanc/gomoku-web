@@ -12,7 +12,7 @@ public interface UserService extends UserDetailsService
 {
     User save(final UserRegistrationDTO registrationDto);
     
-    User findUserByEmail(final String email);
+    User findUserByUsername(final String username);
     
     User getCurrentUser();
     
@@ -22,14 +22,14 @@ public interface UserService extends UserDetailsService
 
 	void deleteUserAccount(String username);
 	
-	List<String> getConnectedUsers();
+	List<String> getChallengers(User user);
 	
-	List<String> getCurrentChallengers();
-	
-	List<String> getCurrentChallengeTargets();
+	List<String> getChallengeTargets(User user);
 	
 	boolean addChallengerTo(String username);
 
 	void removeChallenger(String challengerUsername);
+
+	List<String> getConnectedUsers();
 	
 }

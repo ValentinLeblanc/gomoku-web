@@ -24,37 +24,11 @@
 				<div class="row">
 					<div class="col" id="connectedUsersContainer">
 						Connected users:
-						<th:block th:each="connectedUser: ${connectedUsers}">
-							<div class="row align-items-center mb-2">
-								<div class="col">
-									<span th:text="${connectedUser}"></span>
-								</div>
-								<div class="col">
-									<button th:id="'challenge-' + ${connectedUser}"
-										class="btn btn-primary" th:text="Challenge"></button>
-								</div>
-							</div>
-						</th:block>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col" id="challengesContainer">
 						Challengers:
-						<th:block th:each="challenger: ${challengers}">
-							<div class="row align-items-center mb-2">
-								<div class="col">
-									<span th:text="${challenger}"></span>
-								</div>
-								<div class="col">
-									<button th:id="'accept-' + ${challenger}"
-										class="btn btn-primary">Accept</button>
-								</div>
-								<div class="col">
-									<button th:id="'decline-' + ${challenger}"
-										class="btn btn-primary">Decline</button>
-								</div>
-							</div>
-						</th:block>
 					</div>
 				</div>
 			</div>
@@ -63,11 +37,11 @@
 	</div>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
+		var _csrf = /*[[${_csrf}]]*/'default';
+		var username = /*[[${username}]]*/'default';
 		var connectedUsers = /*[[${connectedUsers}]]*/'default';
 		var challengers = /*[[${challengers}]]*/'default';
 		var challengeTargets = /*[[${challengeTargets}]]*/'default';
-		var username = /*[[${username}]]*/'default';
-		var _csrf = /*[[${_csrf}]]*/'default';
 		/*]]>*/
 	</script>
 	<script

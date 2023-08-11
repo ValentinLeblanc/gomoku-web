@@ -21,7 +21,19 @@
 </head>
 <body>
 	<div th:insert="~{menu}"></div>
-	<div class="container special">
+	<div class="container special" style="padding-top: 0px">
+		<div class="form-floating" style="display: inline-block">
+			<div class="row">
+				<div>
+					<span style="margin: 30px; margin-left: 100px;">
+					    <strong>Game type:</strong> [[${game.type}]]
+					    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Black:</strong> [[${blackPlayer}]]
+					    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>White:</strong> [[${whitePlayer}]]
+					</span>
+
+				</div>
+			</div>
+		</div>
 		<div id="board" style="width: fit-content">
 			<table>
 				<th:block th:each="y: ${#numbers.sequence(0, game.boardSize)}">
@@ -34,7 +46,17 @@
 			</table>
 		</div>
 	</div>
-	<div class="container special">
+	<div class="container special" style="padding-top: 20px">
+		<div id="info">
+			<div class="form-floating" style="display: inline-block">
+				<div class="row">
+					<div style="margin-left: 275px">
+						<span><strong>Evaluation : </strong></span>
+						<span id="evaluationValue"></span>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div id="buttons">
 			<div class="form-floating" style="display: inline-block">
 				<div class="row">
@@ -113,21 +135,6 @@
 							class="btn btn-default" title="Upload game" style="outline: none !important">
 							<em class="fa-solid fa-upload" style="color: #0d6efd; outline: none !important"></em>
 						</button>
-					</div>
-				</div>
-			</div>
-			<div class="form-floating" style="display: inline-block">
-				<div class="row">
-					<div>
-						<span>Evaluation : </span>
-						<span id="evaluationValue"></span>
-					</div>
-				</div>
-			</div>
-			<div class="form-floating" style="display: inline-block">
-				<div class="row">
-					<div>
-						<span style="margin: 30px;" th:text="${game.type}"></span>
 					</div>
 				</div>
 			</div>

@@ -25,12 +25,12 @@ abstract class AbstractControllerTest {
 	@BeforeEach
 	void registration() throws Exception {
 		
-		if (userService.findUserByEmail(USER) == null) {
-			mockMvc.perform(post("/registration").param("email", USER).param("password", PASSWORD).with(csrf()))
+		if (userService.findUserByUsername(USER) == null) {
+			mockMvc.perform(post("/registration").param("username", USER).param("password", PASSWORD).with(csrf()))
 			.andExpect(status().isFound());
 		}
 		
-		assertNotNull(userService.findUserByEmail(USER));
+		assertNotNull(userService.findUserByUsername(USER));
 	}
 
 }
