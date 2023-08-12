@@ -2,9 +2,11 @@
 package fr.leblanc.gomoku.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import fr.leblanc.gomoku.service.UserService;
 
@@ -29,10 +31,14 @@ public class MainController
         return "board";
     }
     
+    @ModelAttribute("username")
+    public String addUsernameToModel() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+    
     @GetMapping({ "/online" })
     public String online(Model model) {
     	if (userService.getCurrentUser().getCurrentOnlineGame() == null) {
-    		model.addAttribute("username", userService.getCurrentUser().getUsername());
     		model.addAttribute("connectedUsers", userService.getConnectedUsers());
     		model.addAttribute("challengers", userService.getChallengers(userService.getCurrentUser()));
     		model.addAttribute("challengeTargets", userService.getChallengeTargets(userService.getCurrentUser()));

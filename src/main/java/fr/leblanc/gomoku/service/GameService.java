@@ -108,23 +108,39 @@ public class GameService {
 		engineService.clearGame(game.getId());
 		gameRepository.delete(game);
 	}
-
-	public Move addMove(GameType gameType, int columnIndex, int rowIndex) {
-		boolean computeNextMove = gameType == GameType.AI;
-		return addMoveInternal(gameType, columnIndex, rowIndex, computeNextMove);
+	
+	private boolean checkNewMoveAllowed(Game currentGame) {
+		if (!currentGame.getWinCombination().isEmpty()) {
+			return false;
+		}
+		int color = extractPlayingColor(currentGame);
+		if (color == GomokuColor.BLACK.toNumber() && !userService.getCurrentUser().equals(currentGame.getBlackPlayer())) {
+			return false;
+		}
+		if (color == GomokuColor.WHITE.toNumber() && !userService.getCurrentUser().equals(currentGame.getWhitePlayer())) {
+			return false;
+		}
+		return true;
 	}
 
-	private Move addMoveInternal(GameType gameType, int columnIndex, int rowIndex, boolean computeNextMove) {
-		Game currentGame = getCurrentGame(gameType);
-
-		if (currentGame == null) {
+	public Move addMove(GameType gameType, int columnIndex, int rowIndex) {
+		
+		Game game = getCurrentGame(gameType);
+		
+		if (game == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		if (!currentGame.getWinCombination().isEmpty()) {
-			throw new IllegalStateException("Game is already over");
+		boolean computeNextMove = gameType == GameType.AI;
+		if (!checkNewMoveAllowed(game)) {
+			return null;
 		}
 		
+		return addMoveInternal(game, columnIndex, rowIndex, computeNextMove);
+	}
+
+	private Move addMoveInternal(Game currentGame, int columnIndex, int rowIndex, boolean computeNextMove) {
+
 		if (currentGame.getMove(columnIndex, rowIndex) != null) {
 			throw new IllegalStateException("Move already set");
 		}
@@ -153,7 +169,7 @@ public class GameService {
 		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation).build());
 		
 		if (!checkWin(currentGame) && computeNextMove) {
-			computeMove(gameType);
+			computeMove(currentGame.getType());
 		}
 		
 		return newMove;
@@ -228,14 +244,13 @@ public class GameService {
 	public Move computeMove(GameType gameType) {
 		
 		Game currentGame = getCurrentGame(gameType);
-
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		if (currentGame.getType() == GameType.ONLINE) {
-			throw new IllegalStateException(NOT_SUPPORTED_FOR_ONLINE_GAME);
-		} 
+		if (!checkNewMoveAllowed(currentGame)) {
+			return null;
+		}
 		
 		GameDTO gameDto = new GameDTO(currentGame);
 		
@@ -250,7 +265,8 @@ public class GameService {
 		}
 		
 		boolean computeNextMove = gameType == GameType.AI_VS_AI;
-		return addMoveInternal(gameType, computedMove.getColumnIndex(), computedMove.getRowIndex(), computeNextMove);
+		
+		return addMoveInternal(currentGame, computedMove.getColumnIndex(), computedMove.getRowIndex(), computeNextMove);
 	}
 
 	public Double computeEvaluation(GameType gameType) {
