@@ -301,6 +301,38 @@ const displayLastMove = (move) => {
 	}
 }
 
+const displayMinMaxResult = (move) => {
+
+	const cells = document.querySelectorAll(".emptyCell");
+	
+	for (const element of cells) {
+		var cell = element;
+		var column = parseInt(cell.id.split("/")[0]);
+		var row = parseInt(cell.id.split("/")[1]);
+
+		if (column == move.columnIndex && row == move.rowIndex) {
+			cell.classList.add('stone');
+			cell.classList.add('analysis');
+			if (move.color == 1) {
+				cell.classList.add('black');
+			} else if (move.color == -1) {
+				cell.classList.add('white');
+			}
+			setTimeout(() => removeAnalysisClass(cell), 3000);
+			break;
+		}
+	}
+}
+
+const removeAnalysisClass = (cell) => {
+	if (cell.classList.contains('analysis')) {
+		cell.classList.remove('stone');
+		cell.classList.remove('analysis');
+		cell.classList.remove('black');
+		cell.classList.remove('white');
+	}
+}
+
 const removeLastClass = (cell) => {
 	cell.classList.remove('last');
 }
@@ -316,6 +348,7 @@ const displayMove = (move) => {
 			var row = parseInt(cell.id.split("/")[1]);
 	
 			if (column == move.columnIndex && row == move.rowIndex) {
+				cell.classList.remove('analysis');
 				if (move.color == 2) {
 					cell.classList.add('win');
 				} else {
@@ -459,6 +492,8 @@ const onReceive = (payload) => {
 			displayMoves(winningMoves);
 		} else if (webSocketMessage.type == "ONLINE_GAME_ABORTED") {
 			window.location.href = "/online";
+		} else if (webSocketMessage.type == "MINMAX_RESULT") {
+			displayMinMaxResult(webSocketMessage.content);
 		}
 	}
 }
