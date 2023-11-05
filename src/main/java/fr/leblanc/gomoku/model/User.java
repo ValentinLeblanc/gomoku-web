@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -64,8 +64,8 @@ public class User
     @JoinTable(name = "users_games", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "game_id", referencedColumnName = "id") })
     private List<Game> games = new ArrayList<>();
     
-    @ManyToMany(fetch=FetchType.EAGER)
-    private List<User> challengers = new ArrayList<>();
+    @ElementCollection(targetClass=String.class)
+    private List<String> challengers = new ArrayList<>();
     
     public User() {
     	

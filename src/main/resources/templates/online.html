@@ -2,35 +2,48 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<link href="https://fonts.googleapis.com/css?family=Montserrat"
-	rel="stylesheet">
-<link href="https://fonts.googleapis.com/css?family=Open+Sans"
-	rel="stylesheet">
-
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-	rel="stylesheet"
-	integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-	crossorigin="anonymous">
-<script src="https://kit.fontawesome.com/561a872f6a.js"
-	crossorigin="anonymous"></script>
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+<link th:href="@{/styles/online.css}" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <title>Gomoku Online</title>
 </head>
 <body>
 	<div th:insert="~{menu}"></div>
 	<div class="container special">
-		<div id="onlineBoards">
-			<h3>Online</h3>
-			<div class="row">
-				<div class="col" id="connectedUsersContainer">
-					<strong>Connected users:</strong>
-				</div>
-				<div class="col" id="challengesContainer">
-					<strong>Challengers:</strong>
-				</div>
-			</div>
+		<div id="connectedUsers">
+			<table id="connectedUsersTable" class="display">
+				<thead>
+					<tr>
+						<th>Connected Users</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Data rows will be populated using Thymeleaf -->
+				</tbody>
+			</table>
+		</div>
+		<div id="challengers">
+			<table id="challengersTable" class="display">
+				<thead>
+					<tr>
+						<th>Challengers</th>
+						<th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Data rows will be populated using Thymeleaf -->
+				</tbody>
+			</table>
 		</div>
 	</div>
+
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		var _csrf = /*[[${_csrf}]]*/'default';
@@ -40,10 +53,148 @@
 		var challengeTargets = /*[[${challengeTargets}]]*/'default';
 		/*]]>*/
 	</script>
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+	<script type="text/javascript">
+
+		// Extract _csrf token value and header name from meta tags
+		var csrfToken = $('meta[name=_csrf]').attr('content');
+		var csrfHeader = $('meta[name=_csrf_header]').attr('content');
+		var connectedUsersTable;
+		var challengersTable;
+		
+		$(document)
+				.ready(
+						function() {
+							connectedUsersTable = $('#connectedUsersTable')
+									.DataTable(
+											{
+												"ajax" : {
+													"url" : "/online/connected-users/",
+													"dataSrc" : ""
+												},
+												"columns" : [
+														{
+															"data" : "username"
+														},
+														{
+															"data" : null,
+															"render": function(data, type, row) {
+															    if (row.challenging) {
+															        return ""; // Don't display the icon if challenging is true
+															    }
+															    if (row.challenged) {
+															        return '<i title="Challenge" class="fas fa-trophy challenge-icon disabled" data-id="' + row.username + '" disabled></i>'; // Display the icon as disabled if challenged is true
+															    }
+															    if (row.username !== username) {
+															        return '<i title="Challenge" class="fas fa-trophy challenge-icon enabled blue" data-id="' + row.username + '"></i>'; // Display the icon normally if neither challenging nor challenged is true
+															    }
+															    return ""; // Default case, don't display the icon
+															}
+														},
+													]
+											});
+							challengersTable = $('#challengersTable')
+									.DataTable(
+											{
+												"ajax" : {
+													"url" : "/online/challengers/",
+													"dataSrc" : ""
+												},
+												"columns" : [
+														{
+															"data" : "username"
+														},
+														{
+															"data" : null,
+															"render" : function(data, type, row) {
+																if (row.username != username) {
+																	return '<i title="Accept" class="fas fa-check accept-icon enabled green" data-id="' + row.username + '"></i>';
+																}
+																return "";
+															}
+														},
+														{
+															"data" : null,
+															"render" : function(data, type, row) {
+																if (row.username != username) {
+																	return '<i title="Decline" class="fas fa-ban decline-icon enabled red" data-id="' + row.username + '"></i>';
+																}
+																return "";
+															}
+														},
+													]
+											});
+						}
+						);
+		$('#connectedUsersTable tbody').on('click', '.challenge-icon', function() {
+
+			var targetUsername = $(this).data('id');
+
+			// Create an object to hold the headers
+			var headers = {};
+			headers[csrfHeader] = csrfToken;
+
+			// Make a call to the backend to delete the corresponding record
+			$.ajax({
+				url : '/online/challenge/' + targetUsername,
+				type : 'POST',
+				headers : headers,
+				success : function() {
+					
+				},
+				error : function() {
+					// Handle error if deletion fails
+					alert('Failed to challenge: ' + targetUsername);
+				}
+			});
+		});
+		$('#challengersTable tbody').on('click', '.accept-icon', function() {
+
+			var targetUsername = $(this).data('id');
+
+			// Create an object to hold the headers
+			var headers = {};
+			headers[csrfHeader] = csrfToken;
+
+			// Make a call to the backend to delete the corresponding record
+			$.ajax({
+				url : '/online/accept/' + targetUsername,
+				type : 'POST',
+				headers : headers,
+				success : function() {
+					
+				},
+				error : function() {
+					// Handle error if deletion fails
+					alert('Failed to accept: ' + targetUsername);
+				}
+			});
+		});
+		$('#challengersTable tbody').on('click', '.decline-icon', function() {
+
+			var targetUsername = $(this).data('id');
+
+			// Create an object to hold the headers
+			var headers = {};
+			headers[csrfHeader] = csrfToken;
+
+			// Make a call to the backend to delete the corresponding record
+			$.ajax({
+				url : '/online/decline/' + targetUsername,
+				type : 'POST',
+				headers : headers,
+				success : function() {
+					
+				},
+				error : function() {
+					// Handle error if deletion fails
+					alert('Failed to decline: ' + targetUsername);
+				}
+			});
+		});
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 	<script type="text/javascript" th:src="@{/scripts/online.js}"></script>
 </body>
 </html>

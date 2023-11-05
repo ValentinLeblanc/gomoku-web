@@ -8,37 +8,33 @@
 	<div th:insert="~{menu}"></div>
 	<div class="container-fluid container special">
 		<h3>Settings</h3>
-		<form method="post" action="#" th:action="@{/settings}" th:object="${settings}" style="margin-right:1000px;">
-		  <div class="form-check">
-		    <label class="form-check-label">Display analysis</label>
-		    <input type="checkbox" class="form-check-input" th:field="*{displayAnalysis}">
-		  </div>
-		  <div class="form-check">
-		    <label class="form-check-label">Strike enabled</label>
-		    <input type="checkbox" class="form-check-input" th:field="*{strikeEnabled}">
-		  </div>
-		  <div class="form-outline">
-		    <label>Board size</label>
-		    <input type="number" class="form-control" th:field="*{boardSize}" id="boardSize">
-		  </div>
-		  <div class="form-outline">
-		    <label>Strike timeout (s)</label>
-		    <input type="number" class="form-control" th:field="*{strikeTimeout}" id="strikeTimeout">
-		  </div>
-		  <div class="form-group">
-		    <label>Strike depth</label>
-		    <input type="number" class="form-control" th:field="*{strikeDepth}">
-		  </div>
-		  <div class="form-group">
-		    <label>MinMax depth</label>
-		    <input type="number" class="form-control" th:field="*{minMaxDepth}">
-		  </div>
-		  <div class="form-group">
-		    <label>MinMax extent</label>
-		    <input type="number" class="form-control" th:field="*{minMaxExtent}">
-		  </div>
-		  <br/>
-		  <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
+		<form method="post" action="#" th:action="@{/settings}" th:object="${settings}" style="margin-right: 1000px;">
+			<div class="form-check">
+				<label class="form-check-label">Display analysis</label> <input type="checkbox" class="form-check-input"
+					th:field="*{displayAnalysis}">
+			</div>
+			<div class="form-check">
+				<label class="form-check-label">Strike enabled</label> <input type="checkbox" class="form-check-input"
+					th:field="*{strikeEnabled}">
+			</div>
+			<div class="form-outline">
+				<label>Board size</label> <input type="number" class="form-control" th:field="*{boardSize}" id="boardSize">
+			</div>
+			<div class="form-outline">
+				<label>Strike timeout (s)</label> <input type="number" class="form-control" th:field="*{strikeTimeout}"
+					id="strikeTimeout">
+			</div>
+			<div class="form-group">
+				<label>Strike depth</label> <input type="number" class="form-control" th:field="*{strikeDepth}">
+			</div>
+			<div class="form-group">
+				<label>MinMax depth</label> <input type="number" class="form-control" th:field="*{minMaxDepth}">
+			</div>
+			<div class="form-group">
+				<label>MinMax extent</label> <input type="number" class="form-control" th:field="*{minMaxExtent}">
+			</div>
+			<br />
+			<button type="submit" class="btn btn-primary" id="submitButton">Save</button>
 		</form>
 	</div>
 </body>

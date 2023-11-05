@@ -39,9 +39,6 @@ public class WebController
     @GetMapping({ "/online" })
     public String online(Model model) {
     	if (userService.getCurrentUser().getCurrentOnlineGame() == null) {
-    		model.addAttribute("connectedUsers", userService.getConnectedUsers());
-    		model.addAttribute("challengers", userService.getChallengers(userService.getCurrentUser()));
-    		model.addAttribute("challengeTargets", userService.getChallengeTargets(userService.getCurrentUser()));
     		return "online";
     	}
     	return "redirect:/game/online";
