@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import fr.leblanc.gomoku.service.UserService;
 
 @Controller
-public class MainController
+public class WebController
 {
     @Autowired
     private UserService userService;
@@ -51,5 +51,10 @@ public class MainController
     public String settings(final Model model) {
         model.addAttribute("settings", userService.getCurrentUser().getSettings());
         return "settings";
+    }
+    
+    @GetMapping({ "/history" })
+    public String history(final Model model) {
+    	return "history";
     }
 }

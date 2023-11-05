@@ -48,6 +48,9 @@ const initButtonListeners = () => {
 	var uploadGameButton = document.getElementById("uploadGame");
 	uploadGameButton.addEventListener("click", onUploadGameAction);
 	hideButtonIfOnline(uploadGameButton);
+	
+	var saveGameButton = document.getElementById("saveGame");
+	saveGameButton.addEventListener("click", onSaveGameAction);
 }
 
 const onAddMoveAction = (event) => {
@@ -65,7 +68,7 @@ const onAddMoveAction = (event) => {
 	var row = parseInt(cell.id.split("/")[1]);
 
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/add-move/" + gameType, true);
+	xhr.open("POST", "/game/add-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.withCredentials = true;
 	var header = this._csrf.headerName;
@@ -83,7 +86,7 @@ const onUndoMoveAction = (event) => {
 	}
 	onStopAction();
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/undo-move/" + gameType, true);
+	xhr.open("POST", "/game/undo-move/" + gameType, true);
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
@@ -105,7 +108,7 @@ const onRedoMoveAction = (event) => {
 	}
 	onStopAction();
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/redo-move/" + gameType, true);
+	xhr.open("POST", "/game/redo-move/" + gameType, true);
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
@@ -123,7 +126,7 @@ const onResetGameAction = (event) => {
 		event.stopPropagation();
 	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/reset-game/" + gameType, true);
+	xhr.open("POST", "/game/reset/" + gameType, true);
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
 	xhr.setRequestHeader(header, token);
@@ -147,7 +150,7 @@ const onComputeMoveAction = (event) => {
 		return;
 	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/compute-move/" + gameType, true);
+	xhr.open("POST", "/game/compute-move/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -161,7 +164,7 @@ const onStopAction = (event) => {
 		event.stopPropagation();
 	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/stop/" + gameId, true);
+	xhr.open("POST", "/game/stop/" + gameId, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -183,7 +186,7 @@ const onStopAction = (event) => {
 
 const requestLastMove = (propagate) => {
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "/lastMove/" + gameType + "/" + propagate, true);
+	xhr.open("GET", "/game/lastMove/" + gameType + "/" + propagate, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -212,7 +215,7 @@ const onDownloadGameAction = (event) => {
 	}
 	var xhr = new XMLHttpRequest();
 	xhr.responseType = 'blob';
-	xhr.open("GET", "/downloadGame/" + gameType, true);
+	xhr.open("GET", "/game/download/" + gameType, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -259,7 +262,7 @@ const onUploadGameAction = (event) => {
 			var file = files[0];
 			
 			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "/uploadGame/" + gameType, true);
+			xhr.open("POST", "/game/upload/" + gameType, true);
 			xhr.setRequestHeader("Content-Type", "application/json");
 			var header = this._csrf.headerName;
 			var token = this._csrf.token;
@@ -277,6 +280,20 @@ const onUploadGameAction = (event) => {
 	};
 	input.click();
   
+}
+
+const onSaveGameAction = (event) => {
+	if (event) {
+		event.stopPropagation();
+	}
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/game/save-history/" + gameType, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	var header = this._csrf.headerName;
+	var token = this._csrf.token;
+	xhr.setRequestHeader(header, token);
+	xhr.withCredentials = true;
+	xhr.send("");
 }
 
 const displayLastMove = (move) => {

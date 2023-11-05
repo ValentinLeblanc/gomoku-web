@@ -29,7 +29,7 @@ public class WebEngineRepository {
 
 	public Set<Move> checkWin(GameDTO game) {
 		
-		String checkWinUrl = customProperties.getEngineUrl() + "/checkWin";
+		String checkWinUrl = customProperties.getEngineUrl() + "/engine/checkWin";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		
@@ -61,7 +61,7 @@ public class WebEngineRepository {
 
 	public Move computeMove(GameDTO game) {
 		
-		String computeMoveUrl = customProperties.getEngineUrl() + "/computeMove";
+		String computeMoveUrl = customProperties.getEngineUrl() + "/engine/computeMove";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDTO> request = new HttpEntity<>(game);
@@ -88,7 +88,7 @@ public class WebEngineRepository {
 
 	public Double computeEvaluation(GameDTO game) {
 		
-		String computeEvaluationUrl = customProperties.getEngineUrl() + "/computeEvaluation";
+		String computeEvaluationUrl = customProperties.getEngineUrl() + "/engine/computeEvaluation";
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<GameDTO> request = new HttpEntity<>(game);
@@ -108,7 +108,7 @@ public class WebEngineRepository {
 	}
 
 	public void stopComputation(Long gameId) {
-		String computeEvaluationUrl = customProperties.getEngineUrl() + "/stop/" + gameId;
+		String computeEvaluationUrl = customProperties.getEngineUrl() + "/engine/stop/" + gameId;
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<String> request = new HttpEntity<>("");
@@ -126,7 +126,7 @@ public class WebEngineRepository {
 	}
 
 	public Boolean isComputing(Long id) {
-		String isComputingUrl = customProperties.getEngineUrl() + "/isComputing/" + id;
+		String isComputingUrl = customProperties.getEngineUrl() + "/engine/isComputing/" + id;
 		
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<String> request = new HttpEntity<>("");
@@ -146,7 +146,7 @@ public class WebEngineRepository {
 	}
 
 	public void clearGame(Long id) {
-		String clearGameUrl = customProperties.getEngineUrl() + "/clearGame";
+		String clearGameUrl = customProperties.getEngineUrl() + "/engine/clearGame";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<Long> request = new HttpEntity<>(id);

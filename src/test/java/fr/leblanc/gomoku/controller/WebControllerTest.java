@@ -17,7 +17,7 @@ import fr.leblanc.gomoku.model.Game;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(OrderAnnotation.class)
-class MainControllerTest extends AbstractControllerTest {
+class WebControllerTest extends AbstractControllerTest {
 	
 	@Test
 	void loginPageTest() throws Exception {

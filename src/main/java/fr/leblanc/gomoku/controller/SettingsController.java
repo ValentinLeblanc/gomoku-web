@@ -33,6 +33,6 @@ public class SettingsController
         
         model.addAttribute("settings", settings);
 		
-		return new RedirectView("/settings");
+		return new RedirectView("/");
     }
 }

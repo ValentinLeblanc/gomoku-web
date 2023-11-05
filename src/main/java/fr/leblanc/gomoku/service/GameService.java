@@ -1,6 +1,7 @@
 package fr.leblanc.gomoku.service;
 
 import java.io.ByteArrayInputStream;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
+import fr.leblanc.gomoku.controller.GameHistoryService;
 import fr.leblanc.gomoku.controller.WebSocketController;
 import fr.leblanc.gomoku.exception.EngineException;
 import fr.leblanc.gomoku.model.Game;
@@ -50,6 +52,9 @@ public class GameService {
 	private EngineService engineService;
 	
 	@Autowired
+	private GameHistoryService gameHistoryService;
+	
+	@Autowired
 	private WebSocketController webSocketController;
 	
 	private Map<Long, Stack<Move>> undoMoveStack = new HashMap<>();
@@ -80,7 +85,11 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		deleteGame(currentGame);
+		engineService.clearGame(currentGame.getId());
+		
+		if (!isGameSavedInHistory(currentGame)) {
+			gameRepository.delete(currentGame);
+		}
 		
 		if (gameType == GameType.ONLINE) {
 			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
@@ -94,6 +103,16 @@ public class GameService {
 		}
 	}
 	
+	private boolean isGameSavedInHistory(Game game) {
+		if (game.getBlackPlayer().getGames().stream().map(Game::getId).toList().contains(game.getId())) {
+			return true;
+		}
+		if (game.getWhitePlayer().getGames().stream().map(Game::getId).toList().contains(game.getId())) {
+			return true;
+		}
+		return false;
+	}
+
 	public void deleteGame(GameType gameType) {
 		Game game = getCurrentGame(gameType);
 		
@@ -101,10 +120,6 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		deleteGame(game);
-	}
-	
-	private void deleteGame(Game game) {
 		engineService.clearGame(game.getId());
 		gameRepository.delete(game);
 	}
@@ -160,6 +175,15 @@ public class GameService {
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
 		currentGame.getMoves().add(newMove);
 		
+		User winningPlayer = checkWin(currentGame);
+		
+		if (winningPlayer != null) {
+			currentGame.setWinner(winningPlayer);
+			if (currentGame.getType() == GameType.ONLINE) {
+				gameHistoryService.saveHistoryGame(currentGame, userService.getCurrentUser());
+			}
+		}
+		
 		gameRepository.save(currentGame);
 		
 		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.MOVE).content(newMove).build());
@@ -168,24 +192,34 @@ public class GameService {
 		
 		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation).build());
 		
-		if (!checkWin(currentGame) && computeNextMove) {
+		if (winningPlayer != null && computeNextMove) {
 			computeMove(currentGame.getType());
 		}
 		
 		return newMove;
 	}
 
-	private boolean checkWin(Game currentGame) {
+	private User checkWin(Game currentGame) {
 		try {
 			Set<Move> winningMoves = engineService.checkWin(new GameDTO(currentGame));
 			if (winningMoves != null && !winningMoves.isEmpty()) {
 				webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves).build());
-				return true;
+				Move winningMove = winningMoves.iterator().next();
+				int color = currentGame.getMove(winningMove.getColumnIndex(), winningMove.getRowIndex()).getColor();
+				
+				GomokuColor winningColor = GomokuColor.toValue(color);
+				
+				if (winningColor == GomokuColor.BLACK) {
+					return currentGame.getBlackPlayer();
+				}
+				if (winningColor == GomokuColor.WHITE) {
+					return currentGame.getBlackPlayer();
+				}
 			}
 		} catch (ResourceAccessException e) {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
-		return false;
+		return null;
 	}
 
 	private int extractPlayingColor(Game currentGame) {
@@ -369,7 +403,7 @@ public class GameService {
 	}
 
 	private Game createGame(User user, GameType gameType) {
-		Game newGame = Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(gameType).build();
+		Game newGame = Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(gameType).date(new Timestamp(System.currentTimeMillis())).build();
 		
 		newGame.setMoves(new HashSet<>());
 		
@@ -434,6 +468,15 @@ public class GameService {
 	public Set<Move> getWinningMoves(GameType gameType) {
 		Game currentGame = getCurrentGame(gameType);
 		return engineService.checkWin(new GameDTO(currentGame));
+	}
+
+	public void saveHistoryGame(GameType gameType) {
+		Game currentGame = getCurrentGame(gameType);
+		gameHistoryService.saveHistoryGame(currentGame, userService.getCurrentUser());
+	}
+
+	public void save(Game game) {
+		gameRepository.save(game);
 	}
 
 }

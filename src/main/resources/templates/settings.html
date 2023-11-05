@@ -7,6 +7,7 @@
 <body>
 	<div th:insert="~{menu}"></div>
 	<div class="container-fluid container special">
+		<h3>Settings</h3>
 		<form method="post" action="#" th:action="@{/settings}" th:object="${settings}" style="margin-right:1000px;">
 		  <div class="form-check">
 		    <label class="form-check-label">Display analysis</label>
@@ -36,7 +37,8 @@
 		    <label>MinMax extent</label>
 		    <input type="number" class="form-control" th:field="*{minMaxExtent}">
 		  </div>
-		  <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+		  <br/>
+		  <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
 		</form>
 	</div>
 </body>

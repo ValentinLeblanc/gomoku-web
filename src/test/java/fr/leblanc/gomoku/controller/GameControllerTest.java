@@ -67,7 +67,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		Gson gson = new Gson();
 
-		mockMvc.perform(post("/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
+		mockMvc.perform(post("/game/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
 				.contentType(MediaType.APPLICATION_JSON).with(csrf())).andExpect(status().isOk());
 
 		move.setColor(GomokuColor.WHITE.toNumber());
@@ -76,7 +76,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertEquals(1, currentGame.getMoves().size());
 		
-		mockMvc.perform(post("/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
+		mockMvc.perform(post("/game/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
 				.contentType(MediaType.APPLICATION_JSON).with(csrf())).andExpect(status().isOk());
 
 		currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
@@ -95,7 +95,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertEquals(2, currentGame.getMoves().size());
 
-		mockMvc.perform(post("/undo-move/LOCAL").with(user(USER).password(PASSWORD)).with(csrf())).andExpect(status().isOk());
+		mockMvc.perform(post("/game/undo-move/LOCAL").with(user(USER).password(PASSWORD)).with(csrf())).andExpect(status().isOk());
 
 		currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();
 
@@ -113,7 +113,7 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertEquals(1, currentGame.getMoves().size());
 
-		mockMvc.perform(post("/reset-game/LOCAL").content("").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/game/reset/LOCAL").content("").contentType(MediaType.APPLICATION_JSON)
 				.with(user(USER).password(PASSWORD)).with(csrf())).andExpect(status().isFound());
 
 		currentGame = userService.findUserByUsername(USER).getCurrentLocalGame();

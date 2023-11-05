@@ -1,7 +1,6 @@
 package fr.leblanc.gomoku.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -40,7 +39,7 @@ public class User
     private String password;
     @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "settings_id")
-    private UserSettings settings;
+    private UserSettings settings = new UserSettings();
     @OneToOne
     @JoinColumn(name = "current_game_id")
     @JsonIgnore
@@ -59,21 +58,16 @@ public class User
     private Game currentAIvsAIGame;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "users_games", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "game_id", referencedColumnName = "id") })
-    private List<Game> games;
+    private List<Game> games = new ArrayList<>();
     
     @ManyToMany(fetch=FetchType.EAGER)
-    private List<User> challengers;
+    private List<User> challengers = new ArrayList<>();
     
     public User() {
-        this.settings = new UserSettings();
-        this.games = new ArrayList<>();
-        this.challengers = new ArrayList<>();
+    	
     }
     
-    public User(final String firstName, final String lastName, final String username, final String password, final Collection<Role> roles) {
-        this.settings = new UserSettings();
-        this.games = new ArrayList<>();
-        this.challengers = new ArrayList<>();
+    public User(final String firstName, final String lastName, final String username, final String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;

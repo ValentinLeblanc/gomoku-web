@@ -1,5 +1,6 @@
 package fr.leblanc.gomoku.model;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +31,8 @@ public class Game {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private GameType type;
+	
+	private Timestamp date;
 
 	@ManyToOne
 	@JoinColumn(name = "black_player_id")

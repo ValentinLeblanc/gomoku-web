@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
@@ -24,6 +25,7 @@ import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
 
 @RestController
+@RequestMapping("/game")
 public class GameController {
 
 	@Autowired
@@ -35,7 +37,7 @@ public class GameController {
     @Autowired
     private GomokuWebConfiguration webConfiguration;
 	
-	@GetMapping("/game/{gameTypeString}")
+	@GetMapping("/{gameTypeString}")
 	public ModelAndView displayGame(@PathVariable String gameTypeString, Model model) {
 		
 		GameType gameType = GameType.valueOf(gameTypeString.toUpperCase());
@@ -61,7 +63,7 @@ public class GameController {
 		return new ModelAndView("forward:/board");
 	}
 	
-	@PostMapping("/reset-game/{gameType}")
+	@PostMapping("/reset/{gameType}")
 	public RedirectView resetGame(@PathVariable String gameType) {
 
 		gameService.resetGame(GameType.valueOf(gameType.toUpperCase()));
@@ -104,18 +106,24 @@ public class GameController {
 		return gameService.getLastMove(GameType.valueOf(gameType.toUpperCase()), propagate);
 	}
 
-	@GetMapping("downloadGame/{gameType}")
+	@GetMapping("/download/{gameType}")
 	public ResponseEntity<Resource> downloadGame(@PathVariable String gameType) {
 		return gameService.downloadGame(GameType.valueOf(gameType.toUpperCase()));
 	}
 	
-	@PostMapping("uploadGame/{gameType}")
+	@PostMapping("/upload/{gameType}")
 	public void uploadGame(@PathVariable String gameType, @RequestBody GameDTO uploadedGame) {
 		gameService.uploadGame(GameType.valueOf(gameType.toUpperCase()), uploadedGame);
 	}
 	
-	@GetMapping("isComputing/{gameId}")
+	@GetMapping("/isComputing/{gameId}")
 	public void isComputing(@PathVariable Long gameId) {
 		gameService.isComputing(gameId);
 	}
+	
+	@PostMapping("/save-history/{gameType}")
+	public void saveGame(@PathVariable String gameType) {
+		gameService.saveHistoryGame(GameType.valueOf(gameType.toUpperCase()));
+	}
+	
 }

@@ -1,6 +1,5 @@
 package fr.leblanc.gomoku.service;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -107,8 +106,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(final UserRegistrationDTO registrationDto) {
 		final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(),
-				registrationDto.getUsername(), passwordEncoder.encode(registrationDto.getPassword()),
-				Arrays.asList(new Role("ROLE_USER")));
+				registrationDto.getUsername(), passwordEncoder.encode(registrationDto.getPassword()));
 		return userRepository.save(user);
 	}
 

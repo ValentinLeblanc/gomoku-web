@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Montserrat"
+	rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans"
+	rel="stylesheet">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+	crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include jQuery -->
+<script src="https://kit.fontawesome.com/561a872f6a.js"
+	crossorigin="anonymous"></script>
+<!-- Add DataTables CSS and JavaScript -->
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script type="text/javascript" charset="utf8"
+	src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<title>Game history</title>
+</head>
+<body>
+	<div th:insert="~{menu}"></div>
+	<div class="container special">
+		<div id="gameHistory">
+			<h3>Game History</h3>
+			<table id="gameHistoryTable" class="display">
+				<thead>
+					<tr>
+						<th>Game type</th>
+						<th>Black player</th>
+						<th>White player</th>
+						<th>Winner</th>
+						<th>Date</th>
+						<!-- Add more table headers for other game attributes -->
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Data rows will be populated using Thymeleaf -->
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var _csrf = /*[[${_csrf}]]*/'default';
+		/*]]>*/
+	</script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#gameHistoryTable').DataTable({
+				"ajax" : {
+					"url" : "/history/data", // Replace with your actual endpoint for fetching game history data
+					"dataSrc" : ""
+				},
+				"columns" : [ {
+					"data" : "gameType"
+				}, 
+				{
+					"data" : "blackPlayer.username"
+				}, 
+				{
+					"data" : "whitePlayer.username"
+				}, 
+				{
+	                "data": "winner.username",
+	                "render": function (data, type, row) {
+	                    return data ? data : "";
+	                }
+	            },
+				{
+					"data" : "date"
+				},
+				]
+			});
+		});
+	</script>
+
+</body>
+</html>
