@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
-import fr.leblanc.gomoku.controller.GameHistoryService;
 import fr.leblanc.gomoku.controller.WebSocketController;
 import fr.leblanc.gomoku.exception.EngineException;
 import fr.leblanc.gomoku.model.Game;
@@ -52,9 +51,6 @@ public class GameService {
 	private EngineService engineService;
 	
 	@Autowired
-	private GameHistoryService gameHistoryService;
-	
-	@Autowired
 	private WebSocketController webSocketController;
 	
 	private Map<Long, Stack<Move>> undoMoveStack = new HashMap<>();
@@ -86,10 +82,7 @@ public class GameService {
 		}
 		
 		engineService.clearGame(currentGame.getId());
-		
-		if (!isGameSavedInHistory(currentGame)) {
-			gameRepository.delete(currentGame);
-		}
+		gameRepository.delete(currentGame);
 		
 		if (gameType == GameType.ONLINE) {
 			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
@@ -103,16 +96,6 @@ public class GameService {
 		}
 	}
 	
-	private boolean isGameSavedInHistory(Game game) {
-		if (game.getBlackPlayer().getGames().stream().map(Game::getId).toList().contains(game.getId())) {
-			return true;
-		}
-		if (game.getWhitePlayer().getGames().stream().map(Game::getId).toList().contains(game.getId())) {
-			return true;
-		}
-		return false;
-	}
-
 	public void deleteGame(GameType gameType) {
 		Game game = getCurrentGame(gameType);
 		
@@ -124,7 +107,10 @@ public class GameService {
 		gameRepository.delete(game);
 	}
 	
-	private boolean checkNewMoveAllowed(Game currentGame) {
+	private boolean isAddMoveAllowed(Game currentGame) {
+		if (currentGame.getType() == GameType.HISTORY) {
+			return false;
+		}
 		if (!currentGame.getWinCombination().isEmpty()) {
 			return false;
 		}
@@ -147,7 +133,7 @@ public class GameService {
 		}
 		
 		boolean computeNextMove = gameType == GameType.AI;
-		if (!checkNewMoveAllowed(game)) {
+		if (!isAddMoveAllowed(game)) {
 			return null;
 		}
 		
@@ -175,15 +161,6 @@ public class GameService {
 		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
 		currentGame.getMoves().add(newMove);
 		
-		User winningPlayer = checkWin(currentGame);
-		
-		if (winningPlayer != null) {
-			currentGame.setWinner(winningPlayer);
-			if (currentGame.getType() == GameType.ONLINE) {
-				gameHistoryService.saveHistoryGame(currentGame, userService.getCurrentUser());
-			}
-		}
-		
 		gameRepository.save(currentGame);
 		
 		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.MOVE).content(newMove).build());
@@ -192,14 +169,14 @@ public class GameService {
 		
 		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation).build());
 		
-		if (winningPlayer != null && computeNextMove) {
+		if (!checkWinner(currentGame) && computeNextMove) {
 			computeMove(currentGame.getType());
 		}
 		
 		return newMove;
 	}
 
-	private User checkWin(Game currentGame) {
+	private boolean checkWinner(Game currentGame) {
 		try {
 			Set<Move> winningMoves = engineService.checkWin(new GameDTO(currentGame));
 			if (winningMoves != null && !winningMoves.isEmpty()) {
@@ -210,16 +187,17 @@ public class GameService {
 				GomokuColor winningColor = GomokuColor.toValue(color);
 				
 				if (winningColor == GomokuColor.BLACK) {
-					return currentGame.getBlackPlayer();
+					currentGame.setWinner(currentGame.getBlackPlayer());
+				} else if (winningColor == GomokuColor.WHITE) {
+					currentGame.setWinner(currentGame.getWhitePlayer());
 				}
-				if (winningColor == GomokuColor.WHITE) {
-					return currentGame.getBlackPlayer();
-				}
+				save(currentGame);
+				return true;
 			}
 		} catch (ResourceAccessException e) {
 			log.error("Could not access Gomoku Engine : " + e.getMessage());
 		}
-		return null;
+		return false;
 	}
 
 	private int extractPlayingColor(Game currentGame) {
@@ -246,7 +224,9 @@ public class GameService {
 			currentGame.getWinCombination().clear();
 		}
 		
-		gameRepository.save(currentGame);
+		if (currentGame.getType() != GameType.HISTORY) {
+			gameRepository.save(currentGame);
+		}
 		
 		return currentGame.getMoves();
 		
@@ -264,12 +244,15 @@ public class GameService {
 			throw new IllegalStateException(NOT_SUPPORTED_FOR_ONLINE_GAME);
 		}
 		
-		Move lastMove = undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>()).pop();
+		Stack<Move> stack = undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>());
 		
-		if (lastMove != null) {
-			currentGame.getMoves().add(lastMove);
-			checkWin(currentGame);
-			gameRepository.save(currentGame);
+		if (!stack.isEmpty()) {
+			Move lastMove = stack.pop();
+			if (lastMove != null) {
+				currentGame.getMoves().add(lastMove);
+				checkWinner(currentGame);
+				gameRepository.save(currentGame);
+			}
 		}
 		
 		return currentGame.getMoves();
@@ -282,7 +265,7 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		if (!checkNewMoveAllowed(currentGame)) {
+		if (!isAddMoveAllowed(currentGame)) {
 			return null;
 		}
 		
@@ -396,6 +379,9 @@ public class GameService {
 		case ONLINE:
 			currentGame = userService.getCurrentUser().getCurrentOnlineGame();
 			break;
+		case HISTORY:
+			currentGame = userService.getCurrentUser().getCurrentHistoryGame();
+			break;
 		default:
 			throw new IllegalStateException("Unknown game type: " + gameType);
 		}
@@ -470,13 +456,16 @@ public class GameService {
 		return engineService.checkWin(new GameDTO(currentGame));
 	}
 
-	public void saveHistoryGame(GameType gameType) {
-		Game currentGame = getCurrentGame(gameType);
-		gameHistoryService.saveHistoryGame(currentGame, userService.getCurrentUser());
+	public Game save(Game game) {
+		return gameRepository.save(game);
 	}
 
-	public void save(Game game) {
-		gameRepository.save(game);
+	public Game findById(Long gameId) {
+		Optional<Game> opt = gameRepository.findById(gameId);
+		if (opt.isPresent()) {
+			return opt.get();
+		}
+		return null;
 	}
 
 }

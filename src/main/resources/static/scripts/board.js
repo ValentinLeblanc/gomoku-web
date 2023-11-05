@@ -13,8 +13,8 @@ const initCellListeners = () => {
 	}
 }
 
-const hideButtonIfOnline = (button) => {
-	if (gameType == "ONLINE") {
+const hideButtonForGameType = (button, type) => {
+	if (gameType == type) {
 		button.parentNode.parentNode.parentNode.parentNode.removeChild(button.parentNode.parentNode.parentNode);
 	}
 }
@@ -22,35 +22,40 @@ const hideButtonIfOnline = (button) => {
 const initButtonListeners = () => {
 	var undoMoveButton = document.getElementById("undo-move");
 	undoMoveButton.addEventListener("click", onUndoMoveAction);
-	hideButtonIfOnline(undoMoveButton);
-	
+	hideButtonForGameType(undoMoveButton, "ONLINE");
+
 	var redoMoveButton = document.getElementById("redo-move");
 	redoMoveButton.addEventListener("click", onRedoMoveAction);
-	hideButtonIfOnline(redoMoveButton);
+	hideButtonForGameType(redoMoveButton, "ONLINE");
 
 	var resetGameButton = document.getElementById("reset-game");
 	resetGameButton.addEventListener("click", onResetGameAction);
+	hideButtonForGameType(resetGameButton, "HISTORY");
 
 	var computeMoveButton = document.getElementById("compute-move");
 	computeMoveButton.addEventListener("click", onComputeMoveAction);
-	hideButtonIfOnline(computeMoveButton);
-	
+	hideButtonForGameType(computeMoveButton, "ONLINE");
+	hideButtonForGameType(computeMoveButton, "HISTORY");
+
 	var stopButton = document.getElementById("stop");
 	stopButton.addEventListener("click", onStopAction);
-	hideButtonIfOnline(stopButton);
-	
+	hideButtonForGameType(stopButton, "ONLINE");
+	hideButtonForGameType(stopButton, "HISTORY");
+
 	var lastMoveButton = document.getElementById("lastMove");
 	lastMoveButton.addEventListener("click", onLastMoveAction);
-	
+
 	var downloadGameButton = document.getElementById("downloadGame");
 	downloadGameButton.addEventListener("click", onDownloadGameAction);
-	
+
 	var uploadGameButton = document.getElementById("uploadGame");
 	uploadGameButton.addEventListener("click", onUploadGameAction);
-	hideButtonIfOnline(uploadGameButton);
-	
+	hideButtonForGameType(uploadGameButton, "ONLINE");
+	hideButtonForGameType(uploadGameButton, "HISTORY");
+
 	var saveGameButton = document.getElementById("saveGame");
 	saveGameButton.addEventListener("click", onSaveGameAction);
+	hideButtonForGameType(saveGameButton, "HISTORY");
 }
 
 const onAddMoveAction = (event) => {
@@ -58,7 +63,7 @@ const onAddMoveAction = (event) => {
 		event.stopPropagation();
 	}
 	if (isComputing) {
-		return;	
+		return;
 	}
 	if (winningMoves != null && winningMoves.length > 0) {
 		return;
@@ -84,41 +89,105 @@ const onUndoMoveAction = (event) => {
 	if (event) {
 		event.stopPropagation();
 	}
-	onStopAction();
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/game/undo-move/" + gameType, true);
-	var header = this._csrf.headerName;
-	var token = this._csrf.token;
-	xhr.setRequestHeader(header, token);
-	xhr.withCredentials = true;
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			sendRefreshBoard();
+
+	if (gameType == "HISTORY") {
+
+		var filteredMoves = moves.filter(function(move) {
+			return !move.hidden;
+		});
+
+		var lastMove = filteredMoves.reduce(function(prev, current) {
+			return (prev.number > current.number) ? prev : current;
+		});
+
+		if (lastMove) {
+			lastMove.hidden = true;
+	
+			const cells = document.querySelectorAll(".stone");
+	
+			for (const element of cells) {
+				var cell = element;
+				var column = parseInt(cell.id.split("/")[0]);
+				var row = parseInt(cell.id.split("/")[1]);
+	
+				if (column == lastMove.columnIndex && row == lastMove.rowIndex) {
+					cell.classList.remove('stone');
+					cell.classList.remove('white');
+					cell.classList.remove('black');
+				}
+			}
 		}
+		
+	} else {
+		onStopAction();
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "/game/undo-move/" + gameType, true);
+		var header = this._csrf.headerName;
+		var token = this._csrf.token;
+		xhr.setRequestHeader(header, token);
+		xhr.withCredentials = true;
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+				sendRefreshBoard();
+			}
+		}
+		xhr.send("");
 	}
-	xhr.send("");
 }
 
 const onRedoMoveAction = (event) => {
 	if (event) {
 		event.stopPropagation();
 	}
-	if (winningMoves != null && winningMoves.length > 0) {
-		return;
-	}
-	onStopAction();
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/game/redo-move/" + gameType, true);
-	var header = this._csrf.headerName;
-	var token = this._csrf.token;
-	xhr.setRequestHeader(header, token);
-	xhr.withCredentials = true;
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
-			sendRefreshBoard();
+	if (gameType == "HISTORY") {
+
+		var filteredMoves = moves.filter(function(move) {
+			return move.hidden;
+		});
+
+		var lastMove = filteredMoves.reduce(function(prev, current) {
+			return (prev.number < current.number) ? prev : current;
+		});
+
+		if (lastMove) {
+			lastMove.hidden = false;
+
+			const cells = document.querySelectorAll(".emptyCell");
+
+			for (const element of cells) {
+				var cell = element;
+				var column = parseInt(cell.id.split("/")[0]);
+				var row = parseInt(cell.id.split("/")[1]);
+
+				if (column == lastMove.columnIndex && row == lastMove.rowIndex) {
+					cell.classList.add('stone');
+					if (lastMove.color == 1) {
+						cell.classList.add('black');
+					} else if (lastMove.color == -1) {
+						cell.classList.add('white');
+					}
+					break;
+				}
+			}
 		}
+	} else {
+		if (winningMoves != null && winningMoves.length > 0) {
+			return;
+		}
+		onStopAction();
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "/game/redo-move/" + gameType, true);
+		var header = this._csrf.headerName;
+		var token = this._csrf.token;
+		xhr.setRequestHeader(header, token);
+		xhr.withCredentials = true;
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE && xhr.response) {
+				sendRefreshBoard();
+			}
+		}
+		xhr.send("");
 	}
-	xhr.send("");
 }
 
 const onResetGameAction = (event) => {
@@ -177,7 +246,7 @@ const onStopAction = (event) => {
 			element.classList.remove("black");
 			element.classList.remove("white");
 		}
-		
+
 		setTimeout(() => displayMinMaxProgress(0), 100);
 	}
 
@@ -257,10 +326,10 @@ const onUploadGameAction = (event) => {
 	input.type = 'file';
 	input.onchange = _ => {
 		var files = Array.from(input.files);
-		
+
 		if (files.length > 0) {
 			var file = files[0];
-			
+
 			var xhr = new XMLHttpRequest();
 			xhr.open("POST", "/game/upload/" + gameType, true);
 			xhr.setRequestHeader("Content-Type", "application/json");
@@ -273,13 +342,13 @@ const onUploadGameAction = (event) => {
 					sendRefreshBoard();
 				}
 			}
-		
+
 			xhr.send(file);
 		}
-		
+
 	};
 	input.click();
-  
+
 }
 
 const onSaveGameAction = (event) => {
@@ -287,7 +356,7 @@ const onSaveGameAction = (event) => {
 		event.stopPropagation();
 	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/game/save-history/" + gameType, true);
+	xhr.open("POST", "/history/save/" + gameId, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	var header = this._csrf.headerName;
 	var token = this._csrf.token;
@@ -304,7 +373,7 @@ const displayLastMove = (move) => {
 	for (const last of lasts) {
 		last.classList.remove('last');
 	}
-	
+
 	for (const element of cells) {
 		var cell = element;
 		var column = parseInt(cell.id.split("/")[0]);
@@ -321,7 +390,7 @@ const displayLastMove = (move) => {
 const displayMinMaxResult = (move) => {
 
 	const cells = document.querySelectorAll(".emptyCell");
-	
+
 	for (const element of cells) {
 		var cell = element;
 		var column = parseInt(cell.id.split("/")[0]);
@@ -358,12 +427,12 @@ const displayMove = (move) => {
 
 	if (move) {
 		const cells = document.querySelectorAll(".emptyCell");
-	
+
 		for (const element of cells) {
 			var cell = element;
 			var column = parseInt(cell.id.split("/")[0]);
 			var row = parseInt(cell.id.split("/")[1]);
-	
+
 			if (column == move.columnIndex && row == move.rowIndex) {
 				cell.classList.remove('analysis');
 				if (move.color == 2) {
@@ -381,7 +450,7 @@ const displayMove = (move) => {
 			}
 		}
 	}
-	
+
 }
 
 const displayAnalysisMove = (move) => {
@@ -435,10 +504,12 @@ const displayEvaluation = (evaluation) => {
 
 const updateComputeIcon = () => {
 	const computeIcon = document.getElementById("computeIcon");
-	if (isComputing) {
-		computeIcon.classList.add("fa-spin");
-	} else {
-		computeIcon.classList.remove("fa-spin");
+	if (computeIcon) {
+		if (isComputing) {
+			computeIcon.classList.add("fa-spin");
+		} else {
+			computeIcon.classList.remove("fa-spin");
+		}
 	}
 }
 
@@ -497,7 +568,7 @@ const onReceive = (payload) => {
 		} else if (webSocketMessage.type == "STRIKE_PROGRESS") {
 			const progress = webSocketMessage.content;
 			displayStrikeProgress(progress);
-		} else if (webSocketMessage.type == "ANALYSIS_MOVE" ) {
+		} else if (webSocketMessage.type == "ANALYSIS_MOVE") {
 			displayAnalysisMove(webSocketMessage.content);
 		} else if (webSocketMessage.type == "IS_COMPUTING") {
 			isComputing = webSocketMessage.content;
@@ -524,10 +595,12 @@ function main() {
 	initCellListeners();
 	initButtonListeners();
 	displayMoves(moves);
-	displayMoves(winningMoves);
-	displayEvaluation(evaluation);
-	updateComputeIcon();
-	requestLastMove(true);
+	if (gameType != "HISTORY") {
+		displayEvaluation(evaluation);
+		updateComputeIcon();
+		displayMoves(winningMoves);
+		requestLastMove(true);
+	}
 }
 
 main();

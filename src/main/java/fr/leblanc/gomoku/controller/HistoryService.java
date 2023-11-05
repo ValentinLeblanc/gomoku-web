@@ -6,29 +6,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import fr.leblanc.gomoku.model.Game;
+import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.User;
+import fr.leblanc.gomoku.service.GameService;
 import fr.leblanc.gomoku.service.UserService;
 import fr.leblanc.gomoku.web.dto.HistoryGameDTO;
 import fr.leblanc.gomoku.web.dto.PlayerDTO;
 
 @Service
-public class GameHistoryService {
+public class HistoryService {
 	
 	@Autowired
     private UserService userService;
-
-	public List<HistoryGameDTO> getHistoryGames(User user) {
+	
+	@Autowired
+	private GameService gameService;
+	
+	public List<HistoryGameDTO> getUserHistory(String username) {
+		User user = userService.findUserByUsername(username);
 		List<Game> dbGames = user.getGames();
 		dbGames.sort((g1, g2) -> g1.getDate() != null ? g1.getDate().compareTo(g2.getDate()) : -1);
 		return dbGames.stream().map(this::createHistoryGameDTO).toList();
 	}
 	
-	public void saveHistoryGame(Game game, User user) {
+	public void saveGameInHistory(Long gameId) {
+		User user = userService.getCurrentUser();
 		List<Game> games = user.getGames();
-		if (!games.contains(game)) {
-			games.add(game);
-			userService.save(user);
-		}
+		Game originalGame = gameService.findById(gameId);
+		Game historyGame = new Game(originalGame);
+		historyGame.setType(GameType.HISTORY);
+		historyGame = gameService.save(historyGame);
+		games.add(historyGame);
+		userService.save(user);
+	}
+	
+	public void viewGameFromHistory(Long gameId) {
+		User user = userService.getCurrentUser();
+		Game game = gameService.findById(gameId);
+		user.setCurrentHistoryGame(game);
+		userService.save(user);
 	}
 
 	private HistoryGameDTO createHistoryGameDTO(Game game) {
@@ -41,6 +57,13 @@ public class GameHistoryService {
 			return new PlayerDTO(user.getUsername(), user.getFirstName(), user.getLastName());
 		}
 		return null;
+	}
+
+	public void deleteGameFromHistory(Long id) {
+		User user = userService.getCurrentUser();
+		if (user.getGames().removeIf(g -> g.getId().equals(id))) {
+			userService.save(user);
+		}
 	}
 
 }

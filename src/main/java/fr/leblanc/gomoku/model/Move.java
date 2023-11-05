@@ -33,4 +33,11 @@ public class Move
         this.rowIndex = rowIndex;
         this.color = color;
     }
+
+	public Move(Move move) {
+		this.color = move.color;
+		this.number = move.number;
+		this.columnIndex = move.columnIndex;
+		this.rowIndex = move.rowIndex;
+	}
 }

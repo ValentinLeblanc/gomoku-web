@@ -55,10 +55,8 @@ public class GameController {
 		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
 		model.addAttribute("webSocketEngineUrl", webConfiguration.getEngineUrl() + "/engineMessages");
 		model.addAttribute("username", userService.getCurrentUser().getUsername());
-		if (gameType == GameType.ONLINE) {
-			model.addAttribute("blackPlayer", game.getBlackPlayer().getUsername());
-			model.addAttribute("whitePlayer", game.getWhitePlayer().getUsername());
-		}
+		model.addAttribute("blackPlayer", game.getBlackPlayer().getUsername());
+		model.addAttribute("whitePlayer", game.getWhitePlayer().getUsername());
 		
 		return new ModelAndView("forward:/board");
 	}
@@ -119,11 +117,6 @@ public class GameController {
 	@GetMapping("/isComputing/{gameId}")
 	public void isComputing(@PathVariable Long gameId) {
 		gameService.isComputing(gameId);
-	}
-	
-	@PostMapping("/save-history/{gameType}")
-	public void saveGame(@PathVariable String gameType) {
-		gameService.saveHistoryGame(GameType.valueOf(gameType.toUpperCase()));
 	}
 	
 }

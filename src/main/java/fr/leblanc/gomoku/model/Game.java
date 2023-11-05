@@ -55,7 +55,7 @@ public class Game {
 	@JoinTable(name = "games_wins")
 	@Column(name = "win_combination")
 	private Set<Move> winCombination;
-
+	
 	public Move getMove(final int columnIndex, final int rowIndex) {
 		for (final Move move : this.moves) {
 			if (move.getColumnIndex() == columnIndex && move.getRowIndex() == rowIndex) {
@@ -68,6 +68,22 @@ public class Game {
 	public Game() {
 		this.moves = new HashSet<>();
 		this.winCombination = new HashSet<>();
+	}
+	
+	public Game(Game game) {
+		this.blackPlayer = game.blackPlayer;
+		this.whitePlayer = game.whitePlayer;
+		this.date = game.date;
+		this.boardSize = game.boardSize;
+		this.moves = new HashSet<>();
+		for (Move move : game.moves) {
+			this.moves.add(new Move(move));
+		}
+		this.winCombination = new HashSet<>();
+		for (Move move : game.winCombination) {
+			this.winCombination.add(new Move(move));
+		}
+		this.winner = game.winner;
 	}
 
 }

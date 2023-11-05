@@ -56,6 +56,10 @@ public class User
     @JoinColumn(name = "current_ai_vs_ai_game_id")
     @JsonIgnore
     private Game currentAIvsAIGame;
+    @OneToOne
+    @JoinColumn(name = "current_history_game_id")
+    @JsonIgnore
+    private Game currentHistoryGame;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "users_games", joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "game_id", referencedColumnName = "id") })
     private List<Game> games = new ArrayList<>();
