@@ -355,14 +355,24 @@ const onSaveGameAction = (event) => {
 	if (event) {
 		event.stopPropagation();
 	}
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/history/save/" + gameId, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	var header = this._csrf.headerName;
-	var token = this._csrf.token;
-	xhr.setRequestHeader(header, token);
-	xhr.withCredentials = true;
-	xhr.send("");
+    // Show a prompt to the user to enter the game name
+    var gameName = window.prompt("Choose a name for the game:");
+    
+    // Check if the user entered a name and save the game
+    if (gameName !== null && gameName !== "") {
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "/history/save/" + gameId + "/" + gameName, true);
+		xhr.setRequestHeader("Content-Type", "application/json");
+		var header = this._csrf.headerName;
+		var token = this._csrf.token;
+		xhr.setRequestHeader(header, token);
+		xhr.withCredentials = true;
+		xhr.send("");
+        console.log("Game saved with the name: " + gameName);
+    } else {
+        console.log("Game not saved. No name provided.");
+    }
+	
 }
 
 const displayLastMove = (move) => {

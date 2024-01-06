@@ -6,7 +6,6 @@
 <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-<link th:href="@{/styles/online.css}" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
@@ -15,32 +14,36 @@
 <body>
 	<div th:insert="~{menu}"></div>
 	<div class="container special">
-		<div id="connectedUsers">
-			<table id="connectedUsersTable" class="display">
-				<thead>
-					<tr>
-						<th>Connected Users</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<!-- Data rows will be populated using Thymeleaf -->
-				</tbody>
-			</table>
-		</div>
-		<div id="challengers">
-			<table id="challengersTable" class="display">
-				<thead>
-					<tr>
-						<th>Challengers</th>
-						<th></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<!-- Data rows will be populated using Thymeleaf -->
-				</tbody>
-			</table>
+		<h3>Online</h3>
+		<div class="flex-container">
+			<div class="table-wrapper" id="connectedUsers">
+				<table id="connectedUsersTable" class="display" style="width: 500px; margin:unset;">
+					<thead>
+						<tr>
+							<th>Connected Users</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Data rows will be populated using Thymeleaf -->
+					</tbody>
+				</table>
+			</div>
+
+			<div class="table-wrapper" id="challengers">
+				<table id="challengersTable" class="display" style="width: 500px; margin:unset;">
+					<thead>
+						<tr>
+							<th>Challengers</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Data rows will be populated using Thymeleaf -->
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 
@@ -69,7 +72,7 @@
 									.DataTable(
 											{
 												"ajax" : {
-													"url" : "/online/connected-users/",
+													"url" : "/online/connected-users",
 													"dataSrc" : ""
 												},
 												"columns" : [
@@ -83,21 +86,28 @@
 															        return ""; // Don't display the icon if challenging is true
 															    }
 															    if (row.challenged) {
-															        return '<i title="Challenge" class="fas fa-trophy challenge-icon disabled" data-id="' + row.username + '" disabled></i>'; // Display the icon as disabled if challenged is true
+															        return '<i title="Abort" class="fas fa-rotate-left abort-icon enabled center-icon" data-id="' + row.username + '"></i>'; // Display the icon as disabled if challenged is true
 															    }
 															    if (row.username !== username) {
-															        return '<i title="Challenge" class="fas fa-trophy challenge-icon enabled blue" data-id="' + row.username + '"></i>'; // Display the icon normally if neither challenging nor challenged is true
+															        return '<i title="Challenge" class="fas fa-trophy challenge-icon enabled blue center-icon" data-id="' + row.username + '"></i>'; // Display the icon normally if neither challenging nor challenged is true
 															    }
 															    return ""; // Default case, don't display the icon
 															}
 														},
-													]
+													],
+												 "initComplete": function(settings, json) {
+											            $('.dataTables_empty').hide();
+											            $('.dataTables_info').hide();
+											            $('.dataTables_length').hide();
+											            $('.dataTables_filter').hide();
+											            $('.dataTables_paginate').hide();
+												    }
 											});
 							challengersTable = $('#challengersTable')
 									.DataTable(
 											{
 												"ajax" : {
-													"url" : "/online/challengers/",
+													"url" : "/online/challengers",
 													"dataSrc" : ""
 												},
 												"columns" : [
@@ -108,7 +118,7 @@
 															"data" : null,
 															"render" : function(data, type, row) {
 																if (row.username != username) {
-																	return '<i title="Accept" class="fas fa-check accept-icon enabled green" data-id="' + row.username + '"></i>';
+																	return '<i title="Accept" class="fas fa-check accept-icon enabled green center-icon" data-id="' + row.username + '"></i>';
 																}
 																return "";
 															}
@@ -117,14 +127,37 @@
 															"data" : null,
 															"render" : function(data, type, row) {
 																if (row.username != username) {
-																	return '<i title="Decline" class="fas fa-ban decline-icon enabled red" data-id="' + row.username + '"></i>';
+																	return '<i title="Decline" class="fas fa-xmark decline-icon enabled red center-icon" data-id="' + row.username + '"></i>';
 																}
 																return "";
 															}
 														},
-													]
+													],
+													"initComplete": function(settings, json) {
+											            $('.dataTables_empty').hide();
+											            $('.dataTables_info').hide();
+											            $('.dataTables_length').hide();
+											            $('.dataTables_filter').hide();
+											            $('.dataTables_paginate').hide();
+												    }
 											});
-						}
+								// Attach a function to the draw event
+								connectedUsersTable.on('draw.dt', function() {
+									$('.dataTables_empty').hide();
+						            $('.dataTables_info').hide();
+						            $('.dataTables_length').hide();
+						            $('.dataTables_filter').hide();
+						            $('.dataTables_paginate').hide();
+								});
+								// Attach a function to the draw event
+								challengersTable.on('draw.dt', function() {
+									$('.dataTables_empty').hide();
+						            $('.dataTables_info').hide();
+						            $('.dataTables_length').hide();
+						            $('.dataTables_filter').hide();
+						            $('.dataTables_paginate').hide();
+								});
+							}
 						);
 		$('#connectedUsersTable tbody').on('click', '.challenge-icon', function() {
 
@@ -145,6 +178,28 @@
 				error : function() {
 					// Handle error if deletion fails
 					alert('Failed to challenge: ' + targetUsername);
+				}
+			});
+		});
+		$('#connectedUsersTable tbody').on('click', '.abort-icon', function() {
+
+			var targetUsername = $(this).data('id');
+
+			// Create an object to hold the headers
+			var headers = {};
+			headers[csrfHeader] = csrfToken;
+
+			// Make a call to the backend to delete the corresponding record
+			$.ajax({
+				url : '/online/abort/' + targetUsername,
+				type : 'POST',
+				headers : headers,
+				success : function() {
+					
+				},
+				error : function() {
+					// Handle error if deletion fails
+					alert('Failed to abort: ' + targetUsername);
 				}
 			});
 		});
@@ -192,9 +247,11 @@
 				}
 			});
 		});
+		
 	</script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 	<script type="text/javascript" th:src="@{/scripts/online.js}"></script>
+	<link th:href="@{/styles/online.css}" rel="stylesheet" />
 </body>
 </html>

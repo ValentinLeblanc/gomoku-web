@@ -24,9 +24,9 @@ public class HistoryController {
 		return historyService.getUserHistory(username);
 	}
 	
-	@PostMapping("/save/{gameId}")
-	public void save(@PathVariable Long gameId) {
-		historyService.saveGameInHistory(gameId);
+	@PostMapping("/save/{gameId}/{name}")
+	public void save(@PathVariable Long gameId, @PathVariable String name) {
+		historyService.saveGameInHistory(gameId, name);
 	}
 	
 	@PostMapping("/view/{gameId}")

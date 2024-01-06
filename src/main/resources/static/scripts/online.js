@@ -14,7 +14,7 @@ const onReceive = (payload) => {
 	
 	if (webSocketMessage.type == "USER_CONNECTED" || webSocketMessage.type == "USER_DISCONNECTED") {
 		connectedUsersTable.ajax.reload();
- 	} else if (webSocketMessage.type == "NEW_CHALLENGER" || webSocketMessage.type == "CHALLENGE_DECLINED") {
+ 	} else if (webSocketMessage.type == "NEW_CHALLENGER" || webSocketMessage.type == "CHALLENGE_DECLINED" || webSocketMessage.type == "CHALLENGE_ABORTED") {
 		challengersTable.ajax.reload();
 		connectedUsersTable.ajax.reload();
 	} else if (webSocketMessage.type == "CHALLENGE_ACCEPTED") {

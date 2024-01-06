@@ -13,3 +13,17 @@
 .green {
 	color: green;
 }
+
+.center-icon {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.flex-container {
+	display: flex;
+}
+
+.table-wrapper {
+	margin-right: 20px; /* Optional: Add some spacing between the tables */
+}

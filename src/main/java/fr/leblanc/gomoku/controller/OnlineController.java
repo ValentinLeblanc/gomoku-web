@@ -66,5 +66,11 @@ public class OnlineController {
 		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_DECLINED).content(declineChallengeInfo).build());
 	}
 	
+	@PostMapping("/abort/{targetUsername}")
+	public void abort(@PathVariable String targetUsername) {
+		onlineService.abortChallenge(targetUsername);
+		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.CHALLENGE_ABORTED).content("").build());
+	}
+	
 	
 }

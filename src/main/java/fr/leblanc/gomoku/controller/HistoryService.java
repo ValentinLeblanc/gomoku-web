@@ -29,12 +29,13 @@ public class HistoryService {
 		return dbGames.stream().map(this::createHistoryGameDTO).toList();
 	}
 	
-	public void saveGameInHistory(Long gameId) {
+	public void saveGameInHistory(Long gameId, String name) {
 		User user = userService.getCurrentUser();
 		List<Game> games = user.getGames();
 		Game originalGame = gameService.findById(gameId);
 		Game historyGame = new Game(originalGame);
 		historyGame.setType(GameType.HISTORY);
+		historyGame.setName(name);
 		historyGame = gameService.save(historyGame);
 		games.add(historyGame);
 		userService.save(user);
@@ -48,7 +49,7 @@ public class HistoryService {
 	}
 
 	private HistoryGameDTO createHistoryGameDTO(Game game) {
-		return new HistoryGameDTO(game.getId(), game.getType(), createPlayerDTO(game.getBlackPlayer()),
+		return new HistoryGameDTO(game.getId(), game.getName(), game.getType(), createPlayerDTO(game.getBlackPlayer()),
 				createPlayerDTO(game.getWhitePlayer()), createPlayerDTO(game.getWinner()), game.getDate());
 	}
 	

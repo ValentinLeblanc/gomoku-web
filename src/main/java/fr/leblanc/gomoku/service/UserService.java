@@ -123,6 +123,13 @@ public class UserService implements UserDetailsService {
 		return false;
 	}
 
+	public void removeChallengerFrom(String targetUsername) {
+		User targetUser = findUserByUsername(targetUsername);
+		String currentUsername = getCurrentUser().getUsername();
+		targetUser.getChallengers().remove(currentUsername);
+		save(targetUser);
+	}
+
 	public User save(final UserRegistrationDTO registrationDto) {
 		final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(),
 				registrationDto.getUsername(), passwordEncoder.encode(registrationDto.getPassword()));

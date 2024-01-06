@@ -11,8 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class GomokuWebConfiguration {
 
-    @Value("${fr.leblanc.gomoku.engineUrl}")
-    private String engineUrl;
+    @Value("${fr.leblanc.gomoku.webSocketEngineUrl}")
+    private String webSocketEngineUrl;
     
     @Bean
     public SessionRegistry sessionRegistry() {
@@ -24,8 +24,8 @@ public class GomokuWebConfiguration {
 		return new BCryptPasswordEncoder();
 	}
 
-    public String getEngineUrl() {
-		return engineUrl;
+    public String getWebSocketEngineUrl() {
+		return webSocketEngineUrl;
 	}
 	
 }

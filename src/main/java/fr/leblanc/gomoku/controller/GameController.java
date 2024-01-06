@@ -53,7 +53,7 @@ public class GameController {
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
 		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
 		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
-		model.addAttribute("webSocketEngineUrl", webConfiguration.getEngineUrl() + "/engineMessages");
+		model.addAttribute("webSocketEngineUrl", webConfiguration.getWebSocketEngineUrl() + "/engineMessages");
 		model.addAttribute("username", userService.getCurrentUser().getUsername());
 		model.addAttribute("blackPlayer", game.getBlackPlayer().getUsername());
 		model.addAttribute("whitePlayer", game.getWhitePlayer().getUsername());

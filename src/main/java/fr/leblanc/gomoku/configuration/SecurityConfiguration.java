@@ -1,49 +1,49 @@
 package fr.leblanc.gomoku.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import fr.leblanc.gomoku.service.UserService;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration {
 
-	@Autowired
-	private UserService userService;
-	
-	@Autowired
-	private SessionRegistry sessionRegistry;
-	
-	@Override
-	protected void configure(final AuthenticationManagerBuilder authBuilder) throws Exception {
-		final DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-		auth.setUserDetailsService(userService);
-		auth.setPasswordEncoder(new BCryptPasswordEncoder());
-		authBuilder.authenticationProvider(auth);
+	@Bean
+	public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
+		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+		authenticationProvider.setUserDetailsService(userDetailsService);
+		authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+
+		ProviderManager providerManager = new ProviderManager(authenticationProvider);
+		providerManager.setEraseCredentialsAfterAuthentication(false);
+
+		return providerManager;
 	}
 
-	@Override
-	protected void configure(final HttpSecurity http) throws Exception {
-		http
-		.cors().disable()
-		.authorizeRequests().antMatchers( "/registration**", "/js/**", "/css/**", "/img/**" ).permitAll()
-		.anyRequest().authenticated()
-		.and()
-		.formLogin().loginPage("/login").permitAll()
-		.and()
-		.logout().invalidateHttpSession(true).clearAuthentication(true)
-		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-		.logoutSuccessUrl("/login?logout").permitAll()
-		.and()
-		.sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistry);
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
+		return http
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/registration**", "/js/**", "/css/**", "/img/**")
+						.permitAll().anyRequest().authenticated())
+				.formLogin(auth -> auth
+						.loginPage("/login").permitAll())
+				.logout(auth -> auth
+						.invalidateHttpSession(true).clearAuthentication(true)
+						.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/login?logout")
+						.permitAll())
+				.sessionManagement(auth -> auth
+						.maximumSessions(1)
+						.sessionRegistry(sessionRegistry))
+				.build();
 	}
 }

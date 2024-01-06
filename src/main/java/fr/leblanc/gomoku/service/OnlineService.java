@@ -25,5 +25,9 @@ public class OnlineService {
 	public void declineChallenge(String challengerUsername) {
 		userService.removeChallenger(challengerUsername);
 	}
+
+	public void abortChallenge(String targetUsername) {
+		userService.removeChallengerFrom(targetUsername);
+	}
 	
 }
