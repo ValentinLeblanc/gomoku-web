@@ -17,12 +17,14 @@ main {
 
 #board {
 	margin-right: 300px;
-	background-color: #deba96;
+	background-color: #f5ac03
+;
 }
 
 .emptyCell {
-	background-color: #deba96;
-	border: 1px solid black;
+	background-color: #f5ac03
+;
+	border: 1px solid #161b19;
 	caret-color: transparent;
 }
 
@@ -34,14 +36,14 @@ td {
 
 .stone {
 	padding: 12px;
-	border: 1px solid black;
+	border: 1px solid #161b19;
 	border-radius: 50px;
 }
 
 .last:before {
     position: absolute;
     content: '';
-    background-color:#FF0000;
+    background-color:#b8341a;
     border-radius:50%;
     width: 12px;
     height: 12px;
@@ -67,11 +69,11 @@ td {
 }
 
 .black {
-	background-color: black;
+	background-color: #161b19;
 }
 
 .white {
-	background-color: white;
+	background-color: #f7f5f9;
 }
 
 p {
@@ -89,7 +91,7 @@ span {
 }
 
 .arrow {
-	border: solid black;
+	border: solid #161b19;
 	border-width: 0 3px 3px 0;
 	display: inline-block;
 	padding: 3px;
