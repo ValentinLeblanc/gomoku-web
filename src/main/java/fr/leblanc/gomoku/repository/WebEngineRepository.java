@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +19,18 @@ import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.web.dto.CheckWinResultDTO;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
-import lombok.extern.apachecommons.CommonsLog;
 
 @Repository
-@CommonsLog
 public class WebEngineRepository {
 	
-	@Autowired
+	private static final Logger logger = LoggerFactory.getLogger(WebEngineRepository.class);
+	
 	private CustomProperties customProperties;
+
+	public WebEngineRepository(CustomProperties customProperties) {
+		super();
+		this.customProperties = customProperties;
+	}
 
 	public Set<Move> checkWin(GameDTO game) {
 		
@@ -46,13 +51,13 @@ public class WebEngineRepository {
 			if (checkWinResult != null && checkWinResult.isWin()) {
 				Set<Move> result = new HashSet<>();
 				for (MoveDTO move : checkWinResult.winMoves()) {
-					result.add(Move.builder().color(GomokuColor.GREEN.toNumber()).columnIndex(move.getColumnIndex()).rowIndex(move.getRowIndex()).build());
+					result.add(Move.build().color(GomokuColor.GREEN.toNumber()).columnIndex(move.columnIndex()).rowIndex(move.rowIndex()));
 				}
 				
 				return result;
 			}
 		} catch (RestClientException e) {
-			log.error("Error while computing checkWin : " + e.getMessage());
+			logger.error("Error while computing checkWin : {}", e.getMessage());
 		}
 		
 		return Collections.emptySet();
@@ -75,12 +80,12 @@ public class WebEngineRepository {
 			
 			MoveDTO computedMove = response.getBody();
 			if (computedMove != null) {
-				return Move.builder().color(computedMove.getColor()).columnIndex(computedMove.getColumnIndex()).rowIndex(computedMove.getRowIndex()).build();
+				return Move.build().color(computedMove.color()).columnIndex(computedMove.columnIndex()).rowIndex(computedMove.rowIndex());
 			}
 			
 			return null;
 		} catch (RestClientException e) {
-			log.error("Error while computing move : " + e.getMessage());
+			logger.error("Error while computing move : {}", e.getMessage());
 			return null;
 		}
 		
@@ -102,7 +107,7 @@ public class WebEngineRepository {
 			
 			return response.getBody();
 		} catch (RestClientException e) {
-			log.error("Error while computing evaluation : " + e.getMessage());
+			logger.error("Error while computing evaluation : {}", e.getMessage());
 			return 0d;
 		}
 	}
@@ -121,7 +126,7 @@ public class WebEngineRepository {
 					Void.class);
 			
 		} catch (RestClientException e) {
-			log.error("Error while stopping computation : " + e.getMessage());
+			logger.error("Error while stopping computation {}", e.getMessage());
 		}
 	}
 
@@ -139,7 +144,7 @@ public class WebEngineRepository {
 					Boolean.class).getBody();
 			
 		} catch (RestClientException e) {
-			log.error("Error while stopping computation : " + e.getMessage());
+			logger.error("Error while stopping computation : {}", e.getMessage());
 		}
 		
 		return Boolean.FALSE;
@@ -159,7 +164,7 @@ public class WebEngineRepository {
 					Void.class);
 			
 		} catch (RestClientException e) {
-			log.error("Error while deleting game : " + e.getMessage());
+			logger.error("Error while deleting game : {}", e.getMessage());
 		}
 		
 	}

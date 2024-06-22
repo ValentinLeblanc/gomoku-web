@@ -2,7 +2,6 @@ package fr.leblanc.gomoku.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import fr.leblanc.gomoku.model.Game;
@@ -16,12 +15,16 @@ import fr.leblanc.gomoku.web.dto.PlayerDTO;
 @Service
 public class HistoryService {
 	
-	@Autowired
     private UserService userService;
 	
-	@Autowired
 	private GameService gameService;
 	
+	public HistoryService(UserService userService, GameService gameService) {
+		super();
+		this.userService = userService;
+		this.gameService = gameService;
+	}
+
 	public List<HistoryGameDTO> getUserHistory(String username) {
 		User user = userService.findUserByUsername(username);
 		List<Game> dbGames = user.getGames();

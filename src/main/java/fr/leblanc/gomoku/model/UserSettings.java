@@ -1,16 +1,16 @@
 package fr.leblanc.gomoku.model;
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "settings")
-@EqualsAndHashCode
 public class UserSettings
 {
     @Id
@@ -21,7 +21,7 @@ public class UserSettings
     @Column(name = "display_analysis")
     private boolean displayAnalysis = false;
 	private boolean strikeEnabled = false;
-	private int minMaxDepth = 2;;
+	private int minMaxDepth = 2;
 	private int strikeDepth = 4;
 	private int minMaxExtent = 0;
 	private int strikeTimeout = 20;
@@ -88,5 +88,33 @@ public class UserSettings
 
 	public void setStrikeTimeout(int strikeTimeout) {
 		this.strikeTimeout = strikeTimeout;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(boardSize, displayAnalysis, id, minMaxDepth, minMaxExtent, strikeDepth, strikeEnabled,
+				strikeTimeout);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserSettings other = (UserSettings) obj;
+		return boardSize == other.boardSize && displayAnalysis == other.displayAnalysis && id == other.id
+				&& minMaxDepth == other.minMaxDepth && minMaxExtent == other.minMaxExtent
+				&& strikeDepth == other.strikeDepth && strikeEnabled == other.strikeEnabled
+				&& strikeTimeout == other.strikeTimeout;
+	}
+
+	@Override
+	public String toString() {
+		return "UserSettings [id=" + id + ", boardSize=" + boardSize + ", displayAnalysis=" + displayAnalysis
+				+ ", strikeEnabled=" + strikeEnabled + ", minMaxDepth=" + minMaxDepth + ", strikeDepth=" + strikeDepth
+				+ ", minMaxExtent=" + minMaxExtent + ", strikeTimeout=" + strikeTimeout + "]";
 	}
 }

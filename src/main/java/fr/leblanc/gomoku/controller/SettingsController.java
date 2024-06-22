@@ -1,6 +1,5 @@
 package fr.leblanc.gomoku.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,21 +12,25 @@ import fr.leblanc.gomoku.web.dto.UserSettingsDTO;
 @RestController
 public class SettingsController
 {
-    @Autowired
     private SettingsService settingsService;
     
-    @PostMapping({ "/settings" })
+    public SettingsController(SettingsService settingsService) {
+		super();
+		this.settingsService = settingsService;
+	}
+
+	@PostMapping({ "/settings" })
     public RedirectView updateSettings(UserSettingsDTO userSettingsDTO, Model model) {
     	
     	UserSettings settings = settingsService.getCurrentSettings();
     	
-    	settings.setBoardSize(userSettingsDTO.getBoardSize());
-    	settings.setDisplayAnalysis(userSettingsDTO.isDisplayAnalysis());
-    	settings.setMinMaxDepth(userSettingsDTO.getMinMaxDepth());
-    	settings.setMinMaxExtent(userSettingsDTO.getMinMaxExtent());
-    	settings.setStrikeDepth(userSettingsDTO.getStrikeDepth());
-    	settings.setStrikeTimeout(userSettingsDTO.getStrikeTimeout());
-    	settings.setStrikeEnabled(userSettingsDTO.isStrikeEnabled());
+    	settings.setBoardSize(userSettingsDTO.boardSize());
+    	settings.setDisplayAnalysis(userSettingsDTO.displayAnalysis());
+    	settings.setMinMaxDepth(userSettingsDTO.minMaxDepth());
+    	settings.setMinMaxExtent(userSettingsDTO.minMaxExtent());
+    	settings.setStrikeDepth(userSettingsDTO.strikeDepth());
+    	settings.setStrikeTimeout(userSettingsDTO.strikeTimeout());
+    	settings.setStrikeEnabled(userSettingsDTO.strikeEnabled());
     	
         settingsService.save(settings);
         

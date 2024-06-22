@@ -1,5 +1,6 @@
 package fr.leblanc.gomoku.service;
 
+
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -10,7 +11,8 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -31,28 +33,34 @@ import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
 import fr.leblanc.gomoku.web.dto.UserSettingsDTO;
-import lombok.extern.apachecommons.CommonsLog;
 
 @Service
-@CommonsLog
 public class GameService {
 
+	private static final Logger logger = LoggerFactory.getLogger(GameService.class);
+	
 	private static final String NOT_SUPPORTED_FOR_ONLINE_GAME = "Not supported for online game";
 
 	private static final String GAME_NOT_FOUND = "Game not found";
 
-	@Autowired
 	private GameRepository gameRepository;
 	
-	@Autowired
 	private UserService userService;
 	
-	@Autowired
 	private EngineService engineService;
 	
-	@Autowired
 	private WebSocketController webSocketController;
 	
+	public GameService(GameRepository gameRepository, UserService userService, EngineService engineService,
+			WebSocketController webSocketController, Map<Long, Stack<Move>> undoMoveStack) {
+		super();
+		this.gameRepository = gameRepository;
+		this.userService = userService;
+		this.engineService = engineService;
+		this.webSocketController = webSocketController;
+		this.undoMoveStack = undoMoveStack;
+	}
+
 	private Map<Long, Stack<Move>> undoMoveStack = new HashMap<>();
 	
 	public Game getOrCreateGame(GameType gameType) {
@@ -89,7 +97,7 @@ public class GameService {
 			userService.save(currentGame.getBlackPlayer());
 			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
 			userService.save(currentGame.getWhitePlayer());
-			webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.ONLINE_GAME_ABORTED).build());
+			webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.ONLINE_GAME_ABORTED));
 		} else {
 			Game newGame = createGame(userService.getCurrentUser(), gameType);
 			gameRepository.save(newGame);
@@ -158,16 +166,16 @@ public class GameService {
 		
 		undoMoveStack.computeIfAbsent(currentGame.getId(), k -> new Stack<>()).clear();
 		
-		Move newMove = Move.builder().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color).build();
+		Move newMove = Move.build().number(currentGame.getMoves().size()).columnIndex(columnIndex).rowIndex(rowIndex).color(color);
 		currentGame.getMoves().add(newMove);
 		
 		gameRepository.save(currentGame);
 		
-		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.MOVE).content(newMove).build());
+		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.MOVE).content(newMove));
 
 		Double newEvaluation = engineService.computeEvaluation(new GameDTO(currentGame));
 		
-		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation).build());
+		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation));
 		
 		if (!checkWinner(currentGame) && computeNextMove) {
 			computeMove(currentGame.getType());
@@ -180,7 +188,7 @@ public class GameService {
 		try {
 			Set<Move> winningMoves = engineService.checkWin(new GameDTO(currentGame));
 			if (winningMoves != null && !winningMoves.isEmpty()) {
-				webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves).build());
+				webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.IS_WIN).content(winningMoves));
 				Move winningMove = winningMoves.iterator().next();
 				int color = currentGame.getMove(winningMove.getColumnIndex(), winningMove.getRowIndex()).getColor();
 				
@@ -195,7 +203,7 @@ public class GameService {
 				return true;
 			}
 		} catch (ResourceAccessException e) {
-			log.error("Could not access Gomoku Engine : " + e.getMessage());
+			logger.error("Could not access Gomoku Engine : {}", e.getMessage());
 		}
 		return false;
 	}
@@ -269,13 +277,11 @@ public class GameService {
 			return null;
 		}
 		
-		GameDTO gameDto = new GameDTO(currentGame);
+		GameDTO gameDto = new GameDTO(currentGame, new UserSettingsDTO(userService.getCurrentUser().getSettings()));
 		
-		gameDto.setSettings(new UserSettingsDTO(userService.getCurrentUser().getSettings()));
-		
-		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(true).build());
+		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(true));
 		Move computedMove = engineService.computeMove(gameDto);
-		webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(false).build());
+		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(false));
 		
 		if (computedMove == null) {
 			throw new EngineException("Move could not be computed");
@@ -294,9 +300,7 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		GameDTO gameDto = new GameDTO(currentGame);
-		
-		gameDto.setSettings(new UserSettingsDTO(userService.getCurrentUser().getSettings()));
+		GameDTO gameDto = new GameDTO(currentGame, new UserSettingsDTO(userService.getCurrentUser().getSettings()));
 		
 		return engineService.computeEvaluation(gameDto);
 	}
@@ -315,7 +319,7 @@ public class GameService {
 		Move lastMove = getLastMove(currentGame);
 		
 		if (propagate) {
-			webSocketController.sendMessage(WebSocketMessage.builder().gameId(currentGame.getId()).type(MessageType.LAST_MOVE).content(lastMove).build());
+			webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.LAST_MOVE).content(lastMove));
 		}
 		
 		return lastMove;
@@ -344,14 +348,14 @@ public class GameService {
 		
 		newGame = gameRepository.save(newGame);
 		
-		for (MoveDTO moveDto : uploadedGame.getMoves()) {
+		for (MoveDTO moveDto : uploadedGame.moves()) {
 			
 			Move move = new Move();
 			
-			move.setColor(moveDto.getColor());
-			move.setColumnIndex(moveDto.getColumnIndex());
-			move.setRowIndex(moveDto.getRowIndex());
-			move.setNumber(moveDto.getNumber());
+			move.setColor(moveDto.color());
+			move.setColumnIndex(moveDto.columnIndex());
+			move.setRowIndex(moveDto.rowIndex());
+			move.setNumber(moveDto.number());
 			
 			newGame.getMoves().add(move);
 		}
@@ -389,7 +393,7 @@ public class GameService {
 	}
 
 	private Game createGame(User user, GameType gameType) {
-		Game newGame = Game.builder().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(gameType).date(new Timestamp(System.currentTimeMillis())).build();
+		Game newGame = Game.build().blackPlayer(user).whitePlayer(user).boardSize(user.getSettings().getBoardSize()).type(gameType).date(new Timestamp(System.currentTimeMillis()));
 		
 		newGame.setMoves(new HashSet<>());
 		
@@ -407,7 +411,7 @@ public class GameService {
 	}
 	
 	private Game createGame(User blackPlayer, User whitePlayer, GameType gameType) {
-		Game newGame = Game.builder().blackPlayer(blackPlayer).whitePlayer(whitePlayer).boardSize(blackPlayer.getSettings().getBoardSize()).type(gameType).build();
+		Game newGame = Game.build().blackPlayer(blackPlayer).whitePlayer(whitePlayer).boardSize(blackPlayer.getSettings().getBoardSize()).type(gameType);
 		
 		newGame.setMoves(new HashSet<>());
 		

@@ -2,7 +2,6 @@ package fr.leblanc.gomoku.controller;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -28,15 +27,19 @@ import fr.leblanc.gomoku.web.dto.MoveDTO;
 @RequestMapping("/game")
 public class GameController {
 
-	@Autowired
 	private GameService gameService;
 	
-	@Autowired
 	private UserService userService;
 	
-    @Autowired
     private GomokuWebConfiguration webConfiguration;
 	
+	public GameController(GameService gameService, UserService userService, GomokuWebConfiguration webConfiguration) {
+		super();
+		this.gameService = gameService;
+		this.userService = userService;
+		this.webConfiguration = webConfiguration;
+	}
+
 	@GetMapping("/{gameTypeString}")
 	public ModelAndView displayGame(@PathVariable String gameTypeString, Model model) {
 		
@@ -71,7 +74,7 @@ public class GameController {
 	
 	@PostMapping("/add-move/{gameType}")
 	public Move addMove(@PathVariable String gameType, @RequestBody MoveDTO move) {
-		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.getColumnIndex(), move.getRowIndex());
+		return gameService.addMove(GameType.valueOf(gameType.toUpperCase()), move.columnIndex(), move.rowIndex());
 	}
 	
 	@PostMapping("/compute-move/{gameType}")

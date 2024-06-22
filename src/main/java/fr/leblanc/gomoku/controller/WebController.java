@@ -1,7 +1,6 @@
 
 package fr.leblanc.gomoku.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,10 +12,14 @@ import fr.leblanc.gomoku.service.UserService;
 @Controller
 public class WebController
 {
-    @Autowired
     private UserService userService;
     
-    @GetMapping({ "/login" })
+    public WebController(UserService userService) {
+		super();
+		this.userService = userService;
+	}
+
+	@GetMapping({ "/login" })
     public String login() {
         return "login";
     }

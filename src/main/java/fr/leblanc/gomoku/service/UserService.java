@@ -7,7 +7,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.authentication.event.LogoutSuccessEvent;
@@ -29,24 +28,26 @@ import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.model.WebSocketMessage;
 import fr.leblanc.gomoku.repository.UserRepository;
 import fr.leblanc.gomoku.web.dto.OnlineUserDTO;
-import fr.leblanc.gomoku.web.dto.UserRegistrationDTO;
+import fr.leblanc.gomoku.web.dto.UserDTO;
 
 @Service
 public class UserService implements UserDetailsService {
 	
 	private UserRepository userRepository;
-
-	@Autowired
+	
 	private PasswordEncoder passwordEncoder;
 	
-	@Autowired
 	private SessionRegistry sessionRegistry;
 	
-	@Autowired
 	private WebSocketController webSocketController;
 	
-	public UserService(final UserRepository userRepository) {
-		this.userRepository = userRepository;	
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SessionRegistry sessionRegistry,
+			WebSocketController webSocketController) {
+		super();
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.sessionRegistry = sessionRegistry;
+		this.webSocketController = webSocketController;
 	}
 	
 	@Override
@@ -73,12 +74,12 @@ public class UserService implements UserDetailsService {
 	
 	@EventListener
     public void onSuccess(AuthenticationSuccessEvent event) {
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.USER_CONNECTED).content(event.getAuthentication().getName()).build());
+		webSocketController.sendMessage(WebSocketMessage.build().type(MessageType.USER_CONNECTED).content(event.getAuthentication().getName()));
     }
 	
 	@EventListener
 	public void onLogout(LogoutSuccessEvent event) {
-		webSocketController.sendMessage(WebSocketMessage.builder().type(MessageType.USER_DISCONNECTED).content(event.getAuthentication().getName()).build());
+		webSocketController.sendMessage(WebSocketMessage.build().type(MessageType.USER_DISCONNECTED).content(event.getAuthentication().getName()));
 	}
 	
 	public List<String> getChallengeTargets() {
@@ -130,9 +131,9 @@ public class UserService implements UserDetailsService {
 		save(targetUser);
 	}
 
-	public User save(final UserRegistrationDTO registrationDto) {
-		final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(),
-				registrationDto.getUsername(), passwordEncoder.encode(registrationDto.getPassword()));
+	public User save(final UserDTO registrationDto) {
+		final User user = new User(registrationDto.firstName(), registrationDto.lastName(),
+				registrationDto.username(), passwordEncoder.encode(registrationDto.password()));
 		return userRepository.save(user);
 	}
 
@@ -150,8 +151,8 @@ public class UserService implements UserDetailsService {
 		return this.findUserByUsername(springUser.getUsername());
 	}
 
-	public void registerUserAccount(final UserRegistrationDTO registrationDto) throws RegistrationException {
-		final User user = this.findUserByUsername(registrationDto.getUsername());
+	public void registerUser(final UserDTO registrationDto) throws RegistrationException {
+		final User user = this.findUserByUsername(registrationDto.username());
 		if (user != null) {
 			throw new RegistrationException("This username is already used in database.");
 		}

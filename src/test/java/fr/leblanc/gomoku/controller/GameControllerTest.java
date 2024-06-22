@@ -58,20 +58,14 @@ class GameControllerTest extends AbstractControllerTest {
 
 		assertNotNull(currentGame);
 
-		MoveDTO move = new MoveDTO();
-
-		move.setColor(GomokuColor.BLACK.toNumber());
-		move.setColumnIndex(5);
-		move.setRowIndex(6);
+		MoveDTO move = new MoveDTO(0, 6, 5, GomokuColor.BLACK.toNumber());
 
 		Gson gson = new Gson();
 
 		mockMvc.perform(post("/game/add-move/LOCAL").with(user(USER).password(PASSWORD)).content(gson.toJson(move))
 				.contentType(MediaType.APPLICATION_JSON).with(csrf())).andExpect(status().isOk());
 
-		move.setColor(GomokuColor.WHITE.toNumber());
-		move.setColumnIndex(5);
-		move.setRowIndex(7);
+		move = new MoveDTO(0, 5, 7, GomokuColor.WHITE.toNumber());
 
 		assertEquals(1, currentGame.getMoves().size());
 		
