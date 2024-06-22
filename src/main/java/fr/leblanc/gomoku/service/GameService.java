@@ -32,7 +32,6 @@ import fr.leblanc.gomoku.model.WebSocketMessage;
 import fr.leblanc.gomoku.repository.GameRepository;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
-import fr.leblanc.gomoku.web.dto.UserSettingsDTO;
 
 @Service
 public class GameService {
@@ -277,7 +276,7 @@ public class GameService {
 			return null;
 		}
 		
-		GameDTO gameDto = new GameDTO(currentGame, new UserSettingsDTO(userService.getCurrentUser().getSettings()));
+		GameDTO gameDto = new GameDTO(currentGame, userService.getCurrentUser().getSettings());
 		
 		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.IS_COMPUTING).content(true));
 		Move computedMove = engineService.computeMove(gameDto);
@@ -300,7 +299,7 @@ public class GameService {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
-		GameDTO gameDto = new GameDTO(currentGame, new UserSettingsDTO(userService.getCurrentUser().getSettings()));
+		GameDTO gameDto = new GameDTO(currentGame, userService.getCurrentUser().getSettings());
 		
 		return engineService.computeEvaluation(gameDto);
 	}
