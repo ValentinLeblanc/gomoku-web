@@ -30,6 +30,7 @@ import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.model.User;
 import fr.leblanc.gomoku.model.WebSocketMessage;
 import fr.leblanc.gomoku.repository.GameRepository;
+import fr.leblanc.gomoku.web.dto.EvaluationDTO;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
 
@@ -172,7 +173,7 @@ public class GameService {
 		
 		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.MOVE).content(newMove));
 
-		Double newEvaluation = engineService.computeEvaluation(new GameDTO(currentGame));
+		EvaluationDTO newEvaluation = engineService.computeEvaluation(new GameDTO(currentGame));
 		
 		webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.EVALUATION).content(newEvaluation));
 		
@@ -291,7 +292,7 @@ public class GameService {
 		return addMoveInternal(currentGame, computedMove.getColumnIndex(), computedMove.getRowIndex(), computeNextMove);
 	}
 
-	public Double computeEvaluation(GameType gameType) {
+	public EvaluationDTO computeEvaluation(GameType gameType) {
 		
 		Game currentGame = getCurrentGame(gameType);
 	

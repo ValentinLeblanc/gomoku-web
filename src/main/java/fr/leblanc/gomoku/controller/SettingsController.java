@@ -26,6 +26,7 @@ public class SettingsController
     	
     	settings.setBoardSize(userSettingsDTO.boardSize());
     	settings.setDisplayAnalysis(userSettingsDTO.displayAnalysis());
+    	settings.setDisplayEvaluation(userSettingsDTO.displayEvaluation());
     	settings.setMinMaxDepth(userSettingsDTO.minMaxDepth());
     	settings.setMinMaxExtent(userSettingsDTO.minMaxExtent());
     	settings.setStrikeDepth(userSettingsDTO.strikeDepth());

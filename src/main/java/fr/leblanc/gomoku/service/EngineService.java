@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.repository.WebEngineRepository;
+import fr.leblanc.gomoku.web.dto.EvaluationDTO;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 
 @Service
@@ -23,7 +24,7 @@ public class EngineService {
 		return engineRepository.computeMove(game);
 	}
 
-	public Double computeEvaluation(GameDTO game) {
+	public EvaluationDTO computeEvaluation(GameDTO game) {
 		return engineRepository.computeEvaluation(game);
 	}
 

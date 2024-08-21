@@ -20,6 +20,7 @@ public class UserSettings
     private int boardSize = 15;
     @Column(name = "display_analysis")
     private boolean displayAnalysis = false;
+    private boolean displayEvaluation = false;
 	private boolean strikeEnabled = false;
 	private int minMaxDepth = 2;
 	private int strikeDepth = 4;
@@ -32,6 +33,14 @@ public class UserSettings
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public boolean isDisplayEvaluation() {
+		return displayEvaluation;
+	}
+	
+	public void setDisplayEvaluation(boolean displayEvaluation) {
+		this.displayEvaluation = displayEvaluation;
 	}
 
 	public Integer getBoardSize() {
@@ -91,9 +100,17 @@ public class UserSettings
 	}
 
 	@Override
+	public String toString() {
+		return "UserSettings [id=" + id + ", boardSize=" + boardSize + ", displayAnalysis=" + displayAnalysis
+				+ ", displayEvaluation=" + displayEvaluation + ", strikeEnabled=" + strikeEnabled + ", minMaxDepth="
+				+ minMaxDepth + ", strikeDepth=" + strikeDepth + ", minMaxExtent=" + minMaxExtent + ", strikeTimeout="
+				+ strikeTimeout + "]";
+	}
+
+	@Override
 	public int hashCode() {
-		return Objects.hash(boardSize, displayAnalysis, id, minMaxDepth, minMaxExtent, strikeDepth, strikeEnabled,
-				strikeTimeout);
+		return Objects.hash(boardSize, displayAnalysis, displayEvaluation, id, minMaxDepth, minMaxExtent, strikeDepth,
+				strikeEnabled, strikeTimeout);
 	}
 
 	@Override
@@ -105,16 +122,9 @@ public class UserSettings
 		if (getClass() != obj.getClass())
 			return false;
 		UserSettings other = (UserSettings) obj;
-		return boardSize == other.boardSize && displayAnalysis == other.displayAnalysis && id == other.id
-				&& minMaxDepth == other.minMaxDepth && minMaxExtent == other.minMaxExtent
-				&& strikeDepth == other.strikeDepth && strikeEnabled == other.strikeEnabled
-				&& strikeTimeout == other.strikeTimeout;
-	}
-
-	@Override
-	public String toString() {
-		return "UserSettings [id=" + id + ", boardSize=" + boardSize + ", displayAnalysis=" + displayAnalysis
-				+ ", strikeEnabled=" + strikeEnabled + ", minMaxDepth=" + minMaxDepth + ", strikeDepth=" + strikeDepth
-				+ ", minMaxExtent=" + minMaxExtent + ", strikeTimeout=" + strikeTimeout + "]";
+		return boardSize == other.boardSize && displayAnalysis == other.displayAnalysis
+				&& displayEvaluation == other.displayEvaluation && id == other.id && minMaxDepth == other.minMaxDepth
+				&& minMaxExtent == other.minMaxExtent && strikeDepth == other.strikeDepth
+				&& strikeEnabled == other.strikeEnabled && strikeTimeout == other.strikeTimeout;
 	}
 }

@@ -132,8 +132,8 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User save(final UserDTO registrationDto) {
-		final User user = new User(registrationDto.firstName(), registrationDto.lastName(),
-				registrationDto.username(), passwordEncoder.encode(registrationDto.password()));
+		final User user = new User(registrationDto.getFirstName(), registrationDto.getLastName(),
+				registrationDto.getUsername(), passwordEncoder.encode(registrationDto.getPassword()));
 		return userRepository.save(user);
 	}
 
@@ -152,7 +152,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public void registerUser(final UserDTO registrationDto) throws RegistrationException {
-		final User user = this.findUserByUsername(registrationDto.username());
+		final User user = this.findUserByUsername(registrationDto.getUsername());
 		if (user != null) {
 			throw new RegistrationException("This username is already used in database.");
 		}

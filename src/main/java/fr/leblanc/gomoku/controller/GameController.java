@@ -20,6 +20,7 @@ import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.Move;
 import fr.leblanc.gomoku.service.GameService;
 import fr.leblanc.gomoku.service.UserService;
+import fr.leblanc.gomoku.web.dto.EvaluationDTO;
 import fr.leblanc.gomoku.web.dto.GameDTO;
 import fr.leblanc.gomoku.web.dto.MoveDTO;
 
@@ -56,7 +57,7 @@ public class GameController {
 		model.addAttribute("userSettings", game.getBlackPlayer().getSettings());
 		model.addAttribute("isComputing", gameService.isComputing(game.getId()));
 		model.addAttribute("winningMoves", gameService.getWinningMoves(gameType));
-		model.addAttribute("webSocketEngineUrl", webConfiguration.getWebSocketEngineUrl() + "/engineMessages");
+		model.addAttribute("engineUrl", webConfiguration.getEngineUrl() + "/engineMessages");
 		model.addAttribute("username", userService.getCurrentUser().getUsername());
 		model.addAttribute("blackPlayer", game.getBlackPlayer().getUsername());
 		model.addAttribute("whitePlayer", game.getWhitePlayer().getUsername());
@@ -93,7 +94,7 @@ public class GameController {
 	}
 	
 	@PostMapping("/compute-evaluation/{gameType}")
-	public Double computeEvaluation(@PathVariable String gameType) {
+	public EvaluationDTO computeEvaluation(@PathVariable String gameType) {
 		return gameService.computeEvaluation(GameType.valueOf(gameType.toUpperCase()));
 	}
 	

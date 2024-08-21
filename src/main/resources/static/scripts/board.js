@@ -509,7 +509,29 @@ const displayStrikeProgress = (progress) => {
 
 const displayEvaluation = (evaluation) => {
 	const evaluationValue = document.getElementById("evaluationValue");
-	evaluationValue.innerText = evaluation;
+	evaluationValue.innerText = evaluation.evaluation;
+	if (userSettings.displayEvaluation) {
+		var cells = document.querySelectorAll(".emptyCell");
+		for (const cell of cells) {
+			cell.textContent = "";
+		}
+		 for (const [key, evalValue] of Object.entries(evaluation.cellMap)) {
+	        // Extract column and row from key
+	        const match = key.match(/column=(\d+), row=(\d+)/);
+	        if (match && evalValue != 0) {
+	            const column = parseInt(match[1], 10);
+	            const row = parseInt(match[2], 10);
+				
+				for (const cell of cells) {
+					var columnCell = parseInt(cell.id.split("/")[0]);
+					var rowCell = parseInt(cell.id.split("/")[1]);
+					if (column == columnCell && row == rowCell) {
+						cell.textContent = evalValue;
+					}
+				}
+	        }
+	    }
+	}
 }
 
 const updateComputeIcon = () => {
@@ -548,7 +570,7 @@ const connectToGameWebSocket = () => {
 }
 
 const connectToEngineWebSocket = () => {
-	const socket = new SockJS(webSocketEngineUrl)
+	const socket = new SockJS(engineUrl)
 	stompClientEngine = Stomp.over(socket)
 	stompClientEngine.connect({}, onEngineConnected)
 }

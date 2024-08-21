@@ -20,6 +20,11 @@ public class UserController {
 	public UserController(final UserService userService) {
 		this.userService = userService;
 	}
+	
+	@ModelAttribute("user")
+	public UserDTO userRegistrationDto() {
+		return new UserDTO(null, null, null, null);
+	}
 
 	@GetMapping
 	public String showRegistrationForm() {
