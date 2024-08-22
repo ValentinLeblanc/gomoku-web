@@ -14,24 +14,18 @@ services:
       - gomoku-engine
     ports:
       - 8080:8080
-      - 8888:8888
-    extra_hosts:
-      - "gomoku-engine.leblanc.fr:172.17.0.1"
     environment:
       SPRING_APPLICATION_JSON: '{
         "spring.datasource.url"  : "jdbc:mysql://gomoku-db:3306/root?useSSL=false",
         "spring.datasource.username" : "root",
         "spring.datasource.password" : "leblanc",
         "spring.jpa.hibernate.ddl-auto" : "update",
-        "fr.leblanc.gomoku.engineUrl" : "http://gomoku-engine.leblanc.fr:8081"
+        "fr.leblanc.gomoku.engineUrl" : "http://gomoku-engine.leblanc.fr"
         }'
   gomoku-engine:
     image: gomoku-engine:1.0.0
-    ports:
-      - 8081:8081
-      - 9888:9888
-  gomoku-http:
-    image: gomoku-http:1.0.0
+  gomoku-engine-http:
+    image: gomoku-engine-http:1.0.0
     ports:
       - 80:80
 volumes:
