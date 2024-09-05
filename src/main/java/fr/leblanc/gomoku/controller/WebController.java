@@ -1,7 +1,9 @@
 
 package fr.leblanc.gomoku.controller;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +38,11 @@ public class WebController
     
     @ModelAttribute("username")
     public String addUsernameToModel() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication.getPrincipal() instanceof OidcUser oidcUser) {
+			return oidcUser.getPreferredUsername();
+		}
+		return authentication.getName();
     }
     
     @GetMapping({ "/online" })

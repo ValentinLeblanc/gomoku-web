@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import fr.leblanc.gomoku.controller.WebSocketController;
@@ -146,8 +147,11 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User getCurrentUser() {
-		final org.springframework.security.core.userdetails.User springUser = (org.springframework.security.core.userdetails.User) SecurityContextHolder
-				.getContext().getAuthentication().getPrincipal();
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof OidcUser oidcUser) {
+			return this.findUserByUsername(oidcUser.getPreferredUsername());
+		}
+		final org.springframework.security.core.userdetails.User springUser = (org.springframework.security.core.userdetails.User) principal;
 		return this.findUserByUsername(springUser.getUsername());
 	}
 

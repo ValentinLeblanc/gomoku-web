@@ -1,1 +1,3 @@
-mvn clean install -DskipTests
+call build_http.bat
+call build_engine.bat
+call build_web.bat

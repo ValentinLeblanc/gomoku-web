@@ -2,11 +2,12 @@ version: "3.8"
 services:
   gomoku-web:
     environment:
-      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8888,server=y,suspend=n"
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8888,server=y,suspend=n
     ports:
       - 8888:8888
     extra_hosts:
-      - "gomoku-engine.leblanc.fr:172.17.0.1"
+      - "gomoku-engine:172.17.0.1"
+      - "gomoku-ids:172.17.0.1"
   gomoku-engine:
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:9888,server=y,suspend=n"

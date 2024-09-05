@@ -5,7 +5,7 @@
 - Maven 3.8.4
 - Docker 20.10.14
 - Docker Compose 2.4.1
-- for local dev, extra host : gomoku-engine.leblanc.fr 127.0.0.1
+- for local dev, extra host : gomoku-engine 127.0.0.1 and gomoku-ids 127.0.0.1
 
 ## How to build and start the web application :
 

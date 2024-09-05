@@ -20,11 +20,23 @@ services:
       - SPRING_DATASOURCE_PASSWORD=leblanc
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - FR_LEBLANC_GOMOKU_ENGINEURL=http://gomoku-engine
+      - SPRING_PROFILES_ACTIVE=sso
   gomoku-engine:
     image: gomoku-engine:1.0.0
   gomoku-engine-http:
     image: gomoku-engine-http:1.0.0
     ports:
       - 80:80
+  gomoku-ids:
+    image: quay.io/keycloak/keycloak:25.0.4
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8282:8080
+    command: start-dev
+    volumes:
+     - ids:/opt/keycloak/data
 volumes:
   db:
+  ids:
