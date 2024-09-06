@@ -1,3 +1,3 @@
 #!/bin/bash
 ./build.sh
-./start.sh
+./start_sso.sh
