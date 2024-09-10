@@ -40,8 +40,10 @@ public class SecurityConfiguration {
 				.formLogin(auth -> auth
 						.loginPage("/login").permitAll())
 				.logout(auth -> auth
-						.invalidateHttpSession(true).clearAuthentication(true)
-						.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/login?logout")
+						.invalidateHttpSession(true)
+						.clearAuthentication(true)
+						.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+						.logoutSuccessUrl("/login?logout")
 						.permitAll())
 				.sessionManagement(auth -> auth
 						.maximumSessions(1)

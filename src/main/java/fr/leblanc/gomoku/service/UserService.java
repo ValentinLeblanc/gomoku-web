@@ -93,10 +93,18 @@ public class UserService implements UserDetailsService {
 	public List<User> getAllConnectedUsers() {
 		return sessionRegistry.getAllPrincipals()
 				.stream()
-				.filter(org.springframework.security.core.userdetails.User.class::isInstance)
-				.map(org.springframework.security.core.userdetails.User.class::cast)
-				.map(u -> findUserByUsername(u.getUsername()))
+				.map(u -> findUserByUsername(extractUsername(u)))
 				.toList();
+	}
+	
+	private String extractUsername(Object principal) {
+		if (principal instanceof OidcUser openIdUser) {
+			return openIdUser.getPreferredUsername();
+		}
+		if (principal instanceof org.springframework.security.core.userdetails.User springUser) {
+			return springUser.getUsername();
+		}
+		throw new IllegalStateException("unknown principal: " + principal);
 	}
 	
 	public List<OnlineUserDTO> getChallengers() {
@@ -148,11 +156,7 @@ public class UserService implements UserDetailsService {
 
 	public User getCurrentUser() {
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof OidcUser oidcUser) {
-			return this.findUserByUsername(oidcUser.getPreferredUsername());
-		}
-		final org.springframework.security.core.userdetails.User springUser = (org.springframework.security.core.userdetails.User) principal;
-		return this.findUserByUsername(springUser.getUsername());
+		return this.findUserByUsername(extractUsername(principal));
 	}
 
 	public void registerUser(final UserDTO registrationDto) throws RegistrationException {
