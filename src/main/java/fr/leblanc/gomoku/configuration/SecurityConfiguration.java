@@ -12,6 +12,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -19,6 +20,11 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Profile("default")
 public class SecurityConfiguration {
 
+	@Bean
+	public HttpSessionEventPublisher httpSessionEventPublisher() {
+	    return new HttpSessionEventPublisher();
+	}
+	
 	@Bean
 	public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
 		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();

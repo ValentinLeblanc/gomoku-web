@@ -75,6 +75,13 @@ public class UserService implements UserDetailsService {
 	
 	@EventListener
     public void onSuccess(AuthenticationSuccessEvent event) {
+		Object principal = event.getAuthentication().getPrincipal();
+		if (principal instanceof OidcUser oidcUser) {
+			User externalUser = findUserByUsername(oidcUser.getPreferredUsername());
+			if (externalUser == null) {
+				save(new UserDTO(oidcUser.getGivenName(), oidcUser.getFamilyName(), oidcUser.getPreferredUsername(), "*****"));
+			}
+		}
 		webSocketController.sendMessage(WebSocketMessage.build().type(MessageType.USER_CONNECTED).content(event.getAuthentication().getName()));
     }
 	
