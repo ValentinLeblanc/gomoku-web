@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.leblanc.gomoku.service.HistoryService;
 import fr.leblanc.gomoku.web.dto.HistoryGameDTO;
 
 @RestController

@@ -12,6 +12,7 @@ services:
     depends_on:
       - gomoku-db
       - gomoku-engine
+      - gomoku-ids
     ports:
       - 8080:8080
     environment:
@@ -21,6 +22,8 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - FR_LEBLANC_GOMOKU_ENGINEURL=http://gomoku-engine
       - SPRING_PROFILES_ACTIVE=sso
+    entrypoint: ["/usr/local/bin/wait-for-it.sh", "http://gomoku-ids:8282/realms/external", "--", "java -jar /gomoku-web.jar"]
+
   gomoku-engine:
     image: gomoku-engine:1.0.0
   gomoku-engine-http:
@@ -34,7 +37,6 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - 8282:8080
-#    command: start-dev --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true
     command: start-dev
     volumes:
      - ids:/opt/keycloak/data

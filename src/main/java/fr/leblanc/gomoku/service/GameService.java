@@ -77,6 +77,7 @@ public class GameService {
 		User player2 = userService.findUserByUsername(player2Username);
 		boolean isBlackPlayer = Math.random() > 0.5;
 		Game onlineGame = createGame(isBlackPlayer ? player1 : player2, isBlackPlayer ? player2 : player1, GameType.ONLINE);
+		onlineGame.setDate(new Timestamp(System.currentTimeMillis()));
 		gameRepository.save(onlineGame);
 		userService.save(player1);
 		userService.save(player2);

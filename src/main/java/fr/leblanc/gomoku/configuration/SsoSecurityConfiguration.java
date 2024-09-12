@@ -11,6 +11,8 @@ import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInit
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -18,10 +20,22 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 public class SsoSecurityConfiguration {
 	
 	@Bean
+	public HttpSessionEventPublisher httpSessionEventPublisher() {
+	    return new HttpSessionEventPublisher();
+	}
+	
+	@Bean
 	public SecurityFilterChain configure(HttpSecurity http, SessionRegistry sessionRegistry, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
 		return http
 				.oauth2Client(Customizer.withDefaults())
-				.oauth2Login(Customizer.withDefaults())
+				.oauth2Login(login -> login
+						.loginPage("/login")
+						.permitAll())
+				.httpBasic(Customizer.withDefaults())
+				.formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll())
 				.sessionManagement(auth -> auth
 						.maximumSessions(1)
 						.sessionRegistry(sessionRegistry))
@@ -31,6 +45,8 @@ public class SsoSecurityConfiguration {
 				.logout(auth -> auth
 						.invalidateHttpSession(true)
 						.clearAuthentication(true)
+						.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+						.logoutSuccessUrl("/login?logout")
 						.logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository))
 						)
 				.build();

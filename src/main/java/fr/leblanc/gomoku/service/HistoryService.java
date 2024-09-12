@@ -1,4 +1,4 @@
-package fr.leblanc.gomoku.controller;
+package fr.leblanc.gomoku.service;
 
 import java.util.List;
 
@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import fr.leblanc.gomoku.model.Game;
 import fr.leblanc.gomoku.model.GameType;
 import fr.leblanc.gomoku.model.User;
-import fr.leblanc.gomoku.service.GameService;
-import fr.leblanc.gomoku.service.UserService;
 import fr.leblanc.gomoku.web.dto.HistoryGameDTO;
 import fr.leblanc.gomoku.web.dto.PlayerDTO;
 
