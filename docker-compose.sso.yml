@@ -10,9 +10,8 @@ services:
   gomoku-web:
     image: gomoku-web:1.0.0
     depends_on:
-      - gomoku-db
-      - gomoku-engine
-      - gomoku-ids
+      gomoku-ids:
+        condition: service_healthy
     ports:
       - 8080:8080
     environment:
@@ -22,7 +21,6 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - FR_LEBLANC_GOMOKU_ENGINEURL=http://gomoku-engine
       - SPRING_PROFILES_ACTIVE=sso
-    entrypoint: ["/usr/local/bin/wait-for-it.sh", "http://gomoku-ids:8282/realms/external", "--", "java -jar /gomoku-web.jar"]
 
   gomoku-engine:
     image: gomoku-engine:1.0.0
@@ -35,6 +33,12 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+    healthcheck:
+      test: timeout 10s bash -c ':> /dev/tcp/localhost/8080'
+      interval: 3s
+      timeout: 60s
+      retries: 10
+      start_period: 5s
     ports:
       - 8282:8080
     command: start-dev
