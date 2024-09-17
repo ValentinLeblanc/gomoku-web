@@ -86,25 +86,32 @@ public class GameService {
 	public void resetGame(GameType gameType) {
 		
 		Game currentGame = getCurrentGame(gameType);
+		
 		if (currentGame == null) {
 			throw new IllegalStateException(GAME_NOT_FOUND);
 		}
 		
+		if (gameType == GameType.AI) {
+			currentGame.getBlackPlayer().setCurrentAIGame(null);
+			currentGame.getWhitePlayer().setCurrentAIGame(null);
+		} else if (gameType == GameType.LOCAL) {
+			currentGame.getBlackPlayer().setCurrentLocalGame(null);
+			currentGame.getWhitePlayer().setCurrentLocalGame(null);
+		} else if (gameType == GameType.ONLINE) {
+			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
+			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
+		} else if (gameType == GameType.AI_VS_AI) {
+			currentGame.getBlackPlayer().setCurrentAIvsAIGame(null);
+			currentGame.getWhitePlayer().setCurrentAIvsAIGame(null);
+		}
+		userService.save(currentGame.getBlackPlayer());
+		userService.save(currentGame.getWhitePlayer());
+		gameRepository.delete(currentGame);
 		engineService.clearGame(currentGame.getId());
 		
 		if (gameType == GameType.ONLINE) {
-			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
-			userService.save(currentGame.getBlackPlayer());
-			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
-			userService.save(currentGame.getWhitePlayer());
-			gameRepository.delete(currentGame);
 			webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.ONLINE_GAME_ABORTED));
 		} else {
-			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
-			userService.save(currentGame.getBlackPlayer());
-			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
-			userService.save(currentGame.getWhitePlayer());
-			gameRepository.delete(currentGame);
 			Game newGame = createGame(userService.getCurrentUser(), gameType);
 			gameRepository.save(newGame);
 		}
