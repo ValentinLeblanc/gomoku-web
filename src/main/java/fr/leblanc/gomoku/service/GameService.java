@@ -91,15 +91,20 @@ public class GameService {
 		}
 		
 		engineService.clearGame(currentGame.getId());
-		gameRepository.delete(currentGame);
 		
 		if (gameType == GameType.ONLINE) {
 			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
 			userService.save(currentGame.getBlackPlayer());
 			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
 			userService.save(currentGame.getWhitePlayer());
+			gameRepository.delete(currentGame);
 			webSocketController.sendMessage(WebSocketMessage.build().gameId(currentGame.getId()).type(MessageType.ONLINE_GAME_ABORTED));
 		} else {
+			currentGame.getBlackPlayer().setCurrentOnlineGame(null);
+			userService.save(currentGame.getBlackPlayer());
+			currentGame.getWhitePlayer().setCurrentOnlineGame(null);
+			userService.save(currentGame.getWhitePlayer());
+			gameRepository.delete(currentGame);
 			Game newGame = createGame(userService.getCurrentUser(), gameType);
 			gameRepository.save(newGame);
 		}

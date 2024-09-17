@@ -26,7 +26,7 @@ public class HistoryService {
 	public List<HistoryGameDTO> getUserHistory(String username) {
 		User user = userService.findUserByUsername(username);
 		List<Game> dbGames = user.getGames();
-		dbGames.sort((g1, g2) -> g1.getDate() != null ? g1.getDate().compareTo(g2.getDate()) : -1);
+		dbGames.sort((g1, g2) -> g2.getDate() != null ? (g1.getDate() != null ? g1.getDate().compareTo(g2.getDate()) : -1) : 1);
 		return dbGames.stream().map(this::createHistoryGameDTO).toList();
 	}
 	
